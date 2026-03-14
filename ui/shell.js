@@ -155,7 +155,7 @@ function initKeyboard() {
         break;
       case '+':
       case '=':
-        setSpeed(Math.min(_speed + 1, 4));
+        setSpeed(Math.min(_speed + 1, SPEED_TABLE.length - 1));
         break;
       case '-':
         setSpeed(Math.max(_speed - 1, 0));

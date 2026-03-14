@@ -44,11 +44,10 @@ function fire(name, data) {
 // --- Speed Configuration ---
 
 var SPEED_TABLE = [
-  { id: 0, label: 'PAUSED',    minutesPerTick: 0,    icon: '⏸' },
-  { id: 1, label: 'REAL-TIME', minutesPerTick: 1/60, icon: '▶' },
-  { id: 2, label: 'NORMAL',    minutesPerTick: 1,    icon: '▶▶' },
-  { id: 3, label: 'FAST',      minutesPerTick: 2,    icon: '▶▶▶' },
-  { id: 4, label: 'VERY FAST', minutesPerTick: 1440, icon: '⏩' },
+  { id: 0, label: 'PAUSED',    minutesPerTick: 0,   icon: '⏸' },
+  { id: 1, label: 'REAL-TIME', minutesPerTick: 1,   icon: '▶' },
+  { id: 2, label: '1H/S',      minutesPerTick: 60,  icon: '▶▶' },
+  { id: 3, label: '12H/S',     minutesPerTick: 720, icon: '▶▶▶' },
 ];
 
 // --- Tick Engine ---

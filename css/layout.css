@@ -39,6 +39,15 @@
   min-width: 200px;
 }
 
+.sb-orthanc-logo {
+  display: block;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+
 .sb-logo {
   font-family: var(--font-display);
   font-weight: 700;

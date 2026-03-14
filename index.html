@@ -33,14 +33,10 @@
       <div class="login-logo-wrap" id="login-logo">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
           <circle class="logo-ring" cx="50" cy="50" r="44" />
-          <circle class="logo-ring" cx="50" cy="50" r="34" />
-          <circle class="logo-ring" cx="50" cy="50" r="24" />
-          <path class="logo-iris" d="M50 28 L66 50 L50 72 L34 50 Z" />
-          <circle class="logo-iris" cx="50" cy="50" r="6" />
-          <line class="logo-ring" x1="50" y1="2" x2="50" y2="16" />
-          <line class="logo-ring" x1="50" y1="84" x2="50" y2="98" />
-          <line class="logo-ring" x1="2" y1="50" x2="16" y2="50" />
-          <line class="logo-ring" x1="84" y1="50" x2="98" y2="50" />
+          <g class="logo-iris-group">
+            <path class="logo-iris" d="M50 24 L70 50 L50 76 L30 50 Z" />
+            <circle class="logo-iris" cx="50" cy="50" r="7" />
+          </g>
         </svg>
         <div class="login-company-name" id="login-company">ORTHANC SYSTEMS</div>
       </div>
@@ -66,7 +62,9 @@
 
           <div class="auth-fp-wrap" id="auth-fp">
             <div class="auth-fp-icon" id="auth-fp-icon">
-              <span>⬡</span>
+              <svg class="fp-hex" viewBox="0 0 40 40" width="28" height="28">
+                <polygon points="20,3 36,12 36,28 20,37 4,28 4,12" />
+              </svg>
               <div class="fp-scan"></div>
             </div>
             <div class="auth-fp-label">BIOMETRIC VERIFICATION</div>
@@ -103,6 +101,11 @@
     <!-- Status Bar -->
     <header id="status-bar">
       <div class="sb-left">
+        <svg class="sb-orthanc-logo" viewBox="0 0 100 100" width="20" height="20">
+          <circle cx="50" cy="50" r="44" />
+          <polygon points="50,24 70,50 50,76 30,50" />
+          <circle cx="50" cy="50" r="7" />
+        </svg>
         <span class="sb-logo">VIGIL</span>
         <span class="sb-powered">ORTHANC SYSTEMS</span>
       </div>
@@ -134,10 +137,9 @@
         <div class="sb-clock" id="sb-clock">0800 · 1 JAN 2052</div>
         <div class="tb-speed" id="speed-controls">
           <button class="speed-btn paused" data-speed="0" title="Pause">⏸</button>
-          <button class="speed-btn" data-speed="1" title="Real-time">▶</button>
-          <button class="speed-btn active" data-speed="2" title="Normal">▶▶</button>
-          <button class="speed-btn" data-speed="3" title="Fast">▶▶▶</button>
-          <button class="speed-btn" data-speed="4" title="Very Fast">⏩</button>
+          <button class="speed-btn active" data-speed="1" title="Real-time">▶</button>
+          <button class="speed-btn" data-speed="2" title="1s = 1h">▶▶</button>
+          <button class="speed-btn" data-speed="3" title="1s = 12h">▶▶▶</button>
         </div>
       </div>
     </header>

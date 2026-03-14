@@ -9,9 +9,13 @@
   to { stroke-dashoffset: 0; }
 }
 
-@keyframes logo-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(74,143,212,0.2)); }
-  50% { filter: drop-shadow(0 0 12px rgba(74,143,212,0.5)); }
+@keyframes logo-eye-look {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(8px); }
+  30% { transform: translateX(8px); }
+  50% { transform: translateX(-8px); }
+  65% { transform: translateX(-8px); }
+  80% { transform: translateX(0); }
 }
 
 @keyframes boot-line-appear {

@@ -68,7 +68,7 @@
 .login-logo-wrap svg .logo-ring {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 1.5;
+  stroke-width: 3;
   stroke-dasharray: 300;
   stroke-dashoffset: 300;
 }
@@ -76,9 +76,13 @@
 .login-logo-wrap svg .logo-iris {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-dasharray: 200;
   stroke-dashoffset: 200;
+}
+
+.login-logo-wrap svg .logo-iris-group {
+  transform-origin: 50px 50px;
 }
 
 .login-logo-wrap.drawing svg .logo-ring {
@@ -89,13 +93,13 @@
   animation: logo-draw 1.5s ease 0.5s forwards;
 }
 
-.login-logo-wrap.drawn svg {
-  animation: logo-glow 3s ease-in-out infinite;
-}
-
 .login-logo-wrap.drawn svg .logo-ring,
 .login-logo-wrap.drawn svg .logo-iris {
   stroke-dashoffset: 0;
+}
+
+.login-logo-wrap.drawn svg .logo-iris-group {
+  animation: logo-eye-look 4s ease-in-out 0.5s infinite;
 }
 
 .login-company-name {
@@ -242,18 +246,28 @@
 }
 
 .auth-fp-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto var(--sp-3);
   border-radius: 50%;
   border: 2px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
   color: var(--text-dim);
   position: relative;
   animation: fp-pulse 2s ease-in-out infinite;
+}
+
+.auth-fp-icon .fp-hex {
+  display: block;
+}
+
+.auth-fp-icon .fp-hex polygon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 
 .auth-fp-icon .fp-scan {
