@@ -42,9 +42,11 @@
   flex-shrink: 0;
 }
 
-.op-status-dot.incoming { background: var(--amber); }
-.op-status-dot.investigating { background: var(--accent); animation: pulse-ring 2s ease infinite; }
-.op-status-dot.ready { background: var(--green); }
+.op-status-dot.detected { background: var(--amber); }
+.op-status-dot.analysis { background: var(--accent); animation: pulse-ring 2s ease infinite; }
+.op-status-dot.options { background: var(--amber); animation: pulse-ring 2s ease infinite; }
+.op-status-dot.approved { background: var(--green); }
+.op-status-dot.transit { background: var(--accent); animation: pulse-ring 1.5s ease infinite; }
 .op-status-dot.executing { background: var(--green); animation: pulse-ring 1.5s ease infinite; }
 .op-status-dot.success { background: var(--green); }
 .op-status-dot.failure { background: var(--red); }
@@ -89,9 +91,11 @@
   border-radius: 2px;
 }
 
-.op-status-chip.incoming { color: var(--amber); background: var(--amber-dim); }
-.op-status-chip.investigating { color: var(--accent); background: var(--accent-dim); }
-.op-status-chip.ready { color: var(--green); background: var(--green-dim); }
+.op-status-chip.detected { color: var(--amber); background: var(--amber-dim); }
+.op-status-chip.analysis { color: var(--accent); background: var(--accent-dim); }
+.op-status-chip.options { color: var(--amber); background: var(--amber-dim); }
+.op-status-chip.approved { color: var(--green); background: var(--green-dim); }
+.op-status-chip.transit { color: var(--accent); background: var(--accent-dim); }
 .op-status-chip.executing { color: var(--green); background: var(--green-dim); }
 .op-status-chip.success { color: var(--green); background: var(--green-dim); }
 .op-status-chip.failure { color: var(--red); background: var(--red-dim); }
@@ -285,3 +289,206 @@
   color: var(--text);
   background: var(--bg-hover);
 }
+
+/* --- Vigil Analysis Bar --- */
+.vigil-analysis-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  margin-top: var(--sp-2);
+  overflow: hidden;
+}
+
+.vigil-analysis-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+/* --- Vigil Option Cards --- */
+.vigil-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.vigil-option-card {
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.vigil-option-card:hover {
+  border-color: var(--border-light);
+}
+
+.vigil-option-card.vigil-recommended {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-dim);
+}
+
+.vigil-rec-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-2);
+}
+
+.vigil-option-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  letter-spacing: 0.5px;
+  margin-bottom: var(--sp-2);
+}
+
+.vigil-option-stats {
+  display: flex;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.vigil-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vigil-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.vigil-stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-hi);
+}
+
+.vigil-stat-value.risk-low { color: var(--green); }
+.vigil-stat-value.risk-moderate { color: var(--accent); }
+.vigil-stat-value.risk-elevated { color: var(--amber); }
+.vigil-stat-value.risk-high { color: var(--severity-high); }
+.vigil-stat-value.risk-critical { color: var(--red); }
+
+.vigil-option-assets {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--sp-3);
+}
+
+.vigil-asset-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  padding: 2px 0;
+}
+
+.vigil-asset-cat {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  min-width: 36px;
+}
+
+.vigil-asset-name {
+  color: var(--text);
+  flex: 1;
+}
+
+.vigil-asset-base {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.vigil-option-consequences {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2);
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+}
+
+.vigil-select-btn {
+  width: 100%;
+}
+
+/* --- Transit Progress --- */
+.transit-assets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.transit-asset-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.transit-asset-info {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 180px;
+}
+
+.transit-bar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.transit-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.transit-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.transit-status {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* --- Debrief Container --- */
+.debrief-container {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: var(--sp-2);
+}
+
+/* --- Department Grid (removed, kept for legacy compat) --- */
+.dept-grid { display: none; }
+.dept-chip { display: none; }

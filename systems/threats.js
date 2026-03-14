@@ -1,6 +1,7 @@
 /* ============================================================
    VIGIL — systems/threats.js
    Threat/org generation, threat levels, spawn operations.
+   v0.2: Operations use new 8-state lifecycle with operationType.
    ============================================================ */
 
 var THREAT_TYPES = [
@@ -11,6 +12,16 @@ var THREAT_TYPES = [
   { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5] },
 ];
+
+// --- Map threat types to operation types ---
+var THREAT_TO_OP_TYPE = {
+  TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'DRONE_STRIKE'],
+  STATE_ACTOR: ['MILITARY_STRIKE', 'SURVEILLANCE', 'CYBER_OP'],
+  CYBER_GROUP: ['CYBER_OP', 'INTEL_COLLECTION'],
+  CRIMINAL_ORG: ['NAVAL_INTERDICTION', 'SOF_RAID', 'INTEL_COLLECTION'],
+  INSURGENCY: ['COUNTER_TERROR', 'MILITARY_STRIKE', 'SOF_RAID'],
+  PROLIFERATOR: ['SURVEILLANCE', 'INTEL_COLLECTION', 'MILITARY_STRIKE'],
+};
 
 function spawnThreat(theaterId) {
   var type = weightedPick(THREAT_TYPES);
@@ -43,29 +54,52 @@ function spawnOperationFromEvent(event, urgent) {
   var codename = generateCodename();
   var threat = randInt(2, 5);
 
+  // Determine operation type from event category
+  var opType = EVENT_TO_OP_TYPE[event.category] || 'SURVEILLANCE';
+
+  var urgencyHours = urgent ? randInt(12, 36) : randInt(48, 168); // hours until expiry
+  var detectionDelay = randInt(30, 180); // 30min to 3h before analysis starts
+
   var op = {
     id: uid('OP'),
     codename: codename,
     label: event.label,
     category: event.category,
-    status: 'INCOMING',
+    operationType: opType,
+    status: 'DETECTED',
     threatLevel: threat,
     location: loc,
     geo: { lat: loc.lat, lon: loc.lon },
     daySpawned: V.time.day,
-    urgencyLeft: urgent ? randInt(3, 5) : randInt(5, 12),
-    invDays: randInt(2, 4),
-    invDaysLeft: 0,
-    execDays: randInt(2, 4),
-    execDaysLeft: 0,
-    assignedDept: null,
-    assignedExecDepts: [],
-    assignedBudget: 0,
-    baseBudget: randInt(5, 20),
-    successProb: 0,
+    urgencyHours: urgencyHours,
+
+    // Lifecycle timing (minute-based)
+    nextTransitionAt: V.time.totalMinutes + detectionDelay,
+    expiresAt: null,
+    execDurationMinutes: 0,
+    transitStartTotalMinutes: 0,
+    transitDurationMinutes: 0,
+
+    // Vigil options
+    options: [],
+    selectedOptionIdx: undefined,
+    vigilRecommendedIdx: undefined,
+    deviatedFromVigil: false,
+
+    // Assets
+    assignedAssetIds: [],
+
+    // Content
     briefing: event.description,
     fillVars: {},
-    intelFields: generateIntelFields(),
+    orgName: null,
+    targetAlias: generatePersonnelAlias(),
+    budgetCost: randInt(5, 20),
+
+    // Debrief
+    debrief: null,
+
+    // References
     relatedEventId: event.id,
     relatedThreatId: null,
   };
@@ -73,15 +107,15 @@ function spawnOperationFromEvent(event, urgent) {
   V.operations.unshift(op);
   fire('operation:spawned', { operation: op });
 
-  addLog('OP ' + codename + ' created from event.', 'log-op');
+  addLog('OP ' + codename + ' detected. Vigil initiating analysis.', 'log-op');
 
-  // Generate feed item for the new operation
+  // Generate feed item
   var feedItem = {
     id: uid('FI'),
     type: 'OPERATION',
     severity: urgent ? 'HIGH' : 'ELEVATED',
-    header: 'NEW OPERATION: ' + codename,
-    body: 'Operation ' + codename + ' has been authorized in response to ' + event.label.toLowerCase() + '. Location: ' + loc.city + ', ' + loc.country + '. Awaiting department assignment.',
+    header: 'THREAT DETECTED: ' + codename,
+    body: 'Vigil has detected a new threat requiring operational response in ' + loc.city + ', ' + loc.country + '. Operation ' + codename + ' has been initiated. Vigil is analyzing deployment options.',
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,
     opId: op.id,
@@ -90,78 +124,62 @@ function spawnOperationFromEvent(event, urgent) {
   pushFeedItem(feedItem);
 }
 
-// --- Intel Fields ---
+// --- Spawn Operation from Threat ---
 
-function generateIntelFields() {
-  var fields = [
-    { key: 'target_identity', label: 'TARGET IDENTITY', revealed: false, value: '' },
-    { key: 'location_detail', label: 'PRECISE LOCATION', revealed: false, value: '' },
-    { key: 'network_size', label: 'NETWORK SIZE', revealed: false, value: '' },
-    { key: 'capabilities', label: 'CAPABILITIES', revealed: false, value: '' },
-    { key: 'timeline', label: 'OPERATIONAL TIMELINE', revealed: false, value: '' },
-    { key: 'funding', label: 'FUNDING SOURCE', revealed: false, value: '' },
-  ];
+function spawnOperationFromThreat(threat) {
+  var opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
+  var opType = pick(opTypes);
 
-  // Randomly reveal 0-2 fields initially
-  var toReveal = randInt(0, 2);
-  var shuffled = shuffle(fields);
-  for (var i = 0; i < toReveal && i < shuffled.length; i++) {
-    shuffled[i].revealed = true;
-    shuffled[i].value = generateIntelFieldValue(shuffled[i].key);
-  }
+  var codename = generateCodename();
+  var detectionDelay = randInt(30, 120);
 
-  return fields;
-}
+  var op = {
+    id: uid('OP'),
+    codename: codename,
+    label: threat.typeLabel + ' Response',
+    category: 'SECURITY',
+    operationType: opType,
+    status: 'DETECTED',
+    threatLevel: threat.threatLevel,
+    location: threat.location,
+    geo: { lat: threat.location.lat, lon: threat.location.lon },
+    daySpawned: V.time.day,
+    urgencyHours: randInt(24, 120),
 
-function generateIntelFieldValue(key) {
-  var values = {
-    target_identity: [
-      'Identified: {alias}, known operative of {org}',
-      'Partial ID — facial recognition match at {confidence}%',
-      'Unknown — operating under alias "{alias}"',
-    ],
-    location_detail: [
-      'Confirmed: {city} commercial district, building identified',
-      'Approximate — {city} industrial zone, 500m radius',
-      'Unknown — last signal intercept from {city} area',
-    ],
-    network_size: [
-      'Estimated 4-8 operatives based on communications analysis',
-      'Large network: 15-30 individuals across multiple cells',
-      'Small cell: 2-3 operatives, likely self-directed',
-    ],
-    capabilities: [
-      'Conventional weapons only — small arms and IEDs',
-      'Advanced capability — access to military-grade hardware',
-      'Cyber-enabled — demonstrated network exploitation capability',
-    ],
-    timeline: [
-      'Imminent — activity consistent with final preparations',
-      'Near-term — estimated 7-14 days to operational readiness',
-      'Unknown — insufficient data to assess timeline',
-    ],
-    funding: [
-      'State-sponsored — traced to foreign government accounts',
-      'Criminal enterprise — narcotics and arms trafficking revenue',
-      'Crowdfunded — distributed cryptocurrency donations',
-    ],
+    nextTransitionAt: V.time.totalMinutes + detectionDelay,
+    expiresAt: null,
+    execDurationMinutes: 0,
+    transitStartTotalMinutes: 0,
+    transitDurationMinutes: 0,
+
+    options: [],
+    selectedOptionIdx: undefined,
+    vigilRecommendedIdx: undefined,
+    deviatedFromVigil: false,
+    assignedAssetIds: [],
+
+    briefing: 'Vigil analysis has identified ' + threat.orgName + ' as a priority target in the ' + threat.location.theater.name + ' theater. Operation ' + codename + ' authorized for ' + (OPERATION_TYPES[opType] ? OPERATION_TYPES[opType].label.toLowerCase() : 'response') + '. Location: ' + threat.location.city + ', ' + threat.location.country + '.',
+    fillVars: {},
+    orgName: threat.orgName,
+    targetAlias: generatePersonnelAlias(),
+    budgetCost: randInt(5, 20),
+    debrief: null,
+
+    relatedEventId: null,
+    relatedThreatId: threat.id,
   };
 
-  var templates = values[key] || ['Classified — assessment pending'];
-  var vars = {
-    alias: generatePersonnelAlias(),
-    org: generateOrgName(),
-    city: pick(['the target city', 'the operational area']),
-    confidence: randInt(60, 95),
-  };
-  return fillTemplate(pick(templates), vars);
+  threat.linkedOpIds.push(op.id);
+  V.operations.unshift(op);
+  fire('operation:spawned', { operation: op });
+
+  addLog('OP ' + codename + ' created targeting ' + threat.orgName + '.', 'log-op');
 }
 
 // --- Auto-spawn threats based on theater volatility ---
 
 (function() {
   hook('tick:day', function() {
-    // Every 5 days, chance to spawn a threat in a volatile theater
     if (V.time.day % 5 !== 0) return;
 
     for (var tid in V.theaters) {
@@ -172,7 +190,7 @@ function generateIntelFieldValue(key) {
     }
   });
 
-  // Initial threats on game start
+  // Initial threats and operations on game start
   hook('game:start', function() {
     // Spawn 2-3 initial threats
     var count = randInt(2, 3);
@@ -185,32 +203,45 @@ function generateIntelFieldValue(key) {
     for (var j = 0; j < opCount; j++) {
       var loc = generateRandomLocation();
       var codename = generateCodename();
+      var opTypes = ['SURVEILLANCE', 'COUNTER_TERROR', 'CYBER_OP', 'INTEL_COLLECTION'];
+      var opType = pick(opTypes);
+
       var op = {
         id: uid('OP'),
         codename: codename,
         label: pick(['SURVEILLANCE', 'COUNTER-TERROR', 'CYBER DEFENSE', 'SIGNAL INTERCEPT']),
         category: pick(['INTELLIGENCE', 'SECURITY', 'CYBER']),
-        status: 'INCOMING',
+        operationType: opType,
+        status: 'DETECTED',
         threatLevel: randInt(2, 4),
         location: loc,
         geo: { lat: loc.lat, lon: loc.lon },
         daySpawned: V.time.day,
-        urgencyLeft: randInt(5, 15),
-        invDays: randInt(2, 4),
-        invDaysLeft: 0,
-        execDays: randInt(2, 4),
-        execDaysLeft: 0,
-        assignedDept: null,
-        assignedExecDepts: [],
-        assignedBudget: 0,
-        baseBudget: randInt(5, 20),
-        successProb: 0,
+        urgencyHours: randInt(48, 168),
+
+        nextTransitionAt: V.time.totalMinutes + randInt(60, 240),
+        expiresAt: null,
+        execDurationMinutes: 0,
+        transitStartTotalMinutes: 0,
+        transitDurationMinutes: 0,
+
+        options: [],
+        selectedOptionIdx: undefined,
+        vigilRecommendedIdx: undefined,
+        deviatedFromVigil: false,
+        assignedAssetIds: [],
+
         briefing: 'Vigil analysis has identified a priority intelligence requirement in the ' + loc.theater.name + ' theater. Operation ' + codename + ' has been authorized. Location: ' + loc.city + ', ' + loc.country + '.',
         fillVars: {},
-        intelFields: generateIntelFields(),
+        orgName: null,
+        targetAlias: generatePersonnelAlias(),
+        budgetCost: randInt(5, 20),
+        debrief: null,
+
         relatedEventId: null,
         relatedThreatId: null,
       };
+
       V.operations.unshift(op);
       fire('operation:spawned', { operation: op });
     }

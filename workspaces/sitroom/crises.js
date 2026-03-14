@@ -162,8 +162,8 @@ var CRISIS_TYPES = [
       if (c.daysLeft <= 0) {
         // Auto-resolve if not addressed
         c.resolved = true;
-        V.resources.confidence = clamp(V.resources.confidence - randInt(3, 8), 0, 100);
-        addLog('Crisis expired: ' + c.label + '. Confidence -.', 'log-warn');
+        V.resources.viability = clamp(V.resources.viability - randInt(3, 8), 0, 100);
+        addLog('Crisis expired: ' + c.label + '. Viability -.', 'log-warn');
       }
     }
   });
@@ -181,10 +181,10 @@ var CRISIS_TYPES = [
     if (response && response.effect) {
       switch (response.effect) {
         case 'confidence_up':
-          V.resources.confidence = clamp(V.resources.confidence + randInt(3, 6), 0, 100);
+          V.resources.viability = clamp(V.resources.viability + randInt(3, 6), 0, 100);
           break;
         case 'confidence_small':
-          V.resources.confidence = clamp(V.resources.confidence + randInt(1, 3), 0, 100);
+          V.resources.viability = clamp(V.resources.viability + randInt(1, 3), 0, 100);
           break;
         case 'risk_down':
           if (crisis.location && V.theaters[crisis.location.theaterId]) {

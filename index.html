@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/operations.css">
   <link rel="stylesheet" href="css/sitroom.css">
   <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/debrief.css">
 
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
@@ -112,10 +113,10 @@
       </div>
       <div class="sb-center">
         <div class="sb-stat">
-          <span class="sb-stat-label">CONF</span>
-          <span class="sb-stat-value" id="sb-confidence">70%</span>
+          <span class="sb-stat-label">VIABILITY</span>
+          <span class="sb-stat-value" id="sb-viability">70%</span>
           <div class="sb-stat-bar">
-            <div class="sb-stat-bar-fill" id="sb-conf-bar" style="width:70%;background:var(--green)"></div>
+            <div class="sb-stat-bar-fill" id="sb-viability-bar" style="width:70%;background:var(--green)"></div>
           </div>
         </div>
         <div class="sb-stat">
@@ -216,6 +217,11 @@
   <!-- Systems -->
   <script src="systems/time.js"></script>
   <script src="systems/content.js"></script>
+  <script src="systems/bases.js"></script>
+  <script src="systems/assets.js"></script>
+  <script src="systems/recommendations.js"></script>
+  <script src="systems/viability.js"></script>
+  <script src="systems/debriefs.js"></script>
   <script src="systems/events.js"></script>
   <script src="systems/threats.js"></script>
   <script src="systems/geopolitics.js"></script>

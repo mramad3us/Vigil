@@ -64,14 +64,14 @@ function renderStatusBar() {
   var clockEl = $('sb-clock');
   if (clockEl) clockEl.textContent = formatGameDateTime(V.time);
 
-  // Confidence
-  var confEl = $('sb-confidence');
-  var confBar = $('sb-conf-bar');
-  if (confEl) confEl.textContent = Math.round(V.resources.confidence) + '%';
+  // Viability
+  var confEl = $('sb-viability');
+  var confBar = $('sb-viability-bar');
+  if (confEl) confEl.textContent = Math.round(V.resources.viability) + '%';
   if (confBar) {
-    confBar.style.width = V.resources.confidence + '%';
-    if (V.resources.confidence > 60) confBar.style.background = 'var(--green)';
-    else if (V.resources.confidence > 30) confBar.style.background = 'var(--amber)';
+    confBar.style.width = V.resources.viability + '%';
+    if (V.resources.viability > 60) confBar.style.background = 'var(--green)';
+    else if (V.resources.viability > 30) confBar.style.background = 'var(--amber)';
     else confBar.style.background = 'var(--red)';
   }
 

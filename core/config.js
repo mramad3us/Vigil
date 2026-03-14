@@ -4,45 +4,83 @@
    Year 2052 setting.
    ============================================================ */
 
-// --- Departments ---
+// --- Operation Types ---
+// Maps event/threat categories to the type of operation Vigil will plan.
+// requiredCapabilities: assets MUST have at least one of these.
+// preferredCapabilities: assets with these score higher in recommendations.
 
-var DEPT_CONFIG = [
-  {
-    id: 'ANALYSIS', name: 'Analysis Division', short: 'ANLYS',
-    desc: 'Intelligence analysis and pattern recognition.',
-    baseCapacity: 6, maxCapacity: 12,
+var OPERATION_TYPES = {
+  MILITARY_STRIKE: {
+    id: 'MILITARY_STRIKE', label: 'Military Strike', shortLabel: 'MIL STRIKE',
+    requiredCapabilities: ['STRIKE'],
+    preferredCapabilities: ['STRIKE', 'ISR'],
+    execHoursRange: [4, 12],
+    baseSuccessRate: 70,
   },
-  {
-    id: 'HUMINT', name: 'Human Intelligence', short: 'HUMINT',
-    desc: 'Clandestine human source operations.',
-    baseCapacity: 4, maxCapacity: 10,
+  SOF_RAID: {
+    id: 'SOF_RAID', label: 'Special Operations Raid', shortLabel: 'SOF RAID',
+    requiredCapabilities: ['SOF'],
+    preferredCapabilities: ['SOF', 'ISR', 'INTEL'],
+    execHoursRange: [2, 8],
+    baseSuccessRate: 65,
   },
-  {
-    id: 'SIGINT', name: 'Signals Intelligence', short: 'SIGINT',
-    desc: 'Communications interception and cryptanalysis.',
-    baseCapacity: 5, maxCapacity: 10,
+  SURVEILLANCE: {
+    id: 'SURVEILLANCE', label: 'Surveillance Operation', shortLabel: 'SURV',
+    requiredCapabilities: ['ISR'],
+    preferredCapabilities: ['ISR', 'SIGINT', 'INTEL'],
+    execHoursRange: [6, 24],
+    baseSuccessRate: 80,
   },
-  {
-    id: 'FIELD_OPS', name: 'Field Operations', short: 'FIELD',
-    desc: 'Tactical field teams for direct action.',
-    baseCapacity: 4, maxCapacity: 8,
+  NAVAL_INTERDICTION: {
+    id: 'NAVAL_INTERDICTION', label: 'Naval Interdiction', shortLabel: 'NAVAL INT',
+    requiredCapabilities: ['NAVAL'],
+    preferredCapabilities: ['NAVAL', 'ISR', 'STRIKE'],
+    execHoursRange: [8, 24],
+    baseSuccessRate: 75,
   },
-  {
-    id: 'SPECIAL_OPS', name: 'Special Operations', short: 'SPECOPS',
-    desc: 'Elite units for high-risk missions.',
-    baseCapacity: 2, maxCapacity: 6,
+  CYBER_OP: {
+    id: 'CYBER_OP', label: 'Cyber Operation', shortLabel: 'CYBER',
+    requiredCapabilities: ['CYBER'],
+    preferredCapabilities: ['CYBER', 'SIGINT'],
+    execHoursRange: [2, 12],
+    baseSuccessRate: 70,
   },
-  {
-    id: 'CYBER', name: 'Cyber Operations', short: 'CYBER',
-    desc: 'Offensive and defensive cyber warfare.',
-    baseCapacity: 4, maxCapacity: 10,
+  HOSTAGE_RESCUE: {
+    id: 'HOSTAGE_RESCUE', label: 'Hostage Rescue', shortLabel: 'HRT',
+    requiredCapabilities: ['HOSTAGE_RESCUE'],
+    preferredCapabilities: ['HOSTAGE_RESCUE', 'SOF', 'ISR'],
+    execHoursRange: [1, 6],
+    baseSuccessRate: 55,
   },
-  {
-    id: 'SPACE', name: 'Space & Satellite Ops', short: 'SPACE',
-    desc: 'Orbital surveillance and space-based assets.',
-    baseCapacity: 3, maxCapacity: 8,
+  COUNTER_TERROR: {
+    id: 'COUNTER_TERROR', label: 'Counter-Terrorism', shortLabel: 'CT',
+    requiredCapabilities: ['COUNTER_TERROR'],
+    preferredCapabilities: ['COUNTER_TERROR', 'SOF', 'INTEL', 'ISR'],
+    execHoursRange: [3, 12],
+    baseSuccessRate: 65,
   },
-];
+  DIPLOMATIC_RESPONSE: {
+    id: 'DIPLOMATIC_RESPONSE', label: 'Diplomatic Response', shortLabel: 'DIPLO',
+    requiredCapabilities: ['INTEL'],
+    preferredCapabilities: ['INTEL', 'HUMINT'],
+    execHoursRange: [4, 16],
+    baseSuccessRate: 75,
+  },
+  INTEL_COLLECTION: {
+    id: 'INTEL_COLLECTION', label: 'Intelligence Collection', shortLabel: 'INT COL',
+    requiredCapabilities: ['INTEL'],
+    preferredCapabilities: ['INTEL', 'HUMINT', 'SIGINT', 'ISR'],
+    execHoursRange: [6, 24],
+    baseSuccessRate: 80,
+  },
+  DRONE_STRIKE: {
+    id: 'DRONE_STRIKE', label: 'Drone Strike', shortLabel: 'UAS STRIKE',
+    requiredCapabilities: ['ISR', 'STRIKE'],
+    preferredCapabilities: ['ISR', 'STRIKE'],
+    execHoursRange: [1, 4],
+    baseSuccessRate: 85,
+  },
+};
 
 // --- Theaters ---
 
@@ -243,11 +281,23 @@ function getAllCities() {
   return all;
 }
 
-// --- Department Helper ---
+// --- Operation Type Helper ---
 
-function getDeptConfig(id) {
-  for (var i = 0; i < DEPT_CONFIG.length; i++) {
-    if (DEPT_CONFIG[i].id === id) return DEPT_CONFIG[i];
-  }
-  return null;
+function getOperationType(id) {
+  return OPERATION_TYPES[id] || null;
 }
+
+// --- Event Category → Operation Type Mapping ---
+
+var EVENT_TO_OP_TYPE = {
+  SECURITY: 'COUNTER_TERROR',
+  CYBER: 'CYBER_OP',
+  MILITARY: 'MILITARY_STRIKE',
+  INTELLIGENCE: 'INTEL_COLLECTION',
+  DIPLOMATIC: 'DIPLOMATIC_RESPONSE',
+  WMD: 'SURVEILLANCE',
+  CRIME: 'NAVAL_INTERDICTION',
+  SPACE: 'SURVEILLANCE',
+  HUMANITARIAN: 'DIPLOMATIC_RESPONSE',
+  DOMESTIC: 'SURVEILLANCE',
+};

@@ -1,0 +1,246 @@
+/* ============================================================
+   VIGIL — css/debrief.css
+   After-action report styling. Classification headers,
+   timelines, asset cards, Vigil assessment.
+   ============================================================ */
+
+/* --- Header --- */
+.debrief-header {
+  text-align: center;
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-4);
+}
+
+.debrief-classification {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--class-text);
+  letter-spacing: 2px;
+  padding: var(--sp-1) var(--sp-3);
+  background: var(--class-bg);
+  border: 1px solid var(--class-border);
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.debrief-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-top: var(--sp-3);
+}
+
+.debrief-codename {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: 1px;
+  margin: var(--sp-2) 0;
+}
+
+.debrief-outcome {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.debrief-outcome.debrief-success {
+  color: var(--green);
+  background: var(--green-dim);
+}
+
+.debrief-outcome.debrief-failure {
+  color: var(--red);
+  background: var(--red-dim);
+}
+
+.debrief-date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  margin-top: var(--sp-2);
+}
+
+/* --- Sections --- */
+.debrief-section {
+  margin-bottom: var(--sp-4);
+}
+
+.debrief-section-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--sp-2);
+}
+
+/* --- Deployed Assets --- */
+.debrief-assets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.debrief-asset-card {
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.debrief-asset-cat {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.debrief-asset-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-hi);
+}
+
+.debrief-asset-origin {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* --- Vigil Assessment --- */
+.debrief-vigil-assessment {
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.debrief-meta-row {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+  font-size: var(--fs-sm);
+}
+
+.debrief-meta-key {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.debrief-meta-val {
+  color: var(--text);
+}
+
+.debrief-meta-row.debrief-deviation .debrief-meta-val {
+  color: var(--amber);
+}
+
+.debrief-deviation-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--red);
+  margin-top: var(--sp-2);
+  padding: var(--sp-2);
+  background: var(--red-dim);
+  border-radius: 2px;
+}
+
+.debrief-compliance-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--green);
+  margin-top: var(--sp-2);
+}
+
+/* --- Timeline --- */
+.debrief-timeline {
+  position: relative;
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--border);
+}
+
+.debrief-timeline-entry {
+  padding: var(--sp-2) 0;
+  position: relative;
+}
+
+.debrief-timeline-entry::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--sp-4) - 4px);
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.debrief-timeline-entry.critical::before {
+  background: var(--amber);
+  box-shadow: 0 0 6px var(--amber);
+}
+
+.debrief-timeline-entry.failure::before {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
+
+.debrief-timeline-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.debrief-timeline-text {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.6;
+  margin-top: 2px;
+}
+
+.debrief-timeline-entry.failure .debrief-timeline-text {
+  color: var(--red);
+}
+
+/* --- Assessment --- */
+.debrief-assessment {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.7;
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* --- Footer --- */
+.debrief-footer {
+  text-align: center;
+  padding: var(--sp-4) 0;
+  margin-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+.debrief-case-file {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-top: var(--sp-1);
+}

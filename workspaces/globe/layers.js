@@ -1,6 +1,6 @@
 /* ============================================================
    VIGIL — workspaces/globe/layers.js
-   Data layers: threats, operations. Toggle-able.
+   Data layers: threats, operations, bases, assets. Toggle-able.
    ============================================================ */
 
 var GLOBE_LAYERS = {
@@ -12,6 +12,16 @@ var GLOBE_LAYERS = {
   operations: {
     label: 'Active Operations',
     color: '#3dcc70',
+    visible: true,
+  },
+  bases: {
+    label: 'US Bases',
+    color: '#4a8fd4',
+    visible: true,
+  },
+  assets: {
+    label: 'Deployed Assets',
+    color: '#e0a030',
     visible: true,
   },
 };
@@ -29,16 +39,33 @@ function syncGlobeLayers(viewer) {
   if (GLOBE_LAYERS.threats.visible) {
     syncThreatMarkers(viewer);
   } else {
-    removeThreatMarkers(viewer);
+    removePrefixMarkers(viewer, 'threat-');
   }
 
   // Sync operations
   if (GLOBE_LAYERS.operations.visible) {
     syncOperationMarkers(viewer);
   } else {
-    removeOperationMarkers(viewer);
+    removePrefixMarkers(viewer, 'op-');
+  }
+
+  // Sync bases
+  if (GLOBE_LAYERS.bases.visible) {
+    syncBaseMarkers(viewer);
+  } else {
+    removePrefixMarkers(viewer, 'base-');
+  }
+
+  // Sync assets
+  if (GLOBE_LAYERS.assets.visible) {
+    syncAssetMarkers(viewer);
+  } else {
+    removePrefixMarkers(viewer, 'asset-');
+    removePrefixMarkers(viewer, 'arc-');
   }
 }
+
+// --- Threats ---
 
 function syncThreatMarkers(viewer) {
   var activeIds = new Set();
@@ -61,21 +88,10 @@ function syncThreatMarkers(viewer) {
     }
   }
 
-  // Remove stale markers
-  for (var id in _globeEntities) {
-    if (id.indexOf('threat-') === 0 && !activeIds.has(id)) {
-      removeGlobeMarker(viewer, id);
-    }
-  }
+  removeStaleMarkers(viewer, 'threat-', activeIds);
 }
 
-function removeThreatMarkers(viewer) {
-  for (var id in _globeEntities) {
-    if (id.indexOf('threat-') === 0) {
-      removeGlobeMarker(viewer, id);
-    }
-  }
-}
+// --- Operations ---
 
 function syncOperationMarkers(viewer) {
   var activeIds = new Set();
@@ -90,9 +106,10 @@ function syncOperationMarkers(viewer) {
     activeIds.add(markerId);
 
     var color = '#4a8fd4';
-    if (status === 'EXECUTING') color = '#3dcc70';
+    if (status === 'EXECUTING' || status === 'ASSETS_IN_TRANSIT') color = '#3dcc70';
     else if (status === 'SUCCESS') color = '#3dcc70';
     else if (status === 'FAILURE') color = '#e04040';
+    else if (status === 'OPTIONS_PRESENTED') color = '#e0a030';
 
     if (!hasGlobeMarker(markerId)) {
       addGlobeMarker(viewer, markerId, {
@@ -108,17 +125,137 @@ function syncOperationMarkers(viewer) {
     }
   }
 
-  // Remove stale
+  removeStaleMarkers(viewer, 'op-', activeIds);
+}
+
+// --- Bases ---
+
+function syncBaseMarkers(viewer) {
+  if (!BASES) return;
+
+  for (var i = 0; i < BASES.length; i++) {
+    var b = BASES[i];
+    var markerId = 'base-' + b.id;
+
+    if (!hasGlobeMarker(markerId)) {
+      var typeInfo = BASE_TYPES[b.type] || {};
+      addGlobeMarker(viewer, markerId, {
+        lat: b.lat,
+        lon: b.lon,
+        color: typeInfo.color || '#4a8fd4',
+        size: 4,
+        outlineWidth: 2,
+        label: b.name,
+      });
+    }
+  }
+}
+
+// --- Assets (in-transit only, not stationed) ---
+
+function syncAssetMarkers(viewer) {
+  if (!V.assets) return;
+  var activeIds = new Set();
+
+  for (var i = 0; i < V.assets.length; i++) {
+    var a = V.assets[i];
+    if (a.status !== 'IN_TRANSIT' && a.status !== 'RETURNING' && a.status !== 'DEPLOYED') continue;
+
+    var markerId = 'asset-' + a.id;
+    activeIds.add(markerId);
+
+    var catInfo = ASSET_CATEGORIES[a.category] || {};
+    var color = catInfo.color || '#e0a030';
+
+    if (!hasGlobeMarker(markerId)) {
+      addGlobeMarker(viewer, markerId, {
+        lat: a.currentLat,
+        lon: a.currentLon,
+        color: color,
+        size: 5,
+        outlineWidth: 3,
+        label: a.name,
+      });
+    } else {
+      updateGlobeMarker(viewer, markerId, {
+        lat: a.currentLat,
+        lon: a.currentLon,
+        color: color,
+      });
+    }
+
+    // Transit arc
+    if ((a.status === 'IN_TRANSIT' || a.status === 'RETURNING') && a.originLat != null && a.destinationLat != null) {
+      syncTransitArc(viewer, a);
+    }
+  }
+
+  removeStaleMarkers(viewer, 'asset-', activeIds);
+  // Clean up arcs for assets that are no longer in transit
+  cleanupArcs(viewer, activeIds);
+}
+
+// --- Transit Arc ---
+
+function syncTransitArc(viewer, asset) {
+  var arcId = 'arc-' + asset.id;
+
+  // Build a series of points along the great circle
+  var points = [];
+  var segments = 40;
+  for (var i = 0; i <= segments; i++) {
+    var frac = i / segments;
+    var pt = interpolateGreatCircle(
+      asset.originLat, asset.originLon,
+      asset.destinationLat, asset.destinationLon,
+      frac
+    );
+    points.push(pt.lon, pt.lat, 0);
+  }
+
+  if (!hasGlobeMarker(arcId)) {
+    // Create polyline entity
+    var positions = Cesium.Cartesian3.fromDegreesArrayHeights(points);
+    var entity = viewer.entities.add({
+      id: arcId,
+      polyline: {
+        positions: positions,
+        width: 1.5,
+        material: new Cesium.PolylineDashMaterialProperty({
+          color: Cesium.Color.fromCssColorString('#e0a03080'),
+          dashLength: 8,
+        }),
+        clampToGround: false,
+      },
+    });
+    _globeEntities[arcId] = entity;
+  }
+}
+
+function cleanupArcs(viewer, activeAssetIds) {
   for (var id in _globeEntities) {
-    if (id.indexOf('op-') === 0 && !activeIds.has(id)) {
+    if (id.indexOf('arc-') === 0) {
+      var assetId = 'asset-' + id.substring(4);
+      if (!activeAssetIds.has(assetId)) {
+        removeGlobeMarker(viewer, id);
+      }
+    }
+  }
+}
+
+// --- Helpers ---
+
+function removePrefixMarkers(viewer, prefix) {
+  for (var id in _globeEntities) {
+    if (id.indexOf(prefix) === 0) {
       removeGlobeMarker(viewer, id);
     }
   }
 }
 
-function removeOperationMarkers(viewer) {
+function removeStaleMarkers(viewer, prefix, activeIds) {
   for (var id in _globeEntities) {
-    if (id.indexOf('op-') === 0) {
+    if (id.indexOf(prefix) === 0 && !activeIds.has(id)) {
       removeGlobeMarker(viewer, id);
     }
   }

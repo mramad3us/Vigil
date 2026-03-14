@@ -1,230 +1,300 @@
 /* ============================================================
    VIGIL — workspaces/operations/lifecycle.js
-   Operation state machine, timers, resolution.
-   States: INCOMING → INVESTIGATING → READY → EXECUTING → SUCCESS/FAILURE
+   Operation state machine — 8 states, minute-based timing.
+   DETECTED → ANALYSIS → OPTIONS_PRESENTED → APPROVED →
+   ASSETS_IN_TRANSIT → EXECUTING → RESOLVED → DEBRIEF
    ============================================================ */
 
 (function() {
 
-  // --- Timer ticks ---
+  // --- Minute-based tick ---
 
-  hook('tick:day', function(data) {
+  hook('tick', function(data) {
+    if (!V.operations || V.operations.length === 0) return;
+    var now = V.time.totalMinutes;
+
     for (var i = 0; i < V.operations.length; i++) {
       var op = V.operations[i];
 
-      // Urgency countdown
-      if (op.status === 'INCOMING' || op.status === 'READY') {
-        op.urgencyLeft = Math.max(0, op.urgencyLeft - 1);
-        if (op.urgencyLeft <= 0) {
-          expireOperation(op);
-          continue;
-        }
-      }
+      switch (op.status) {
+        case 'DETECTED':
+          if (now >= op.nextTransitionAt) {
+            transitionToAnalysis(op);
+          }
+          break;
 
-      // Investigation countdown
-      if (op.status === 'INVESTIGATING') {
-        op.invDaysLeft = Math.max(0, op.invDaysLeft - 1);
-        if (op.invDaysLeft <= 0) {
-          completeInvestigation(op);
-        }
-        // Also check urgency
-        op.urgencyLeft = Math.max(0, op.urgencyLeft - 1);
-        if (op.urgencyLeft <= 0) {
-          expireOperation(op);
-        }
-      }
+        case 'ANALYSIS':
+          if (now >= op.nextTransitionAt) {
+            transitionToOptions(op);
+          }
+          break;
 
-      // Execution countdown
-      if (op.status === 'EXECUTING') {
-        op.execDaysLeft = Math.max(0, op.execDaysLeft - 1);
-        if (op.execDaysLeft <= 0) {
-          resolveOperation(op);
-        }
+        case 'OPTIONS_PRESENTED':
+          // Waiting for player — check expiry
+          if (op.expiresAt && now >= op.expiresAt) {
+            expireOperation(op);
+          }
+          break;
+
+        case 'APPROVED':
+          // Immediate transition to transit
+          transitionToTransit(op);
+          break;
+
+        case 'ASSETS_IN_TRANSIT':
+          // Check if all assets have arrived
+          if (allAssetsArrived(op)) {
+            transitionToExecuting(op);
+          }
+          break;
+
+        case 'EXECUTING':
+          if (now >= op.nextTransitionAt) {
+            resolveOperation(op);
+          }
+          break;
       }
     }
-  });
+  }, 8); // After asset transit tick (priority 5)
 
   // --- State Transitions ---
 
-  function expireOperation(op) {
-    op.status = 'EXPIRED';
-    addLog('OP ' + op.codename + ' EXPIRED — deadline passed.', 'log-warn');
+  function transitionToAnalysis(op) {
+    op.status = 'ANALYSIS';
+    var analysisMinutes = randInt(120, 360); // 2-6 game-hours
+    op.nextTransitionAt = V.time.totalMinutes + analysisMinutes;
 
-    V.resources.confidence = clamp(V.resources.confidence - randInt(1, 3), 0, 100);
-
-    var feedItem = {
-      id: uid('FI'),
-      type: 'OPERATION',
-      severity: 'ELEVATED',
-      header: 'OPERATION EXPIRED: ' + op.codename,
-      body: 'Operation ' + op.codename + ' has expired due to inaction. The operational window has closed. Confidence impact: negative.',
-      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
-      read: false,
-      opId: op.id,
-    };
-    pushFeedItem(feedItem);
+    addLog('OP ' + op.codename + ': Vigil analysis initiated.', 'log-info');
   }
 
-  function completeInvestigation(op) {
-    op.status = 'READY';
+  function transitionToOptions(op) {
+    // Generate Vigil's recommendations
+    var options = generateVigilOptions(op);
 
-    // Reveal intel fields based on investigation quality
-    var total = op.intelFields.length;
-    var hidden = op.intelFields.filter(function(f) { return !f.revealed; });
-    var toReveal = Math.min(hidden.length, randInt(1, Math.ceil(total * 0.6)));
-
-    for (var i = 0; i < toReveal; i++) {
-      hidden[i].revealed = true;
-      hidden[i].value = generateIntelFieldValue(hidden[i].key);
+    if (options.length === 0) {
+      // No assets available — auto-expire
+      addLog('OP ' + op.codename + ': No assets available. Operation cannot proceed.', 'log-warn');
+      expireOperation(op);
+      return;
     }
 
-    addLog('OP ' + op.codename + ' investigation complete. ' + toReveal + ' intel fields revealed.', 'log-info');
+    op.status = 'OPTIONS_PRESENTED';
+    op.options = options;
+    op.expiresAt = V.time.totalMinutes + (op.urgencyHours * 60);
 
-    var feedItem = {
+    addLog('OP ' + op.codename + ': Vigil presents ' + options.length + ' deployment options.', 'log-info');
+
+    // Feed item
+    pushFeedItem({
       id: uid('FI'),
       type: 'OPERATION',
-      severity: 'ELEVATED',
-      header: 'INVESTIGATION COMPLETE: ' + op.codename,
-      body: 'Investigation phase for Operation ' + op.codename + ' is complete. ' + toReveal + ' intelligence fields have been confirmed. The operation is ready for execution.',
+      severity: 'HIGH',
+      header: 'AWAITING APPROVAL: ' + op.codename,
+      body: 'Vigil has completed analysis of Operation ' + op.codename + ' (' + op.location.city + ', ' + op.location.country + '). ' + options.length + ' deployment options are ready for operator review.',
       timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
       read: false,
       opId: op.id,
-    };
-    pushFeedItem(feedItem);
+      geo: op.geo,
+    });
+  }
+
+  function transitionToTransit(op) {
+    if (!op.options || op.selectedOptionIdx === undefined) return;
+    var option = op.options[op.selectedOptionIdx];
+    if (!option) return;
+
+    // Deploy assets
+    deployAssets(option.assetIds, op.geo.lat, op.geo.lon, op.id);
+    op.assignedAssetIds = option.assetIds.slice();
+    op.transitStartTotalMinutes = V.time.totalMinutes;
+    op.transitDurationMinutes = option.transitTimeMinutes;
+
+    op.status = 'ASSETS_IN_TRANSIT';
+
+    addLog('OP ' + op.codename + ': Assets deploying. Transit: ' + formatTransitTime(option.transitTimeMinutes) + '.', 'log-op');
+  }
+
+  function transitionToExecuting(op) {
+    op.status = 'EXECUTING';
+    var opType = getOperationType(op.operationType);
+    var execHours = opType ? randInt(opType.execHoursRange[0], opType.execHoursRange[1]) : randInt(4, 12);
+    op.execDurationMinutes = execHours * 60;
+    op.nextTransitionAt = V.time.totalMinutes + op.execDurationMinutes;
+
+    addLog('OP ' + op.codename + ': All assets on station. Execution phase begun.', 'log-op');
   }
 
   function resolveOperation(op) {
-    var prob = op.successProb || calcOpProb(op);
-    var roll = Math.random() * 100;
+    var opType = getOperationType(op.operationType);
+    var option = op.options && op.options[op.selectedOptionIdx];
 
-    if (roll < prob) {
+    // Calculate success probability
+    var prob = option ? option.confidencePercent : (opType ? opType.baseSuccessRate : 50);
+
+    // Roll for success
+    var roll = Math.random() * 100;
+    var success = roll < prob;
+
+    if (success) {
       op.status = 'SUCCESS';
       V.playStats.opsSucceeded++;
-
-      // Rewards
-      V.resources.confidence = clamp(V.resources.confidence + randInt(2, 6), 0, 100);
-      V.resources.intel += randInt(5, 15);
-      V.resources.xp += randInt(3, 8);
-
-      addLog('OP ' + op.codename + ' SUCCESS. Confidence +, Intel +.', 'log-success');
-
-      var feedItem = {
-        id: uid('FI'),
-        type: 'OPERATION',
-        severity: 'ROUTINE',
-        header: 'OPERATION SUCCESS: ' + op.codename,
-        body: 'Operation ' + op.codename + ' has been completed successfully. ' +
-          op.location.city + ', ' + op.location.country + '. ' +
-          'Objectives achieved. Confidence and intelligence assets have been reinforced.',
-        timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
-        read: false,
-        opId: op.id,
-      };
-      pushFeedItem(feedItem);
-
     } else {
       op.status = 'FAILURE';
       V.playStats.opsFailed++;
+    }
+    V.playStats.opsCompleted++;
 
-      // Penalties
-      V.resources.confidence = clamp(V.resources.confidence - randInt(3, 8), 0, 100);
+    // Apply viability impact
+    var viabilityDelta = assessOptionOutcome(op, success);
 
-      addLog('OP ' + op.codename + ' FAILED. Confidence -.', 'log-fail');
+    // Budget cost
+    var budgetCost = op.budgetCost || randInt(5, 20);
+    V.resources.budget = clamp(V.resources.budget - budgetCost, 0, 200);
 
-      var feedItem2 = {
-        id: uid('FI'),
-        type: 'OPERATION',
-        severity: 'HIGH',
-        header: 'OPERATION FAILURE: ' + op.codename,
-        body: 'Operation ' + op.codename + ' has failed to achieve its objectives. ' +
-          'Location: ' + op.location.city + ', ' + op.location.country + '. ' +
-          'Post-action assessment is underway. Confidence has been impacted.',
-        timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
-        read: false,
-        opId: op.id,
-      };
-      pushFeedItem(feedItem2);
+    // Intel gain on success
+    if (success) {
+      V.resources.intel += randInt(5, 15);
+    }
 
-      // Failed ops may increase theater risk
-      if (op.location && op.location.theaterId && V.theaters[op.location.theaterId]) {
+    // Generate debrief
+    if (typeof generateDebrief === 'function') {
+      op.debrief = generateDebrief(op, success);
+    }
+
+    // Return assets to base
+    if (op.assignedAssetIds && op.assignedAssetIds.length > 0) {
+      returnAssetsToBase(op.assignedAssetIds);
+    }
+
+    // Log
+    var outcomeLabel = success ? 'SUCCESS' : 'FAILURE';
+    addLog('OP ' + op.codename + ' ' + outcomeLabel + '. Viability ' + (viabilityDelta >= 0 ? '+' : '') + viabilityDelta + '.', success ? 'log-success' : 'log-fail');
+
+    // Feed item
+    pushFeedItem({
+      id: uid('FI'),
+      type: 'OPERATION',
+      severity: success ? 'ROUTINE' : 'HIGH',
+      header: 'OPERATION ' + outcomeLabel + ': ' + op.codename,
+      body: 'Operation ' + op.codename + ' has ' + (success ? 'achieved its objectives' : 'failed to achieve its objectives') + ' in ' + op.location.city + ', ' + op.location.country + '. ' +
+        'Viability impact: ' + (viabilityDelta >= 0 ? '+' : '') + viabilityDelta + '%. ' +
+        (op.deviatedFromVigil ? 'NOTE: Operator deviated from Vigil recommendation.' : 'Vigil recommendation was followed.'),
+      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+      read: false,
+      opId: op.id,
+      geo: op.geo,
+    });
+
+    // Theater risk impact
+    if (op.location && op.location.theaterId && V.theaters[op.location.theaterId]) {
+      if (success) {
+        V.theaters[op.location.theaterId].risk = clamp(V.theaters[op.location.theaterId].risk - 0.3, 1, 5);
+      } else {
         V.theaters[op.location.theaterId].risk = clamp(V.theaters[op.location.theaterId].risk + 0.5, 1, 5);
       }
     }
 
-    V.playStats.opsCompleted++;
     fire('operation:resolved', { operation: op });
   }
 
-  // --- Probability Calculation ---
+  function expireOperation(op) {
+    op.status = 'EXPIRED';
+    V.resources.viability = clamp(V.resources.viability - randInt(1, 3), 0, 100);
 
-  window.calcOpProb = function(op, budget, depts) {
-    var base = 35;
+    addLog('OP ' + op.codename + ' EXPIRED — operational window closed.', 'log-warn');
 
-    // Budget contribution (0-20%)
-    var assignedBudget = budget || op.assignedBudget || op.baseBudget;
-    var budgetRatio = clamp(assignedBudget / Math.max(1, op.baseBudget), 0, 2);
-    var budgetBonus = Math.round(budgetRatio * 10);
+    pushFeedItem({
+      id: uid('FI'),
+      type: 'OPERATION',
+      severity: 'ELEVATED',
+      header: 'OPERATION EXPIRED: ' + op.codename,
+      body: 'Operation ' + op.codename + ' has expired. The operational window in ' + op.location.city + ', ' + op.location.country + ' has closed. Viability impact: negative.',
+      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+      read: false,
+      opId: op.id,
+      geo: op.geo,
+    });
+  }
 
-    // Intel contribution (0-15%)
-    var totalFields = op.intelFields.length;
-    var revealedFields = op.intelFields.filter(function(f) { return f.revealed; }).length;
-    var intelRatio = totalFields > 0 ? revealedFields / totalFields : 0;
-    var intelBonus = Math.round(intelRatio * 15);
+  // --- Helper: check if all assigned assets have arrived ---
 
-    // Intel penalty if fields missing (-10%)
-    var intelPenalty = intelRatio < 0.3 ? 10 : 0;
-
-    // Department bonus (0-10%)
-    var deptBonus = 0;
-    var assignedDepts = depts || op.assignedExecDepts || [];
-    deptBonus = Math.min(10, assignedDepts.length * 5);
-
-    var prob = base + budgetBonus + intelBonus + deptBonus - intelPenalty;
-    return clamp(prob, 10, 92);
-  };
-
-  // --- Player Actions ---
-
-  window.assignInvestigation = function(opId, deptId) {
-    var op = getOp(opId);
-    if (!op || op.status !== 'INCOMING') return;
-    if (deptAvail(deptId) < 1) {
-      addLog('Department unavailable.', 'log-warn');
-      return;
+  function allAssetsArrived(op) {
+    if (!op.assignedAssetIds || op.assignedAssetIds.length === 0) return true;
+    for (var i = 0; i < op.assignedAssetIds.length; i++) {
+      var asset = getAsset(op.assignedAssetIds[i]);
+      if (!asset) continue;
+      if (asset.status === 'IN_TRANSIT') return false;
     }
+    return true;
+  }
 
-    op.status = 'INVESTIGATING';
-    op.assignedDept = deptId;
-    op.invDaysLeft = op.invDays;
+  // --- Player Action: Approve Option ---
 
-    addLog('OP ' + op.codename + ' assigned to ' + deptId + ' for investigation.', 'log-info');
-  };
-
-  window.executeOperation = function(opId) {
+  window.approveOption = function(opId, optionIdx) {
     var op = getOp(opId);
-    if (!op || op.status !== 'READY') return;
+    if (!op || op.status !== 'OPTIONS_PRESENTED') return;
+    if (!op.options || !op.options[optionIdx]) return;
 
-    var budget = op.assignedBudget || op.baseBudget;
-    if (V.resources.budget < budget) {
-      addLog('Insufficient budget.', 'log-warn');
-      return;
-    }
+    op.selectedOptionIdx = optionIdx;
+    op.deviatedFromVigil = (optionIdx !== op.vigilRecommendedIdx);
+    op.status = 'APPROVED';
 
-    V.resources.budget -= budget;
-    op.status = 'EXECUTING';
-    op.execDaysLeft = op.execDays;
-    op.successProb = calcOpProb(op);
+    // Build fillVars for debrief system
+    var option = op.options[optionIdx];
+    var assets = getAssetsByIds(option.assetIds);
+    op.fillVars = buildOpFillVars(op, assets);
 
-    addLog('OP ' + op.codename + ' LAUNCHED. Budget: $' + budget + 'M. Prob: ' + op.successProb + '%', 'log-op');
+    addLog('OP ' + op.codename + ': Option "' + option.label + '" approved.' + (op.deviatedFromVigil ? ' (DEVIATED FROM VIGIL)' : ''), 'log-decision');
   };
+
+  // --- Player Action: Cancel Operation ---
 
   window.cancelOperation = function(opId) {
     var op = getOp(opId);
     if (!op) return;
-    if (op.status === 'EXECUTING') return; // Can't cancel executing ops
+    if (op.status === 'EXECUTING' || op.status === 'ASSETS_IN_TRANSIT') return; // Can't cancel in-flight
 
     op.status = 'ARCHIVED';
-    addLog('OP ' + op.codename + ' cancelled.', 'log-info');
+    V.resources.viability = clamp(V.resources.viability - 1, 0, 100);
+    addLog('OP ' + op.codename + ' cancelled by operator.', 'log-info');
   };
+
+  // --- Build Fill Variables for Debrief Parametrization ---
+
+  function buildOpFillVars(op, assets) {
+    var assetNames = assets.map(function(a) { return a.name; });
+    var baseNames = [];
+    var baseIds = {};
+    for (var i = 0; i < assets.length; i++) {
+      var baseId = assets[i].currentBaseId || assets[i].homeBaseId;
+      if (baseId && !baseIds[baseId]) {
+        baseIds[baseId] = true;
+        var base = getBase(baseId);
+        if (base) baseNames.push(base.name);
+      }
+    }
+
+    var option = op.options[op.selectedOptionIdx];
+    var transitStr = option ? formatTransitTime(option.transitTimeMinutes) : '?';
+
+    return {
+      city: op.location.city,
+      country: op.location.country,
+      theater: op.location.theater ? op.location.theater.name : '?',
+      theaterShort: op.location.theater ? op.location.theater.shortName : '?',
+      orgName: op.orgName || 'unknown threat organization',
+      codename: op.codename,
+      targetAlias: op.targetAlias || generatePersonnelAlias(),
+      assetNames: assetNames,
+      baseNames: baseNames,
+      assetNamesStr: assetNames.join(', '),
+      baseNamesStr: baseNames.join(', '),
+      transitTimeStr: transitStr,
+      threatLevel: String(op.threatLevel),
+      operationType: op.operationType,
+      primaryAsset: assetNames[0] || 'deployed forces',
+      primaryBase: baseNames[0] || 'forward operating base',
+    };
+  }
 
 })();

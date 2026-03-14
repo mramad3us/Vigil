@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.1.3';
+V.version = '0.2.0';
 
 function initState() {
 
@@ -27,24 +27,22 @@ function initState() {
 
   // Resources
   V.resources = {
-    confidence: 70,
+    viability: 70,
     budget: 100,
     intel: 0,
     xp: 0,
   };
 
-  // Departments
-  V.departments = {};
-  if (typeof DEPT_CONFIG !== 'undefined') {
-    for (var i = 0; i < DEPT_CONFIG.length; i++) {
-      var dc = DEPT_CONFIG[i];
-      V.departments[dc.id] = {
-        id: dc.id,
-        capacity: dc.baseCapacity,
-        maxCapacity: dc.maxCapacity,
-      };
-    }
-  }
+  // Bases & Assets (populated by bases.js / assets.js at game:start)
+  V.bases = BASES || [];
+  V.assets = [];
+
+  // Viability tracking
+  V.viability = {
+    deviationCount: 0,
+    monthlyHistory: [],
+    lastEvalMonth: 0,
+  };
 
   // Operations
   V.operations = [];
@@ -86,7 +84,7 @@ function initState() {
   // Globe
   V.globe = {
     cameraPosition: null,
-    activeLayers: ['threats', 'operations'],
+    activeLayers: ['threats', 'operations', 'bases', 'assets'],
     selectedEntity: null,
   };
 
@@ -109,36 +107,12 @@ function initState() {
     totalDaysPlayed: 0,
     threatsNeutralized: 0,
     crisesResolved: 0,
+    recommendationsFollowed: 0,
+    recommendationsDeviated: 0,
   };
 }
 
 // --- Computed Accessors (never cached — Faux13 pattern) ---
-
-function deptAllocated(deptId) {
-  var n = 0;
-  for (var i = 0; i < V.operations.length; i++) {
-    var op = V.operations[i];
-    if (op.status === 'INVESTIGATING' && op.assignedDept === deptId) n++;
-    if (op.status === 'EXECUTING') {
-      var depts = op.assignedExecDepts || [];
-      for (var j = 0; j < depts.length; j++) {
-        if (depts[j] === deptId) n++;
-      }
-    }
-  }
-  return n;
-}
-
-function deptAvail(deptId) {
-  var d = V.departments[deptId];
-  if (!d) return 0;
-  return Math.max(0, d.capacity - deptAllocated(deptId));
-}
-
-function deptCapacity(deptId) {
-  var d = V.departments[deptId];
-  return d ? d.capacity : 0;
-}
 
 function getOp(id) {
   for (var i = 0; i < V.operations.length; i++) {

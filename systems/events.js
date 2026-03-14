@@ -301,10 +301,10 @@ var EVENT_CATALOG = [
           addLog('Intelligence gain: +' + randInt(5, 15) + ' INTEL', 'log-info');
           break;
         case 'confidence_gain':
-          V.resources.confidence = clamp(V.resources.confidence + randInt(2, 5), 0, 100);
+          V.resources.viability = clamp(V.resources.viability + randInt(2, 5), 0, 100);
           break;
         case 'confidence_small':
-          V.resources.confidence = clamp(V.resources.confidence + randInt(1, 3), 0, 100);
+          V.resources.viability = clamp(V.resources.viability + randInt(1, 3), 0, 100);
           break;
         case 'budget_cost':
           V.resources.budget = clamp(V.resources.budget - randInt(5, 15), 0, 200);

@@ -293,7 +293,7 @@ window.logoutGame = function() {
         label: 'Autosave — Day ' + V.time.day,
         callsign: V.player.callsign,
         day: V.time.day,
-        confidence: Math.round(V.resources.confidence),
+        viability: Math.round(V.resources.viability),
         timestamp: Date.now(),
         data: JSON.parse(JSON.stringify(V)),
       };

@@ -58,7 +58,7 @@
       label: label || 'Save',
       callsign: V.player.callsign,
       day: V.time.day,
-      confidence: Math.round(V.resources.confidence),
+      viability: Math.round(V.resources.viability),
       timestamp: Date.now(),
       data: serializeState(),
     };

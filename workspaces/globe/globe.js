@@ -171,12 +171,37 @@
     } else if (type === 'op') {
       var op = getOp(id);
       if (op) {
+        var statusLabels = { DETECTED: 'DETECTED', ANALYSIS: 'ANALYZING', OPTIONS_PRESENTED: 'AWAITING APPROVAL', APPROVED: 'APPROVED', ASSETS_IN_TRANSIT: 'IN TRANSIT', EXECUTING: 'EXECUTING', SUCCESS: 'SUCCESS', FAILURE: 'FAILURE' };
         title = op.codename;
-        typeLabel = op.category + ' · ' + op.status;
+        typeLabel = (op.operationType && OPERATION_TYPES[op.operationType] ? OPERATION_TYPES[op.operationType].shortLabel : op.category) + ' · ' + (statusLabels[op.status] || op.status);
         detail = 'Location: ' + op.location.city + ', ' + op.location.country +
           '<br>Threat Level: ' + op.threatLevel +
-          '<br>Status: ' + op.status;
+          '<br>Status: ' + (statusLabels[op.status] || op.status);
         action = '<button class="feed-action-btn primary" onclick="viewOperationFromGlobe(\'' + op.id + '\')">VIEW OPERATION</button>';
+      }
+    } else if (type === 'base') {
+      var base = getBase(id);
+      if (base) {
+        var baseTypeInfo = BASE_TYPES[base.type] || {};
+        var assetsHere = getAssetsAtBase(base.id);
+        title = base.name;
+        typeLabel = (baseTypeInfo.label || base.type) + ' · ' + base.country;
+        detail = 'Location: ' + base.city + ', ' + base.country +
+          '<br>Assets stationed: ' + assetsHere.length;
+        action = '';
+      }
+    } else if (type === 'asset') {
+      var asset = getAsset(id);
+      if (asset) {
+        var assetCat = ASSET_CATEGORIES[asset.category] || {};
+        title = asset.name;
+        typeLabel = (assetCat.label || asset.category) + ' · ' + asset.status;
+        detail = 'Status: ' + asset.status;
+        if (asset.assignedOpId) {
+          var assignedOp = getOp(asset.assignedOpId);
+          if (assignedOp) detail += '<br>Assigned: ' + assignedOp.codename;
+        }
+        action = asset.assignedOpId ? '<button class="feed-action-btn primary" onclick="viewOperationFromGlobe(\'' + asset.assignedOpId + '\')">VIEW OPERATION</button>' : '';
       }
     }
 
