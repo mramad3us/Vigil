@@ -228,12 +228,15 @@
     var viabilityDelta = assessOptionOutcome(op, success);
 
     // Intel gain on success
+    var intelGain = 0;
     if (success) {
-      V.resources.intel += randInt(5, 15);
+      intelGain = randInt(5, 15);
+      V.resources.intel += intelGain;
     }
 
-    // Store viability delta for debrief
+    // Store impact data for debrief
     op.viabilityDelta = viabilityDelta;
+    op.intelGain = intelGain;
 
     // Generate debrief
     if (typeof generateDebrief === 'function') {
@@ -265,15 +268,19 @@
     });
 
     // Theater risk impact
+    op.theaterRiskDelta = 0;
     if (op.location && op.location.theaterId && V.theaters[op.location.theaterId]) {
+      var riskBefore = V.theaters[op.location.theaterId].risk;
       if (success) {
         V.theaters[op.location.theaterId].risk = clamp(V.theaters[op.location.theaterId].risk - 0.3, 1, 5);
       } else {
         V.theaters[op.location.theaterId].risk = clamp(V.theaters[op.location.theaterId].risk + 0.5, 1, 5);
       }
+      op.theaterRiskDelta = Math.round((V.theaters[op.location.theaterId].risk - riskBefore) * 10) / 10;
     }
 
     // Mark linked threat as resolved
+    op.diplomaticImpacts = [];
     if (op.relatedThreatId) {
       var threat = getThreat(op.relatedThreatId);
       if (threat) {
@@ -287,6 +294,7 @@
             var ftCountry = threat.foreignTarget.country;
             if (V.diplomacy[ftCountry]) {
               shiftStance(ftCountry, 2);
+              op.diplomaticImpacts.push({ country: ftCountry, delta: 2, reason: 'Threat neutralization goodwill' });
               addLog('DIPLOMACY: ' + ftCountry + ' grateful for neutralizing ' + threat.orgName + '. Stance +2.', 'log-info');
               pushFeedItem({
                 id: uid('FI'),
@@ -309,16 +317,36 @@
 
   function expireOperation(op) {
     op.status = 'EXPIRED';
-    V.resources.viability = clamp(V.resources.viability - randInt(1, 3), 0, 100);
+    var viabilityLoss = randInt(1, 3);
+    V.resources.viability = clamp(V.resources.viability - viabilityLoss, 0, 100);
 
-    addLog('OP ' + op.codename + ' EXPIRED — operational window closed.', 'log-warn');
+    // Store impact data for debrief
+    op.viabilityDelta = -viabilityLoss;
+    op.intelGain = 0;
+    op.theaterRiskDelta = 0;
+    op.diplomaticImpacts = [];
+    op.expired = true;
+
+    // Theater risk increases on expired ops
+    if (op.location && op.location.theaterId && V.theaters[op.location.theaterId]) {
+      var riskBefore = V.theaters[op.location.theaterId].risk;
+      V.theaters[op.location.theaterId].risk = clamp(V.theaters[op.location.theaterId].risk + 0.3, 1, 5);
+      op.theaterRiskDelta = Math.round((V.theaters[op.location.theaterId].risk - riskBefore) * 10) / 10;
+    }
+
+    // Generate debrief for expired op
+    if (typeof generateDebrief === 'function') {
+      op.debrief = generateDebrief(op, false);
+    }
+
+    addLog('OP ' + op.codename + ' EXPIRED — operational window closed. Viability -' + viabilityLoss + '.', 'log-warn');
 
     pushFeedItem({
       id: uid('FI'),
       type: 'OPERATION',
       severity: 'ELEVATED',
       header: 'OPERATION EXPIRED: ' + op.codename,
-      body: 'Operation ' + op.codename + ' has expired. The operational window in ' + op.location.city + ', ' + op.location.country + ' has closed. Viability impact: negative.',
+      body: 'Operation ' + op.codename + ' has expired. The operational window in ' + op.location.city + ', ' + op.location.country + ' has closed without action. Viability impact: -' + viabilityLoss + '%.',
       timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
       read: false,
       opId: op.id,

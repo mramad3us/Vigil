@@ -196,6 +196,20 @@ var LE_ENTRY = [
 
 function generateDebrief(op, success) {
   var v = op.fillVars || {};
+
+  // Expired ops with no assets deployed get a special debrief
+  if (op.expired) {
+    // Build minimal fillVars if missing (expired ops may not have gone through full flow)
+    if (!v.codename) v.codename = op.codename || 'UNKNOWN';
+    if (!v.orgName) v.orgName = op.orgName || 'Unknown';
+    if (!v.city && op.location) v.city = op.location.city;
+    if (!v.country && op.location) v.country = op.location.country;
+    if (!v.theater && op.location && op.location.theater) v.theater = op.location.theater.name;
+    if (!v.threatLevel) v.threatLevel = op.threatLevel || 3;
+    var sections = DEBRIEF_GENERATORS.EXPIRED(op, v, false);
+    return assemblDebrief(sections, op, false);
+  }
+
   var generator = DEBRIEF_GENERATORS[op.operationType];
   if (!generator) generator = DEBRIEF_GENERATORS.MILITARY_STRIKE;
 
@@ -215,7 +229,7 @@ function assemblDebrief(sections, op, success) {
     html += sections[i];
   }
 
-  html += viabilityImpactSection(op);
+  html += operationalImpactSection(op);
   html += classificationFooter(op);
   return html;
 }
@@ -225,6 +239,10 @@ function assemblDebrief(sections, op, success) {
 function headerSection(op, success) {
   var outcomeClass = success ? 'debrief-success' : 'debrief-failure';
   var outcomeLabel = success ? 'MISSION SUCCESS' : 'MISSION FAILURE';
+  if (op.expired) {
+    outcomeClass = 'debrief-failure';
+    outcomeLabel = 'OPERATIONAL WINDOW EXPIRED — NO ACTION TAKEN';
+  }
   var dt = dayToDate(V.time.day, V.time.year, V.time.month);
   var dateStr = dt.dayOfMonth + ' ' + MONTH_NAMES[dt.month] + ' ' + dt.year;
 
@@ -291,18 +309,69 @@ function vigilAssessmentSection(op) {
   return html;
 }
 
-function viabilityImpactSection(op) {
-  if (op.viabilityDelta === undefined) return '';
+function operationalImpactSection(op) {
+  var html = '<div class="debrief-section">' +
+    '<div class="debrief-section-title">OPERATIONAL IMPACT</div>' +
+    '<div class="debrief-vigil-assessment">';
 
-  var delta = op.viabilityDelta;
+  // --- Viability ---
+  if (op.viabilityDelta !== undefined) {
+    var vDelta = op.viabilityDelta;
+    var vSign = vDelta >= 0 ? '+' : '';
+    var vColor = vDelta > 0 ? 'var(--green)' : vDelta < 0 ? 'var(--red)' : 'var(--text-dim)';
+    html += '<div class="debrief-meta-row">' +
+      '<span class="debrief-meta-key">VIABILITY</span>' +
+      '<span class="debrief-meta-val" style="color:' + vColor + ';font-weight:700">' + vSign + vDelta + '% (now ' + Math.round(V.resources.viability) + '%)</span>' +
+    '</div>';
+  }
+
+  // --- Intel ---
+  if (op.intelGain !== undefined && op.intelGain > 0) {
+    html += '<div class="debrief-meta-row">' +
+      '<span class="debrief-meta-key">INTELLIGENCE</span>' +
+      '<span class="debrief-meta-val" style="color:var(--green);font-weight:700">+' + op.intelGain + ' (now ' + V.resources.intel + ')</span>' +
+    '</div>';
+  } else if (op.status !== 'SUCCESS' && op.status !== 'EXPIRED') {
+    html += '<div class="debrief-meta-row">' +
+      '<span class="debrief-meta-key">INTELLIGENCE</span>' +
+      '<span class="debrief-meta-val" style="color:var(--text-dim)">No actionable intelligence recovered.</span>' +
+    '</div>';
+  }
+
+  // --- Theater Risk ---
+  if (op.theaterRiskDelta !== undefined && op.theaterRiskDelta !== 0) {
+    var rSign = op.theaterRiskDelta > 0 ? '+' : '';
+    var rColor = op.theaterRiskDelta < 0 ? 'var(--green)' : 'var(--red)';
+    var theaterName = (op.location && op.location.theater) ? op.location.theater.name : (op.location ? op.location.theaterId : 'Unknown');
+    html += '<div class="debrief-meta-row">' +
+      '<span class="debrief-meta-key">THEATER RISK (' + theaterName.toUpperCase() + ')</span>' +
+      '<span class="debrief-meta-val" style="color:' + rColor + ';font-weight:700">' + rSign + op.theaterRiskDelta + '</span>' +
+    '</div>';
+  }
+
+  // --- Diplomatic Impact ---
+  if (op.diplomaticImpacts && op.diplomaticImpacts.length > 0) {
+    for (var i = 0; i < op.diplomaticImpacts.length; i++) {
+      var di = op.diplomaticImpacts[i];
+      var dSign = di.delta >= 0 ? '+' : '';
+      var dColor = di.delta > 0 ? 'var(--green)' : 'var(--red)';
+      html += '<div class="debrief-meta-row">' +
+        '<span class="debrief-meta-key">DIPLOMATIC (' + di.country.toUpperCase() + ')</span>' +
+        '<span class="debrief-meta-val" style="color:' + dColor + ';font-weight:700">' + dSign + di.delta + ' stance — ' + di.reason + '</span>' +
+      '</div>';
+    }
+  }
+
+  // --- Vigil Assessment Commentary ---
   var deviated = op.deviatedFromVigil;
   var success = op.status === 'SUCCESS';
-  var sign = delta >= 0 ? '+' : '';
-  var color = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--text-dim)';
-  var currentViability = Math.round(V.resources.viability);
-
+  var expired = op.expired;
   var assessment;
-  if (success && !deviated) {
+
+  if (expired) {
+    assessment = 'The operator failed to deploy assets within the operational window. ' + (op.orgName || 'The target') + ' was not engaged. ' +
+      'Vigil presented viable options that were not acted upon. This inaction has been logged. The threat remains active and the window of opportunity has closed.';
+  } else if (success && !deviated) {
     assessment = 'Operator adhered to Vigil-recommended course of action. Mission success validates system analysis. Viability standing reinforced.';
   } else if (success && deviated) {
     assessment = 'Mission objectives achieved despite operator deviation from Vigil recommendation. Outcome acknowledged, however the deviation introduces uncertainty into Vigil\'s predictive models. Reduced viability credit applied.';
@@ -312,20 +381,9 @@ function viabilityImpactSection(op) {
     assessment = 'Mission failure compounded by unauthorized deviation from Vigil recommendation. The operator chose a course of action Vigil assessed as suboptimal, and the outcome confirms that assessment. Significant viability reduction applied. This pattern of judgment is being tracked.';
   }
 
-  return '<div class="debrief-section">' +
-    '<div class="debrief-section-title">VIABILITY IMPACT</div>' +
-    '<div class="debrief-vigil-assessment">' +
-      '<div class="debrief-meta-row">' +
-        '<span class="debrief-meta-key">VIABILITY ADJUSTMENT</span>' +
-        '<span class="debrief-meta-val" style="color:' + color + ';font-weight:700">' + sign + delta + '%</span>' +
-      '</div>' +
-      '<div class="debrief-meta-row">' +
-        '<span class="debrief-meta-key">CURRENT VIABILITY</span>' +
-        '<span class="debrief-meta-val">' + currentViability + '%</span>' +
-      '</div>' +
-      '<div style="margin-top:var(--sp-2);color:var(--text-dim);font-size:var(--fs-sm);line-height:1.6">' + assessment + '</div>' +
-    '</div>' +
-  '</div>';
+  html += '<div style="margin-top:var(--sp-2);color:var(--text-dim);font-size:var(--fs-sm);line-height:1.6">' + assessment + '</div>';
+  html += '</div></div>';
+  return html;
 }
 
 function classificationFooter(op) {
@@ -1076,6 +1134,34 @@ DEBRIEF_GENERATORS.ARREST_OPERATION = function(op, v, success) {
   var assessment = success ?
     'Arrest operation against ' + v.orgName + ' in ' + v.city + ' completed successfully. All ' + targetCount + ' subjects in custody. Evidence preserved. Prosecution timeline on track. Operation conducted within constitutional requirements.' :
     'Arrest operation partially failed. Key subject(s) evaded custody. Vigil recommends fugitive task force activation and enhanced surveillance on known associates. The failed arrest will alert the wider ' + v.orgName + ' network.';
+
+  return [buildTimeline(entries), buildAssessment(assessment)];
+};
+
+// =====================================================================
+//  EXPIRED — No action taken by operator
+// =====================================================================
+
+DEBRIEF_GENERATORS.EXPIRED = function(op, v, success) {
+  var entries = [];
+
+  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' as an active threat in ' + v.city + ', ' + v.country + '. Threat level assessed at ' + v.threatLevel + '/5. Intelligence package compiled and forwarded for operator review.' });
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil completed threat analysis and generated operational recommendations. ' + (op.options ? op.options.length : 'Multiple') + ' viable courses of action presented to the operator. Operational window established: ' + (op.urgencyHours || '48') + ' hours.' });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued reminder: operational window for ' + v.orgName + ' is closing. Deployment options remain available. No operator response received.' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'failure', text: 'Operational window EXPIRED. No assets were deployed. No action was taken against ' + v.orgName + '. The target has moved beyond the reach of previously recommended options.' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'failure', text: v.orgName + ' remains operational in ' + v.city + ', ' + v.country + '. Vigil\'s intelligence collection on the target will continue, but the window for direct action at the recommended confidence levels has passed.' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Post-expiry intelligence indicates ' + pick([
+    v.orgName + ' has relocated to an unknown safehouse. Re-acquisition will require significant intelligence effort.',
+    v.orgName + ' has dispersed its cell structure. Individual members are now operating independently, making them harder to track.',
+    v.orgName + ' has accelerated its operational timeline. The threat they pose may materialize before new options can be generated.',
+    v.orgName + ' has reinforced its security posture. Future operations against this target will face greater resistance.',
+    'the target has gone dark. Communications ceased, known locations abandoned. Vigil has lost the thread.',
+  ]) });
+
+  var assessment = 'Operation ' + v.codename + ' expired without action. The operator was presented with viable options and chose not to deploy. ' +
+    v.orgName + ' remains an active threat in the ' + (v.theater || 'unknown') + ' theater. ' +
+    'Vigil notes that inaction carries consequences equal to failed action — threats do not resolve themselves. ' +
+    'This operational lapse has been recorded in the operator\'s performance file.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
