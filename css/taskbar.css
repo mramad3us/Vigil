@@ -1,0 +1,160 @@
+/* ============================================================
+   VIGIL — css/taskbar.css
+   Bottom OS taskbar: app buttons, speed controls, system tray.
+   ============================================================ */
+
+#taskbar {
+  height: var(--taskbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-3);
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+/* --- App Buttons --- */
+.tb-apps {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tb-app {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: all var(--transition-fast);
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.tb-app:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.tb-app.active {
+  color: var(--text-hi);
+  background: var(--bg-active);
+  border-color: var(--border-light);
+}
+
+.tb-app.active::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.tb-icon {
+  font-size: var(--fs-md);
+  width: 18px;
+  text-align: center;
+}
+
+.tb-label {
+  letter-spacing: 0.3px;
+}
+
+.tb-badge {
+  display: none;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  color: var(--text-hi);
+  background: var(--red);
+}
+
+.tb-badge.visible {
+  display: inline-block;
+}
+
+/* --- Speed Controls --- */
+.tb-speed {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: var(--sp-4);
+  background: var(--bg-3);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+
+.speed-btn {
+  width: 32px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.speed-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.speed-btn.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.speed-btn.paused {
+  color: var(--amber);
+}
+
+/* --- System Tray --- */
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.tb-sys {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all var(--transition-fast);
+  letter-spacing: 0.5px;
+}
+
+.tb-sys:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+}
+
+.tb-status {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--green);
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-left: 1px solid var(--border);
+}

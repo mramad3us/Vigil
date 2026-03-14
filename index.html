@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIGIL — Global Intelligence Command System</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/taskbar.css">
+  <link rel="stylesheet" href="css/workspace.css">
+  <link rel="stylesheet" href="css/globe.css">
+  <link rel="stylesheet" href="css/feed.css">
+  <link rel="stylesheet" href="css/operations.css">
+  <link rel="stylesheet" href="css/sitroom.css">
+  <link rel="stylesheet" href="css/modal.css">
+
+  <!-- CesiumJS -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ======================== LOGIN SCREEN ======================== -->
+  <div id="screen-login" class="screen active">
+    <div class="login-wrap">
+
+      <!-- Orthanc Logo -->
+      <div class="login-logo-wrap" id="login-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <circle class="logo-ring" cx="50" cy="50" r="44" />
+          <circle class="logo-ring" cx="50" cy="50" r="34" />
+          <circle class="logo-ring" cx="50" cy="50" r="24" />
+          <path class="logo-iris" d="M50 28 L66 50 L50 72 L34 50 Z" />
+          <circle class="logo-iris" cx="50" cy="50" r="6" />
+          <line class="logo-ring" x1="50" y1="2" x2="50" y2="16" />
+          <line class="logo-ring" x1="50" y1="84" x2="50" y2="98" />
+          <line class="logo-ring" x1="2" y1="50" x2="16" y2="50" />
+          <line class="logo-ring" x1="84" y1="50" x2="98" y2="50" />
+        </svg>
+        <div class="login-company-name" id="login-company">ORTHANC SYSTEMS</div>
+      </div>
+
+      <!-- Boot Output -->
+      <div class="boot-output" id="boot-output"></div>
+
+      <!-- VIGIL Wordmark -->
+      <div class="login-wordmark" id="login-wordmark">
+        <div class="login-wordmark-text">VIGIL</div>
+        <div class="login-wordmark-sub" id="login-subtitle">GLOBAL INTELLIGENCE COMMAND SYSTEM</div>
+      </div>
+
+      <!-- Auth Form -->
+      <div class="login-auth" id="login-auth">
+        <div class="auth-form">
+          <div class="auth-field">
+            <div class="auth-label">OPERATOR CALLSIGN</div>
+            <div class="auth-input-wrap">
+              <input type="text" class="auth-input" id="auth-callsign" placeholder="Enter callsign..." autocomplete="off" spellcheck="false">
+              <div class="auth-input-cursor"></div>
+            </div>
+          </div>
+
+          <div class="auth-fp-wrap" id="auth-fp">
+            <div class="auth-fp-icon" id="auth-fp-icon">
+              <span>⬡</span>
+              <div class="fp-scan"></div>
+            </div>
+            <div class="auth-fp-label">BIOMETRIC VERIFICATION</div>
+          </div>
+
+          <button class="auth-btn" id="auth-btn" disabled>INITIALIZE SESSION</button>
+        </div>
+
+        <!-- Verification checks -->
+        <div class="auth-checks" id="auth-checks"></div>
+
+        <!-- Progress bar -->
+        <div class="auth-bar-wrap" id="auth-bar-wrap">
+          <div class="auth-bar" id="auth-bar"></div>
+        </div>
+
+        <!-- Classification banner -->
+        <div class="login-class-banner" id="login-class-banner">
+          TOP SECRET // SCI // VIGIL // NOFORN
+        </div>
+      </div>
+
+    </div>
+
+    <div class="login-footer">
+      WARNING: This is a U.S. Government information system. Unauthorized access is prohibited.
+      Use of this system constitutes consent to monitoring.
+    </div>
+  </div>
+
+  <!-- ======================== MAIN OS SCREEN ======================== -->
+  <div id="screen-main" class="screen">
+
+    <!-- Status Bar -->
+    <header id="status-bar">
+      <div class="sb-left">
+        <span class="sb-logo">VIGIL</span>
+        <span class="sb-powered">ORTHANC SYSTEMS</span>
+      </div>
+      <div class="sb-center">
+        <div class="sb-stat">
+          <span class="sb-stat-label">CONF</span>
+          <span class="sb-stat-value" id="sb-confidence">70%</span>
+          <div class="sb-stat-bar">
+            <div class="sb-stat-bar-fill" id="sb-conf-bar" style="width:70%;background:var(--green)"></div>
+          </div>
+        </div>
+        <div class="sb-stat">
+          <span class="sb-stat-label">BUDGET</span>
+          <span class="sb-stat-value" id="sb-budget">$100M</span>
+          <div class="sb-stat-bar">
+            <div class="sb-stat-bar-fill" id="sb-budget-bar" style="width:100%;background:var(--accent)"></div>
+          </div>
+        </div>
+        <div class="sb-stat">
+          <span class="sb-stat-label">INTEL</span>
+          <span class="sb-stat-value" id="sb-intel">0</span>
+        </div>
+        <div class="sb-stat">
+          <span class="sb-stat-label">THREAT</span>
+          <span class="sb-threat" id="sb-threat" style="color:var(--amber);border-color:var(--amber)">ELEVATED</span>
+        </div>
+      </div>
+      <div class="sb-right">
+        <div class="sb-clock" id="sb-clock">0800 · 1 JAN 2052</div>
+        <div class="tb-speed" id="speed-controls">
+          <button class="speed-btn paused" data-speed="0" title="Pause">⏸</button>
+          <button class="speed-btn" data-speed="1" title="Real-time">▶</button>
+          <button class="speed-btn active" data-speed="2" title="Normal">▶▶</button>
+          <button class="speed-btn" data-speed="3" title="Fast">▶▶▶</button>
+          <button class="speed-btn" data-speed="4" title="Very Fast">⏩</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Workspace Container -->
+    <div id="workspace-container">
+      <div class="workspace active" id="ws-globe" data-workspace="globe"></div>
+      <div class="workspace" id="ws-feed" data-workspace="feed"></div>
+      <div class="workspace" id="ws-operations" data-workspace="operations"></div>
+      <div class="workspace" id="ws-sitroom" data-workspace="sitroom"></div>
+    </div>
+
+    <!-- Taskbar -->
+    <footer id="taskbar">
+      <div class="tb-apps">
+        <button class="tb-app active" data-workspace="globe" onclick="activateWorkspace('globe')">
+          <span class="tb-icon">◎</span>
+          <span class="tb-label">Globe</span>
+          <span class="tb-badge" id="badge-globe"></span>
+        </button>
+        <button class="tb-app" data-workspace="feed" onclick="activateWorkspace('feed')">
+          <span class="tb-icon">⫘</span>
+          <span class="tb-label">Intel Feed</span>
+          <span class="tb-badge" id="badge-feed"></span>
+        </button>
+        <button class="tb-app" data-workspace="operations" onclick="activateWorkspace('operations')">
+          <span class="tb-icon">⬡</span>
+          <span class="tb-label">Operations</span>
+          <span class="tb-badge" id="badge-operations"></span>
+        </button>
+        <button class="tb-app" data-workspace="sitroom" onclick="activateWorkspace('sitroom')">
+          <span class="tb-icon">◉</span>
+          <span class="tb-label">Sit Room</span>
+          <span class="tb-badge" id="badge-sitroom"></span>
+        </button>
+      </div>
+      <div class="tb-right">
+        <button class="tb-sys" id="btn-save" onclick="showSaveModal()">SAVE</button>
+        <div class="tb-status" id="tb-status">OPERATIONAL</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ======================== MODAL ======================== -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title"></span>
+        <button class="modal-close" onclick="hideModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ======================== ALERT OVERLAY ======================== -->
+  <div id="alert-overlay" class="alert-overlay hidden"></div>
+
+  <!-- ======================== SCRIPTS ======================== -->
+  <!-- Core (must load first) -->
+  <script src="core/util.js"></script>
+  <script src="core/config.js"></script>
+  <script src="core/engine.js"></script>
+  <script src="core/state.js"></script>
+
+  <!-- UI Shell -->
+  <script src="ui/shell.js"></script>
+  <script src="ui/modal.js"></script>
+  <script src="ui/notifications.js"></script>
+  <script src="ui/login.js"></script>
+
+  <!-- Systems -->
+  <script src="systems/time.js"></script>
+  <script src="systems/content.js"></script>
+  <script src="systems/events.js"></script>
+  <script src="systems/threats.js"></script>
+  <script src="systems/geopolitics.js"></script>
+  <script src="systems/saves.js"></script>
+
+  <!-- Workspaces -->
+  <script src="workspaces/globe/markers.js"></script>
+  <script src="workspaces/globe/layers.js"></script>
+  <script src="workspaces/globe/globe.js"></script>
+  <script src="workspaces/feed/templates.js"></script>
+  <script src="workspaces/feed/generators.js"></script>
+  <script src="workspaces/feed/feed.js"></script>
+  <script src="workspaces/operations/lifecycle.js"></script>
+  <script src="workspaces/operations/operations.js"></script>
+  <script src="workspaces/sitroom/crises.js"></script>
+  <script src="workspaces/sitroom/sitroom.js"></script>
+
+</body>
+</html>

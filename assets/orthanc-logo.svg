@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Outer ring -->
+  <circle class="logo-ring" cx="50" cy="50" r="44" />
+  <!-- Middle ring -->
+  <circle class="logo-ring" cx="50" cy="50" r="34" />
+  <!-- Inner ring -->
+  <circle class="logo-ring" cx="50" cy="50" r="24" />
+  <!-- Diamond iris -->
+  <path class="logo-iris" d="M50 28 L66 50 L50 72 L34 50 Z" />
+  <!-- Pupil dot -->
+  <circle class="logo-iris" cx="50" cy="50" r="6" />
+  <!-- Cross hairs -->
+  <line class="logo-ring" x1="50" y1="2" x2="50" y2="16" />
+  <line class="logo-ring" x1="50" y1="84" x2="50" y2="98" />
+  <line class="logo-ring" x1="2" y1="50" x2="16" y2="50" />
+  <line class="logo-ring" x1="84" y1="50" x2="98" y2="50" />
+</svg>

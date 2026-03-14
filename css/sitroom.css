@@ -1,0 +1,266 @@
+/* ============================================================
+   VIGIL — css/sitroom.css
+   Situation room: crisis dashboard.
+   ============================================================ */
+
+#ws-sitroom {
+  background: var(--bg-1);
+}
+
+.sitroom-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Threat Gauge (left panel) --- */
+.sitroom-gauge-panel {
+  width: 260px;
+  padding: var(--sp-4);
+  border-right: 1px solid var(--border);
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex-shrink: 0;
+}
+
+.gauge-section-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-2);
+}
+
+.threat-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.threat-gauge-ring {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.threat-gauge-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.threat-gauge-ring .gauge-bg {
+  fill: none;
+  stroke: var(--bg-4);
+  stroke-width: 8;
+}
+
+.threat-gauge-ring .gauge-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-slow), stroke var(--transition-med);
+}
+
+.threat-gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  transform: rotate(0deg);
+}
+
+.threat-gauge-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* --- Theater Risk Bars --- */
+.theater-risks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.theater-risk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.theater-risk-name {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  width: 60px;
+  letter-spacing: 0.5px;
+}
+
+.theater-risk-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.theater-risk-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--transition-med);
+}
+
+.theater-risk-val {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  width: 16px;
+  text-align: right;
+}
+
+/* --- Crisis Cards (main area) --- */
+.sitroom-crises {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+}
+
+.sitroom-crises-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+
+.sitroom-crises-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  letter-spacing: 1px;
+}
+
+.sitroom-crises-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.crisis-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--sp-3);
+}
+
+.crisis-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.crisis-card:hover {
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-md);
+}
+
+.crisis-card.critical {
+  border-left: 3px solid var(--red);
+}
+
+.crisis-card.high {
+  border-left: 3px solid var(--severity-high);
+}
+
+.crisis-card.elevated {
+  border-left: 3px solid var(--amber);
+}
+
+.crisis-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+
+.crisis-card-severity {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.crisis-card-severity.critical { color: var(--red); background: var(--red-dim); }
+.crisis-card-severity.high { color: var(--severity-high); background: rgba(224,112,48,0.1); }
+.crisis-card-severity.elevated { color: var(--amber); background: var(--amber-dim); }
+
+.crisis-card-timer {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.crisis-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  margin-bottom: var(--sp-1);
+}
+
+.crisis-card-location {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  margin-bottom: var(--sp-2);
+}
+
+.crisis-card-desc {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: var(--sp-3);
+}
+
+.crisis-card-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* --- Empty State --- */
+.sitroom-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  letter-spacing: 1px;
+}
+
+.sitroom-empty-icon {
+  font-size: 36px;
+  margin-bottom: var(--sp-3);
+  opacity: 0.3;
+}

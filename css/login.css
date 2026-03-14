@@ -1,0 +1,412 @@
+/* ============================================================
+   VIGIL — css/login.css
+   Orthanc boot sequence → Vigil loading → biometric auth.
+   ============================================================ */
+
+#screen-login {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-0);
+  position: relative;
+  z-index: 200;
+}
+#screen-login.active {
+  display: flex;
+}
+
+/* Subtle grid overlay */
+#screen-login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 80px,
+      rgba(74, 143, 212, 0.015) 80px,
+      rgba(74, 143, 212, 0.015) 81px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 80px,
+      rgba(74, 143, 212, 0.015) 80px,
+      rgba(74, 143, 212, 0.015) 81px
+    );
+}
+
+.login-wrap {
+  max-width: 560px;
+  width: 90%;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Orthanc Logo --- */
+.login-logo-wrap {
+  text-align: center;
+  margin-bottom: var(--sp-6);
+  opacity: 0;
+}
+
+.login-logo-wrap.visible {
+  opacity: 1;
+}
+
+.login-logo-wrap svg {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--sp-3);
+}
+
+.login-logo-wrap svg .logo-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+}
+
+.login-logo-wrap svg .logo-iris {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+}
+
+.login-logo-wrap.drawing svg .logo-ring {
+  animation: logo-draw 2s ease forwards;
+}
+
+.login-logo-wrap.drawing svg .logo-iris {
+  animation: logo-draw 1.5s ease 0.5s forwards;
+}
+
+.login-logo-wrap.drawn svg {
+  animation: logo-glow 3s ease-in-out infinite;
+}
+
+.login-logo-wrap.drawn svg .logo-ring,
+.login-logo-wrap.drawn svg .logo-iris {
+  stroke-dashoffset: 0;
+}
+
+.login-company-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.login-company-name.visible {
+  animation: fade-in 0.5s ease forwards;
+}
+
+/* --- Boot Terminal Lines --- */
+.boot-output {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 2;
+  margin: var(--sp-6) 0;
+}
+
+.boot-line {
+  opacity: 0;
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+}
+
+.boot-line.visible {
+  animation: boot-line-appear 0.25s ease forwards;
+}
+
+.boot-line .boot-key {
+  color: var(--text-dim);
+}
+
+.boot-line .boot-dots {
+  flex: 1;
+  margin: 0 var(--sp-2);
+  border-bottom: 1px dotted var(--text-muted);
+  position: relative;
+  top: -4px;
+}
+
+.boot-line .boot-val {
+  color: var(--green);
+  font-weight: 500;
+}
+
+.boot-line .boot-val.pending {
+  color: var(--amber);
+  animation: boot-cursor-blink 0.6s step-end infinite;
+}
+
+/* --- VIGIL Wordmark --- */
+.login-wordmark {
+  text-align: center;
+  margin: var(--sp-8) 0 var(--sp-4);
+  opacity: 0;
+}
+
+.login-wordmark.visible {
+  animation: wordmark-appear 1s var(--ease-out) forwards;
+}
+
+.login-wordmark-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  color: var(--text-hi);
+  letter-spacing: 6px;
+}
+
+.login-wordmark-sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  margin-top: var(--sp-2);
+  opacity: 0;
+}
+
+.login-wordmark-sub.visible {
+  animation: fade-in 0.5s ease 0.2s forwards;
+}
+
+/* --- Auth Form --- */
+.login-auth {
+  display: none;
+  margin-top: var(--sp-6);
+}
+
+.login-auth.visible {
+  display: block;
+  animation: slide-up 0.5s var(--ease-out);
+}
+
+.auth-form {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.auth-field {
+  margin-bottom: var(--sp-4);
+}
+
+.auth-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-1);
+  text-transform: uppercase;
+}
+
+.auth-input-wrap {
+  position: relative;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.auth-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-dim);
+}
+
+.auth-input-cursor {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 18px;
+  background: var(--accent);
+  animation: boot-cursor-blink 1s step-end infinite;
+}
+
+.auth-fp-wrap {
+  text-align: center;
+  margin: var(--sp-6) 0;
+}
+
+.auth-fp-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--sp-3);
+  border-radius: 50%;
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--text-dim);
+  position: relative;
+  animation: fp-pulse 2s ease-in-out infinite;
+}
+
+.auth-fp-icon .fp-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-fp-icon.scanning .fp-scan {
+  opacity: 0.6;
+  animation: fp-scan-line 1.2s ease-in-out infinite;
+}
+
+.auth-fp-icon.confirmed {
+  border-color: var(--green);
+  color: var(--green);
+  animation: fp-confirm 0.5s ease;
+}
+
+.auth-fp-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 10px 20px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background: var(--accent-mid);
+  box-shadow: var(--shadow-glow);
+}
+
+.auth-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.auth-btn.success {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* --- Biometric Verification Lines --- */
+.auth-checks {
+  margin-top: var(--sp-5);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 2.2;
+}
+
+.auth-check {
+  display: flex;
+  justify-content: space-between;
+  opacity: 0;
+}
+
+.auth-check.visible {
+  animation: auth-check-appear 0.25s ease forwards;
+}
+
+.auth-check .check-label {
+  color: var(--text-dim);
+}
+
+.auth-check .check-status {
+  font-weight: 600;
+}
+
+.auth-check .check-status.ok {
+  color: var(--green);
+}
+
+.auth-check .check-status.pending {
+  color: var(--amber);
+}
+
+/* --- Auth Progress Bar --- */
+.auth-bar-wrap {
+  margin-top: var(--sp-4);
+  height: 3px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.auth-bar-wrap.visible {
+  opacity: 1;
+}
+
+.auth-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* --- Classification Banner --- */
+.login-class-banner {
+  margin-top: var(--sp-6);
+  padding: var(--sp-2) var(--sp-4);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--class-text);
+  background: var(--class-bg);
+  border: 1px solid var(--class-border);
+  border-radius: var(--radius-sm);
+  letter-spacing: 2px;
+  opacity: 0;
+}
+
+.login-class-banner.visible {
+  animation: boot-flash 0.6s ease 2 forwards;
+}
+
+/* --- Login Footer --- */
+.login-footer {
+  position: absolute;
+  bottom: var(--sp-4);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  padding: 0 var(--sp-4);
+}

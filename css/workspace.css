@@ -1,0 +1,144 @@
+/* ============================================================
+   VIGIL — css/workspace.css
+   Workspace frame and transitions.
+   ============================================================ */
+
+.workspace {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.workspace.active {
+  display: flex;
+  flex-direction: column;
+  animation: ws-fade-in 200ms var(--ease-out);
+}
+
+@keyframes ws-fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Workspace Two-Pane Layout (Feed, Ops) --- */
+.ws-two-pane {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ws-list-pane {
+  width: var(--sidebar-w);
+  min-width: 220px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg-1);
+}
+
+.ws-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+
+.ws-list-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  letter-spacing: 1px;
+}
+
+.ws-list-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.ws-list-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-1);
+}
+
+.ws-detail-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-1);
+}
+
+.ws-detail-header {
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+
+.ws-detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+}
+
+.ws-detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+/* --- Workspace Full Layout (Globe, Sitroom) --- */
+.ws-full {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Workspace Toolbar --- */
+.ws-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ws-toolbar-btn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.ws-toolbar-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.ws-toolbar-btn.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.ws-toolbar-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 var(--sp-1);
+}

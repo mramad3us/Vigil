@@ -1,0 +1,193 @@
+/* ============================================================
+   VIGIL — css/animations.css
+   All @keyframes and animation utility classes.
+   ============================================================ */
+
+/* --- Boot Sequence --- */
+@keyframes logo-draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(74,143,212,0.2)); }
+  50% { filter: drop-shadow(0 0 12px rgba(74,143,212,0.5)); }
+}
+
+@keyframes boot-line-appear {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes boot-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes boot-bar-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+@keyframes boot-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes wordmark-appear {
+  from { opacity: 0; letter-spacing: 16px; }
+  to { opacity: 1; letter-spacing: 6px; }
+}
+
+/* --- Biometric Auth --- */
+@keyframes fp-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes fp-scan-line {
+  from { top: 0%; }
+  to { top: 100%; }
+}
+
+@keyframes fp-confirm {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes auth-check-appear {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* --- Workspace Transitions --- */
+@keyframes ws-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Alerts & Notifications --- */
+@keyframes urgent-slide-in {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes urgent-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 64, 64, 0.3); }
+  50% { box-shadow: 0 0 20px 4px rgba(224, 64, 64, 0.15); }
+}
+
+@keyframes alert-badge-pop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes feed-item-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* --- Status Flashes --- */
+@keyframes flash-green {
+  0%, 100% { background: transparent; }
+  40% { background: var(--green-dim); }
+}
+
+@keyframes flash-red {
+  0%, 100% { background: transparent; }
+  40% { background: var(--red-dim); }
+}
+
+@keyframes flash-amber {
+  0%, 100% { background: transparent; }
+  40% { background: var(--amber-dim); }
+}
+
+@keyframes flash-blue {
+  0%, 100% { background: transparent; }
+  40% { background: var(--blue-dim); }
+}
+
+.flash-green { animation: flash-green 0.6s ease; }
+.flash-red { animation: flash-red 0.6s ease; }
+.flash-amber { animation: flash-amber 0.6s ease; }
+.flash-blue { animation: flash-blue 0.6s ease; }
+
+/* --- Globe Markers --- */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--accent-mid); opacity: 1; }
+  100% { box-shadow: 0 0 0 14px transparent; opacity: 0; }
+}
+
+@keyframes marker-appear {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* --- Operations --- */
+@keyframes op-card-stagger {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes op-resolve-success {
+  0% { border-color: var(--border); }
+  50% { border-color: var(--green); box-shadow: 0 0 12px var(--green-dim); }
+  100% { border-color: var(--border); }
+}
+
+@keyframes op-resolve-failure {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+/* --- Scanline (day advance visual) --- */
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.scanline-flash::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(74, 143, 212, 0.03),
+    transparent
+  );
+  height: 40px;
+  animation: scanline 0.4s ease-out forwards;
+  z-index: 9999;
+}
+
+/* --- Misc --- */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bg-grid-shift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}

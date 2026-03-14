@@ -1,0 +1,202 @@
+/* ============================================================
+   VIGIL — css/feed.css
+   Intelligence feed: alert cards, severity, detail view.
+   ============================================================ */
+
+/* --- Feed List Items --- */
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  margin: var(--sp-1);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  animation: feed-item-in 250ms var(--ease-out);
+}
+
+.feed-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.feed-item.selected {
+  background: var(--bg-active);
+  border-color: var(--border-light);
+}
+
+.feed-item.unread {
+  border-left: 2px solid var(--accent);
+}
+
+.feed-item.unread .feed-item-header {
+  color: var(--text-hi);
+  font-weight: 600;
+}
+
+/* --- Severity Badge --- */
+.feed-severity {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.feed-severity.critical { background: var(--severity-critical); box-shadow: 0 0 6px var(--red-mid); }
+.feed-severity.high { background: var(--severity-high); }
+.feed-severity.elevated { background: var(--severity-elevated); }
+.feed-severity.routine { background: var(--severity-routine); }
+.feed-severity.low { background: var(--severity-low); }
+
+/* --- Feed Item Content --- */
+.feed-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-item-header {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.feed-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.feed-item-type {
+  padding: 1px 5px;
+  background: var(--bg-3);
+  border-radius: 2px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+/* --- Feed Detail View --- */
+.feed-detail-classification {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--class-text);
+  background: var(--class-bg);
+  border: 1px solid var(--class-border);
+  padding: var(--sp-1) var(--sp-3);
+  text-align: center;
+  letter-spacing: 2px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--sp-4);
+}
+
+.feed-detail-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-xl);
+  color: var(--text-hi);
+  margin-bottom: var(--sp-3);
+}
+
+.feed-detail-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-1) var(--sp-3);
+  margin-bottom: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.feed-detail-meta-key {
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.feed-detail-meta-val {
+  color: var(--text);
+}
+
+.feed-detail-body {
+  font-size: var(--fs-md);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.feed-detail-body p {
+  margin-bottom: var(--sp-3);
+}
+
+.feed-detail-actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+.feed-action-btn {
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
+}
+
+.feed-action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-light);
+}
+
+.feed-action-btn.primary {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.feed-action-btn.primary:hover {
+  background: var(--accent-mid);
+}
+
+/* --- Feed Filters --- */
+.feed-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.feed-filter {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
+}
+
+.feed-filter:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.feed-filter.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}

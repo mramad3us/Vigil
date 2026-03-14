@@ -1,0 +1,224 @@
+/* ============================================================
+   VIGIL — css/modal.css
+   Modal system and urgent alert overlays.
+   ============================================================ */
+
+/* --- Modal Overlay --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(var(--glass-blur));
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 200ms ease;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  max-width: 520px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slide-up 300ms var(--ease-out);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  letter-spacing: 1px;
+}
+
+.modal-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-lg);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.modal-body {
+  padding: var(--sp-4);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+/* --- Modal Buttons --- */
+.modal-btn {
+  padding: 8px 16px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
+}
+
+.modal-btn-primary {
+  color: var(--text-hi);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+}
+
+.modal-btn-primary:hover {
+  background: var(--accent-mid);
+  box-shadow: var(--shadow-glow);
+}
+
+.modal-btn-danger {
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid var(--red);
+}
+
+.modal-btn-danger:hover {
+  background: var(--red-mid);
+}
+
+.modal-btn-ghost {
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+.modal-btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+  background: var(--bg-hover);
+}
+
+/* --- Urgent Alert Overlay --- */
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 600;
+  padding: var(--sp-4);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.alert-overlay.hidden {
+  display: none;
+}
+
+.urgent-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  border: 1px solid rgba(224, 64, 64, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(224, 64, 64, 0.08);
+  max-width: 560px;
+  width: 100%;
+  padding: var(--sp-4);
+  pointer-events: all;
+  animation: urgent-slide-in 400ms var(--ease-out), urgent-pulse 2s ease-in-out infinite 0.4s;
+}
+
+.urgent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+
+.urgent-severity {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.urgent-severity.severity-critical {
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid rgba(224, 64, 64, 0.3);
+}
+
+.urgent-severity.severity-high {
+  color: var(--severity-high);
+  background: rgba(224, 112, 48, 0.1);
+  border: 1px solid rgba(224, 112, 48, 0.3);
+}
+
+.urgent-time {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.urgent-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  margin-bottom: var(--sp-2);
+}
+
+.urgent-body {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: var(--sp-4);
+}
+
+.urgent-dismiss {
+  width: 100%;
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.urgent-dismiss:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+}

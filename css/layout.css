@@ -1,0 +1,130 @@
+/* ============================================================
+   VIGIL — css/layout.css
+   Main shell: status bar + workspace container + taskbar.
+   ============================================================ */
+
+/* --- Screen system (login / main / gameover) --- */
+.screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Main OS Screen --- */
+#screen-main {
+  background: var(--bg-0);
+}
+
+/* --- Status Bar (top) --- */
+#status-bar {
+  height: var(--status-bar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-4);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.sb-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 200px;
+}
+
+.sb-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  letter-spacing: 3px;
+}
+
+.sb-powered {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.sb-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+}
+
+.sb-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+
+.sb-stat-label {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.5px;
+}
+
+.sb-stat-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.sb-stat-bar {
+  width: 60px;
+  height: 3px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sb-stat-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--transition-med);
+}
+
+.sb-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-width: 320px;
+  justify-content: flex-end;
+}
+
+.sb-clock {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  letter-spacing: 1px;
+}
+
+.sb-threat {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+}
+
+/* --- Workspace Container --- */
+#workspace-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: var(--bg-1);
+}
