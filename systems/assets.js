@@ -940,6 +940,29 @@ var FORCE_STRUCTURE = {
     { type: 'CIA_CASE_TEAM_1', count: 2 },
     { type: 'CIA_POLITICAL_OFC', count: 2 },
   ],
+  CIA_PARIS: [
+    { type: 'CIA_CASE_TEAM_1', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+    { type: 'CIA_INFLUENCE_OFC', count: 1 },
+  ],
+  CIA_ROME: [
+    { type: 'CIA_CASE_TEAM_1', count: 1 },
+    { type: 'CIA_SAD_EU', count: 1 },
+  ],
+  CIA_KYIV: [
+    { type: 'CIA_CASE_TEAM_1', count: 2 },
+    { type: 'CIA_SAD_EU', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_WARSAW: [
+    { type: 'CIA_CASE_TEAM_1', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_ANKARA: [
+    { type: 'CIA_CASE_TEAM_1', count: 1 },
+    { type: 'CIA_SAD_EU', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
   LAKENHEATH: [
     { type: 'F15E_SQN', count: 2 },
     { type: 'F35_SQN_EU', count: 1 },
@@ -984,6 +1007,29 @@ var FORCE_STRUCTURE = {
     { type: 'CIA_POLITICAL_OFC', count: 1 },
     { type: 'DEFENSE_ATTACHE', count: 1 },
   ],
+  CIA_RIYADH: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_BAGHDAD: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_AMMAN: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 1 },
+  ],
+  CIA_TEL_AVIV: [
+    { type: 'CIA_CASE_TEAM_2', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+    { type: 'CIA_INFLUENCE_OFC', count: 1 },
+  ],
+  CIA_BEIRUT: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 1 },
+  ],
   AL_DHAFRA: [
     { type: 'F22_SQN', count: 1 },
     { type: 'RQ4_FLIGHT', count: 1 },
@@ -1023,6 +1069,23 @@ var FORCE_STRUCTURE = {
     { type: 'CIA_POLITICAL_OFC', count: 1 },
     { type: 'DEFENSE_ATTACHE', count: 1 },
   ],
+  CIA_SEOUL: [
+    { type: 'CIA_CASE_TEAM_3', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_BEIJING: [
+    { type: 'CIA_CASE_TEAM_3', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+    { type: 'CIA_INFLUENCE_OFC', count: 1 },
+  ],
+  CIA_MANILA: [
+    { type: 'CIA_CASE_TEAM_3', count: 1 },
+    { type: 'CIA_SAD_ME', count: 1 },
+  ],
+  CIA_TAIPEI: [
+    { type: 'CIA_CASE_TEAM_3', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
 
   // ===== SOUTH ASIA =====
   CIA_ISLAMABAD: [
@@ -1030,6 +1093,15 @@ var FORCE_STRUCTURE = {
     { type: 'CIA_SAD_ME', count: 1 },
     { type: 'CIA_POLITICAL_OFC', count: 1 },
     { type: 'CIA_INFLUENCE_OFC', count: 1 },
+  ],
+  CIA_NEW_DELHI: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_KABUL: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
   ],
   DIEGO_GARCIA: [
     { type: 'SSN_SQUADRON', count: 1 },
@@ -1053,6 +1125,14 @@ var FORCE_STRUCTURE = {
     { type: 'AMBASSADOR_AF', count: 1 },
     { type: 'CIA_POLITICAL_OFC', count: 1 },
   ],
+  CIA_LAGOS: [
+    { type: 'CIA_CASE_TEAM_2', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_ADDIS_ABABA: [
+    { type: 'CIA_CASE_TEAM_2', count: 1 },
+    { type: 'CIA_SAD_ME', count: 1 },
+  ],
 
   // ===== LATIN AMERICA =====
   GUANTANAMO: [
@@ -1065,6 +1145,16 @@ var FORCE_STRUCTURE = {
     { type: 'MQ9_FLIGHT_AF', count: 1 },
     { type: '75TH_RANGERS', count: 1 },
     { type: 'GREEN_BERETS', count: 1 },
+  ],
+  CIA_BOGOTA: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_SAD_ME', count: 1 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+  ],
+  CIA_MEXICO_CITY: [
+    { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_POLITICAL_OFC', count: 1 },
+    { type: 'CIA_INFLUENCE_OFC', count: 1 },
   ],
 
   // ===== SIGINT =====

@@ -32,6 +32,11 @@ var BASES = [
   { id: 'MENWITH_HILL', name: 'RAF Menwith Hill', type: 'DIA_FACILITY', city: 'Harrogate', country: 'United Kingdom', lat: 54.00, lon: -1.69, theaterId: 'EUROPE' },
   { id: 'CIA_LONDON', name: 'CIA London Station', type: 'CIA_STATION', city: 'London', country: 'United Kingdom', lat: 51.50, lon: -0.14, theaterId: 'EUROPE' },
   { id: 'CIA_BERLIN', name: 'CIA Berlin Station', type: 'CIA_STATION', city: 'Berlin', country: 'Germany', lat: 52.52, lon: 13.38, theaterId: 'EUROPE' },
+  { id: 'CIA_PARIS', name: 'CIA Paris Station', type: 'CIA_STATION', city: 'Paris', country: 'France', lat: 48.86, lon: 2.35, theaterId: 'EUROPE' },
+  { id: 'CIA_ROME', name: 'CIA Rome Station', type: 'CIA_STATION', city: 'Rome', country: 'Italy', lat: 41.90, lon: 12.50, theaterId: 'EUROPE' },
+  { id: 'CIA_KYIV', name: 'CIA Kyiv Station', type: 'CIA_STATION', city: 'Kyiv', country: 'Ukraine', lat: 50.45, lon: 30.52, theaterId: 'EUROPE' },
+  { id: 'CIA_WARSAW', name: 'CIA Warsaw Station', type: 'CIA_STATION', city: 'Warsaw', country: 'Poland', lat: 52.23, lon: 21.01, theaterId: 'EUROPE' },
+  { id: 'CIA_ANKARA', name: 'CIA Ankara Station', type: 'CIA_STATION', city: 'Ankara', country: 'Turkey', lat: 39.93, lon: 32.85, theaterId: 'EUROPE' },
   { id: 'LAKENHEATH', name: 'RAF Lakenheath', type: 'AIR', city: 'Brandon', country: 'United Kingdom', lat: 52.41, lon: 0.56, theaterId: 'EUROPE' },
   { id: 'SIGONELLA', name: 'NAS Sigonella', type: 'NAVAL', city: 'Catania', country: 'Italy', lat: 37.40, lon: 14.92, theaterId: 'EUROPE' },
   { id: 'NAPLES', name: 'Naval Support Activity Naples', type: 'NAVAL', city: 'Naples', country: 'Italy', lat: 40.82, lon: 14.28, theaterId: 'EUROPE' },
@@ -42,6 +47,11 @@ var BASES = [
   { id: 'BAHRAIN', name: 'NSA Bahrain', type: 'NAVAL', city: 'Manama', country: 'Bahrain', lat: 26.21, lon: 50.61, theaterId: 'MIDDLE_EAST' },
   { id: 'INCIRLIK', name: 'Incirlik Air Base', type: 'AIR', city: 'Adana', country: 'Turkey', lat: 37.00, lon: 35.43, theaterId: 'MIDDLE_EAST' },
   { id: 'CIA_CAIRO', name: 'CIA Cairo Station', type: 'CIA_STATION', city: 'Cairo', country: 'Egypt', lat: 30.04, lon: 31.24, theaterId: 'MIDDLE_EAST' },
+  { id: 'CIA_RIYADH', name: 'CIA Riyadh Station', type: 'CIA_STATION', city: 'Riyadh', country: 'Saudi Arabia', lat: 24.71, lon: 46.68, theaterId: 'MIDDLE_EAST' },
+  { id: 'CIA_BAGHDAD', name: 'CIA Baghdad Station', type: 'CIA_STATION', city: 'Baghdad', country: 'Iraq', lat: 33.31, lon: 44.37, theaterId: 'MIDDLE_EAST' },
+  { id: 'CIA_AMMAN', name: 'CIA Amman Station', type: 'CIA_STATION', city: 'Amman', country: 'Jordan', lat: 31.95, lon: 35.93, theaterId: 'MIDDLE_EAST' },
+  { id: 'CIA_TEL_AVIV', name: 'CIA Tel Aviv Station', type: 'CIA_STATION', city: 'Tel Aviv', country: 'Israel', lat: 32.08, lon: 34.78, theaterId: 'MIDDLE_EAST' },
+  { id: 'CIA_BEIRUT', name: 'CIA Beirut Station', type: 'CIA_STATION', city: 'Beirut', country: 'Lebanon', lat: 33.89, lon: 35.50, theaterId: 'MIDDLE_EAST' },
   { id: 'AL_DHAFRA', name: 'Al Dhafra Air Base', type: 'AIR', city: 'Abu Dhabi', country: 'UAE', lat: 24.25, lon: 54.55, theaterId: 'MIDDLE_EAST' },
   { id: 'CAMP_ARIFJAN', name: 'Camp Arifjan', type: 'MILITARY', city: 'Kuwait City', country: 'Kuwait', lat: 29.12, lon: 48.10, theaterId: 'MIDDLE_EAST' },
 
@@ -50,14 +60,22 @@ var BASES = [
   { id: 'YOKOSUKA', name: 'Fleet Activities Yokosuka', type: 'NAVAL', city: 'Yokosuka', country: 'Japan', lat: 35.29, lon: 139.67, theaterId: 'EAST_ASIA' },
   { id: 'CAMP_HUMPHREYS', name: 'Camp Humphreys', type: 'MILITARY', city: 'Pyeongtaek', country: 'South Korea', lat: 36.96, lon: 127.03, theaterId: 'EAST_ASIA' },
   { id: 'CIA_TOKYO', name: 'CIA Tokyo Station', type: 'CIA_STATION', city: 'Tokyo', country: 'Japan', lat: 35.68, lon: 139.75, theaterId: 'EAST_ASIA' },
+  { id: 'CIA_SEOUL', name: 'CIA Seoul Station', type: 'CIA_STATION', city: 'Seoul', country: 'South Korea', lat: 37.57, lon: 126.98, theaterId: 'EAST_ASIA' },
+  { id: 'CIA_BEIJING', name: 'CIA Beijing Station', type: 'CIA_STATION', city: 'Beijing', country: 'China', lat: 39.90, lon: 116.40, theaterId: 'EAST_ASIA' },
+  { id: 'CIA_MANILA', name: 'CIA Manila Station', type: 'CIA_STATION', city: 'Manila', country: 'Philippines', lat: 14.60, lon: 120.98, theaterId: 'EAST_ASIA' },
+  { id: 'CIA_TAIPEI', name: 'CIA Taipei Station', type: 'CIA_STATION', city: 'Taipei', country: 'Taiwan', lat: 25.03, lon: 121.57, theaterId: 'EAST_ASIA' },
 
   // --- SOUTH ASIA ---
   { id: 'CIA_ISLAMABAD', name: 'CIA Islamabad Station', type: 'CIA_STATION', city: 'Islamabad', country: 'Pakistan', lat: 33.69, lon: 73.04, theaterId: 'SOUTH_ASIA' },
+  { id: 'CIA_NEW_DELHI', name: 'CIA New Delhi Station', type: 'CIA_STATION', city: 'New Delhi', country: 'India', lat: 28.61, lon: 77.21, theaterId: 'SOUTH_ASIA' },
+  { id: 'CIA_KABUL', name: 'CIA Kabul Station', type: 'CIA_STATION', city: 'Kabul', country: 'Afghanistan', lat: 34.53, lon: 69.17, theaterId: 'SOUTH_ASIA' },
   { id: 'DIEGO_GARCIA', name: 'Naval Support Facility Diego Garcia', type: 'NAVAL', city: 'Diego Garcia', country: 'BIOT', lat: -7.32, lon: 72.42, theaterId: 'SOUTH_ASIA' },
 
   // --- AFRICA ---
   { id: 'CAMP_LEMONNIER', name: 'Camp Lemonnier', type: 'MILITARY', city: 'Djibouti', country: 'Djibouti', lat: 11.55, lon: 43.15, theaterId: 'AFRICA' },
   { id: 'CIA_NAIROBI', name: 'CIA Nairobi Station', type: 'CIA_STATION', city: 'Nairobi', country: 'Kenya', lat: -1.29, lon: 36.82, theaterId: 'AFRICA' },
+  { id: 'CIA_LAGOS', name: 'CIA Lagos Station', type: 'CIA_STATION', city: 'Lagos', country: 'Nigeria', lat: 6.52, lon: 3.38, theaterId: 'AFRICA' },
+  { id: 'CIA_ADDIS_ABABA', name: 'CIA Addis Ababa Station', type: 'CIA_STATION', city: 'Addis Ababa', country: 'Ethiopia', lat: 9.02, lon: 38.75, theaterId: 'AFRICA' },
 
   // --- RUSSIA/CIS (nearby forward bases) ---
   // Covered by European bases — no US bases in theater
@@ -65,6 +83,8 @@ var BASES = [
   // --- LATIN AMERICA ---
   { id: 'GUANTANAMO', name: 'Naval Station Guantanamo Bay', type: 'NAVAL', city: 'Guantanamo Bay', country: 'Cuba', lat: 19.90, lon: -75.10, theaterId: 'LATIN_AMERICA' },
   { id: 'SOTO_CANO', name: 'Soto Cano Air Base', type: 'AIR', city: 'Comayagua', country: 'Honduras', lat: 14.38, lon: -87.62, theaterId: 'LATIN_AMERICA' },
+  { id: 'CIA_BOGOTA', name: 'CIA Bogotá Station', type: 'CIA_STATION', city: 'Bogotá', country: 'Colombia', lat: 4.71, lon: -74.07, theaterId: 'LATIN_AMERICA' },
+  { id: 'CIA_MEXICO_CITY', name: 'CIA Mexico City Station', type: 'CIA_STATION', city: 'Mexico City', country: 'Mexico', lat: 19.43, lon: -99.13, theaterId: 'LATIN_AMERICA' },
 
   // --- SIGNALS INTELLIGENCE ---
   { id: 'PINE_GAP', name: 'Pine Gap', type: 'DIA_FACILITY', city: 'Alice Springs', country: 'Australia', lat: -23.80, lon: 133.74, theaterId: 'EAST_ASIA' },
