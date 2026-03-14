@@ -167,6 +167,7 @@ function assemblDebrief(sections, op, success) {
     html += sections[i];
   }
 
+  html += viabilityImpactSection(op);
   html += classificationFooter(op);
   return html;
 }
@@ -240,6 +241,43 @@ function vigilAssessmentSection(op) {
 
   html += '</div></div>';
   return html;
+}
+
+function viabilityImpactSection(op) {
+  if (op.viabilityDelta === undefined) return '';
+
+  var delta = op.viabilityDelta;
+  var deviated = op.deviatedFromVigil;
+  var success = op.status === 'SUCCESS';
+  var sign = delta >= 0 ? '+' : '';
+  var color = delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--text-dim)';
+  var currentViability = Math.round(V.resources.viability);
+
+  var assessment;
+  if (success && !deviated) {
+    assessment = 'Operator adhered to Vigil-recommended course of action. Mission success validates system analysis. Viability standing reinforced.';
+  } else if (success && deviated) {
+    assessment = 'Mission objectives achieved despite operator deviation from Vigil recommendation. Outcome acknowledged, however the deviation introduces uncertainty into Vigil\'s predictive models. Reduced viability credit applied.';
+  } else if (!success && !deviated) {
+    assessment = 'Mission failure occurred while following Vigil-recommended course of action. System acknowledges shared responsibility for outcome. Minimal viability adjustment applied pending root-cause analysis.';
+  } else {
+    assessment = 'Mission failure compounded by unauthorized deviation from Vigil recommendation. The operator chose a course of action Vigil assessed as suboptimal, and the outcome confirms that assessment. Significant viability reduction applied. This pattern of judgment is being tracked.';
+  }
+
+  return '<div class="debrief-section">' +
+    '<div class="debrief-section-title">VIABILITY IMPACT</div>' +
+    '<div class="debrief-vigil-assessment">' +
+      '<div class="debrief-meta-row">' +
+        '<span class="debrief-meta-key">VIABILITY ADJUSTMENT</span>' +
+        '<span class="debrief-meta-val" style="color:' + color + ';font-weight:700">' + sign + delta + '%</span>' +
+      '</div>' +
+      '<div class="debrief-meta-row">' +
+        '<span class="debrief-meta-key">CURRENT VIABILITY</span>' +
+        '<span class="debrief-meta-val">' + currentViability + '%</span>' +
+      '</div>' +
+      '<div style="margin-top:var(--sp-2);color:var(--text-dim);font-size:var(--fs-sm);line-height:1.6">' + assessment + '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function classificationFooter(op) {

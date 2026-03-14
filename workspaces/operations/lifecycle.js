@@ -232,6 +232,9 @@
       V.resources.intel += randInt(5, 15);
     }
 
+    // Store viability delta for debrief
+    op.viabilityDelta = viabilityDelta;
+
     // Generate debrief
     if (typeof generateDebrief === 'function') {
       op.debrief = generateDebrief(op, success);
