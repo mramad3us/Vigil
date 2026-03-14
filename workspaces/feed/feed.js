@@ -479,6 +479,7 @@
       '<button class="feed-filter' + (_deploySortMode === 'EFFECTIVENESS' ? ' active' : '') + '" onclick="setDeploySortMode(\'EFFECTIVENESS\')">EFFECTIVENESS</button>' +
       '<button class="feed-filter' + (_deploySortMode === 'TIME' ? ' active' : '') + '" onclick="setDeploySortMode(\'TIME\')">TRANSIT TIME</button>' +
       '<button class="feed-filter' + (_deployCovertFilter ? ' active' : '') + '" onclick="toggleCovertFilter()">COVERT ONLY</button>' +
+      '<button class="feed-action-btn" onclick="toggleDeployPanel()" style="margin-left:auto">CLOSE</button>' +
     '</div>';
 
     // Diplomatic warning for overt deployment
@@ -565,7 +566,6 @@
     }
 
     html += '</div>';
-    html += '<button class="feed-action-btn" onclick="toggleDeployPanel()" style="margin-top:var(--sp-2)">CLOSE</button>';
 
     return html;
   }

@@ -149,6 +149,11 @@ function initKeyboard() {
     // Don't handle if input focused
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+    // Blur focused buttons so space always reaches here
+    if (e.key === ' ' && e.target.tagName === 'BUTTON') {
+      e.target.blur();
+    }
+
     switch (e.key) {
       case '1': activateWorkspace('globe'); break;
       case '2': activateWorkspace('feed'); break;

@@ -13,6 +13,18 @@ var BASES = [
   { id: 'PEARL_HARBOR', name: 'Joint Base Pearl Harbor-Hickam', type: 'NAVAL', city: 'Honolulu', country: 'United States', lat: 21.35, lon: -157.95, theaterId: 'NORTH_AMERICA' },
   { id: 'CREECH', name: 'Creech Air Force Base', type: 'AIR', city: 'Indian Springs', country: 'United States', lat: 36.58, lon: -115.67, theaterId: 'NORTH_AMERICA' },
   { id: 'FORT_MEADE', name: 'NSA Headquarters', type: 'DIA_FACILITY', city: 'Fort Meade', country: 'United States', lat: 39.11, lon: -76.77, theaterId: 'NORTH_AMERICA' },
+  { id: 'FORT_CAMPBELL', name: 'Fort Campbell', type: 'MILITARY', city: 'Clarksville', country: 'United States', lat: 36.66, lon: -87.47, theaterId: 'NORTH_AMERICA' },
+  { id: 'CAMP_LEJEUNE', name: 'Camp Lejeune', type: 'MILITARY', city: 'Jacksonville', country: 'United States', lat: 34.62, lon: -77.36, theaterId: 'NORTH_AMERICA' },
+  { id: 'CAMP_PENDLETON', name: 'Camp Pendleton', type: 'MILITARY', city: 'Oceanside', country: 'United States', lat: 33.30, lon: -117.35, theaterId: 'NORTH_AMERICA' },
+  { id: 'CORONADO', name: 'Naval Base Coronado', type: 'NAVAL', city: 'San Diego', country: 'United States', lat: 32.68, lon: -117.17, theaterId: 'NORTH_AMERICA' },
+  { id: 'SAN_DIEGO', name: 'Naval Base San Diego', type: 'NAVAL', city: 'San Diego', country: 'United States', lat: 32.70, lon: -117.20, theaterId: 'NORTH_AMERICA' },
+  { id: 'KINGS_BAY', name: 'Naval Submarine Base Kings Bay', type: 'NAVAL', city: 'Kings Bay', country: 'United States', lat: 30.80, lon: -81.51, theaterId: 'NORTH_AMERICA' },
+  { id: 'ELMENDORF', name: 'Joint Base Elmendorf-Richardson', type: 'AIR', city: 'Anchorage', country: 'United States', lat: 61.25, lon: -149.80, theaterId: 'NORTH_AMERICA' },
+  { id: 'ELLSWORTH', name: 'Ellsworth Air Force Base', type: 'AIR', city: 'Rapid City', country: 'United States', lat: 44.14, lon: -103.10, theaterId: 'NORTH_AMERICA' },
+  { id: 'TRAVIS', name: 'Travis Air Force Base', type: 'AIR', city: 'Fairfield', country: 'United States', lat: 38.26, lon: -121.93, theaterId: 'NORTH_AMERICA' },
+  { id: 'CHARLESTON', name: 'Joint Base Charleston', type: 'AIR', city: 'Charleston', country: 'United States', lat: 32.90, lon: -80.04, theaterId: 'NORTH_AMERICA' },
+  { id: 'EGLIN', name: 'Eglin Air Force Base', type: 'AIR', city: 'Valparaiso', country: 'United States', lat: 30.47, lon: -86.53, theaterId: 'NORTH_AMERICA' },
+  { id: 'MACDILL', name: 'MacDill Air Force Base', type: 'MILITARY', city: 'Tampa', country: 'United States', lat: 27.85, lon: -82.52, theaterId: 'NORTH_AMERICA' },
 
   // --- EUROPE ---
   { id: 'RAMSTEIN', name: 'Ramstein Air Base', type: 'AIR', city: 'Ramstein', country: 'Germany', lat: 49.44, lon: 7.60, theaterId: 'EUROPE' },
@@ -20,12 +32,18 @@ var BASES = [
   { id: 'MENWITH_HILL', name: 'RAF Menwith Hill', type: 'DIA_FACILITY', city: 'Harrogate', country: 'United Kingdom', lat: 54.00, lon: -1.69, theaterId: 'EUROPE' },
   { id: 'CIA_LONDON', name: 'CIA London Station', type: 'CIA_STATION', city: 'London', country: 'United Kingdom', lat: 51.50, lon: -0.14, theaterId: 'EUROPE' },
   { id: 'CIA_BERLIN', name: 'CIA Berlin Station', type: 'CIA_STATION', city: 'Berlin', country: 'Germany', lat: 52.52, lon: 13.38, theaterId: 'EUROPE' },
+  { id: 'LAKENHEATH', name: 'RAF Lakenheath', type: 'AIR', city: 'Brandon', country: 'United Kingdom', lat: 52.41, lon: 0.56, theaterId: 'EUROPE' },
+  { id: 'SIGONELLA', name: 'NAS Sigonella', type: 'NAVAL', city: 'Catania', country: 'Italy', lat: 37.40, lon: 14.92, theaterId: 'EUROPE' },
+  { id: 'NAPLES', name: 'Naval Support Activity Naples', type: 'NAVAL', city: 'Naples', country: 'Italy', lat: 40.82, lon: 14.28, theaterId: 'EUROPE' },
+  { id: 'GRAFENWOEHR', name: 'Grafenwöhr Training Area', type: 'MILITARY', city: 'Grafenwöhr', country: 'Germany', lat: 49.69, lon: 11.94, theaterId: 'EUROPE' },
 
   // --- MIDDLE EAST ---
   { id: 'AL_UDEID', name: 'Al Udeid Air Base', type: 'AIR', city: 'Doha', country: 'Qatar', lat: 25.12, lon: 51.31, theaterId: 'MIDDLE_EAST' },
   { id: 'BAHRAIN', name: 'NSA Bahrain', type: 'NAVAL', city: 'Manama', country: 'Bahrain', lat: 26.21, lon: 50.61, theaterId: 'MIDDLE_EAST' },
   { id: 'INCIRLIK', name: 'Incirlik Air Base', type: 'AIR', city: 'Adana', country: 'Turkey', lat: 37.00, lon: 35.43, theaterId: 'MIDDLE_EAST' },
   { id: 'CIA_CAIRO', name: 'CIA Cairo Station', type: 'CIA_STATION', city: 'Cairo', country: 'Egypt', lat: 30.04, lon: 31.24, theaterId: 'MIDDLE_EAST' },
+  { id: 'AL_DHAFRA', name: 'Al Dhafra Air Base', type: 'AIR', city: 'Abu Dhabi', country: 'UAE', lat: 24.25, lon: 54.55, theaterId: 'MIDDLE_EAST' },
+  { id: 'CAMP_ARIFJAN', name: 'Camp Arifjan', type: 'MILITARY', city: 'Kuwait City', country: 'Kuwait', lat: 29.12, lon: 48.10, theaterId: 'MIDDLE_EAST' },
 
   // --- EAST ASIA ---
   { id: 'KADENA', name: 'Kadena Air Base', type: 'AIR', city: 'Okinawa', country: 'Japan', lat: 26.35, lon: 127.77, theaterId: 'EAST_ASIA' },

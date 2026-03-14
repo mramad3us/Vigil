@@ -90,6 +90,11 @@
       if (restored.hasOwnProperty(k)) V[k] = restored[k];
     }
 
+    // Ensure Set fields survive older saves that lacked them
+    if (!(V.usedCodenames instanceof Set)) {
+      V.usedCodenames = new Set(Array.isArray(V.usedCodenames) ? V.usedCodenames : []);
+    }
+
     fire('game:load', V);
     addLog('Game loaded: ' + (save.label || slotId), 'log-info');
     return true;
