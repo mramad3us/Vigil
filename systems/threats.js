@@ -20,16 +20,22 @@ var THREAT_TYPES = [
   { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4] },
   { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5] },
+  { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
+  { id: 'HVT_TARGET', label: 'High-Value Target', weight: 2, threatRange: [3, 5] },
+  { id: 'ASSET_COMPROMISED', label: 'Compromised Asset', weight: 1, threatRange: [3, 5] },
 ];
 
 // --- Map threat types to operation types for the DA phase ---
 var THREAT_TO_OP_TYPE = {
-  TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'DRONE_STRIKE'],
-  STATE_ACTOR: ['MILITARY_STRIKE', 'SURVEILLANCE', 'CYBER_OP'],
-  CYBER_GROUP: ['CYBER_OP', 'INTEL_COLLECTION'],
-  CRIMINAL_ORG: ['NAVAL_INTERDICTION', 'SOF_RAID', 'INTEL_COLLECTION'],
-  INSURGENCY: ['COUNTER_TERROR', 'MILITARY_STRIKE', 'SOF_RAID'],
-  PROLIFERATOR: ['SURVEILLANCE', 'INTEL_COLLECTION', 'MILITARY_STRIKE'],
+  TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'DRONE_STRIKE', 'HVT_ELIMINATION', 'HOSTAGE_RESCUE'],
+  STATE_ACTOR: ['MILITARY_STRIKE', 'SURVEILLANCE', 'CYBER_OP', 'DIPLOMATIC_RESPONSE'],
+  CYBER_GROUP: ['CYBER_OP', 'INTEL_COLLECTION', 'SURVEILLANCE'],
+  CRIMINAL_ORG: ['NAVAL_INTERDICTION', 'SOF_RAID', 'INTEL_COLLECTION', 'HVT_CAPTURE'],
+  INSURGENCY: ['COUNTER_TERROR', 'MILITARY_STRIKE', 'SOF_RAID', 'DRONE_STRIKE', 'HVT_ELIMINATION'],
+  PROLIFERATOR: ['SURVEILLANCE', 'INTEL_COLLECTION', 'MILITARY_STRIKE', 'SOF_RAID'],
+  HOSTAGE_CRISIS: ['HOSTAGE_RESCUE', 'SOF_RAID', 'COUNTER_TERROR'],
+  HVT_TARGET: ['HVT_ELIMINATION', 'HVT_CAPTURE', 'DRONE_STRIKE', 'TARGETED_KILLING', 'SOF_RAID'],
+  ASSET_COMPROMISED: ['ASSET_EXTRACTION', 'SOF_RAID', 'HOSTAGE_RESCUE'],
 };
 
 // ===================================================================
@@ -163,6 +169,21 @@ function spawnThreat(theaterId) {
     PROLIFERATOR: [
       'WMD proliferation activity detected in ' + loc.country + '. Facility near ' + loc.city + ' shows signatures consistent with weapons program. Threat level assessed CRITICAL.',
       'Vigil has identified potential weapons proliferation activity in ' + loc.city + ', ' + loc.country + '. Procurement patterns and facility analysis indicate active program.',
+    ],
+    HOSTAGE_CRISIS: [
+      'HOSTAGE SITUATION: Vigil has confirmed hostage-taking in ' + loc.city + ', ' + loc.country + '. Multiple personnel believed held by hostile elements. Situation is deteriorating. Rescue planning authorized.',
+      'Vigil intelligence confirms a hostage crisis developing in the ' + loc.theater.name + ' theater. Hostages seized in ' + loc.city + '. Captors are making demands. Time-sensitive response required.',
+      'Hostage crisis reported in ' + loc.city + ', ' + loc.country + '. Vigil is receiving intermittent signals intelligence from the location. At least one US national among the hostages. Rescue or negotiation window narrowing.',
+    ],
+    HVT_TARGET: [
+      'Vigil has positively identified a high-value target operating in ' + loc.city + ', ' + loc.country + '. Target has been on the disposition matrix for 18+ months. Current location confidence: HIGH. Recommend immediate action planning.',
+      'HIGH-VALUE TARGET: Vigil pattern-of-life analysis has located a priority target in the ' + loc.theater.name + ' theater. Target is currently in ' + loc.city + '. Window of opportunity may be limited.',
+      'Vigil intelligence network has surfaced a confirmed HVT in ' + loc.city + ', ' + loc.country + '. Target is a senior figure with operational authority. Elimination or capture would significantly degrade adversary capability in the theater.',
+    ],
+    ASSET_COMPROMISED: [
+      'FLASH — COMPROMISED ASSET: A Vigil intelligence asset has been burned in ' + loc.city + ', ' + loc.country + '. Asset is attempting to evade hostile surveillance. Extraction must be initiated before capture by local security services.',
+      'Vigil has lost contact with an intelligence officer operating under cover in ' + loc.city + '. Last transmission indicated compromise. Hostile counterintelligence is actively searching. Asset extraction is time-critical.',
+      'URGENT: Intelligence asset in ' + loc.city + ', ' + loc.country + ' has triggered emergency exfiltration protocol. Cover identity compromised. Asset possesses knowledge of active operations in the ' + loc.theater.name + ' theater. Extraction or sanitization required.',
     ],
   };
 
@@ -743,7 +764,12 @@ function fireUrgencyAlert(threat, severity) {
 // The threat's intel fields MOVE to the operation. No duplicates.
 
 function spawnOperationFromThreat(threat) {
-  var opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
+  var opTypes;
+  if (threat.domestic && typeof DOMESTIC_THREAT_TO_OP_TYPE !== 'undefined') {
+    opTypes = DOMESTIC_THREAT_TO_OP_TYPE[threat.type] || THREAT_TO_OP_TYPE[threat.type] || ['INVESTIGATION'];
+  } else {
+    opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
+  }
   var opType = pick(opTypes);
 
   var codename = generateCodename();
@@ -811,6 +837,9 @@ function spawnOperationFromThreat(threat) {
 
     // Debrief (generated on resolution)
     debrief: null,
+
+    // Domestic flag
+    domestic: threat.domestic || false,
 
     // References
     relatedEventId: null,

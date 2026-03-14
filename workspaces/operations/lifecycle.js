@@ -159,6 +159,14 @@
 
     op.status = 'ASSETS_IN_TRANSIT';
 
+    // Fire per-asset deployed events (used by domestic Posse Comitatus system)
+    for (var da = 0; da < option.assetIds.length; da++) {
+      var deployedAsset = getAsset(option.assetIds[da]);
+      if (deployedAsset) {
+        fire('operation:asset:deployed', { operation: op, asset: deployedAsset });
+      }
+    }
+
     addLog('OP ' + op.codename + ': Assets deploying. Transit: ' + formatTransitTime(option.transitTimeMinutes) + '.', 'log-op');
   }
 

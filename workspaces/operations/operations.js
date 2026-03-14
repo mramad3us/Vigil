@@ -165,7 +165,9 @@
       ' data-tip-align="right">' +
       '<div class="op-status-dot ' + statusCls + '"></div>' +
       '<div class="op-card-content">' +
-        '<div class="op-card-codename">' + op.codename + '</div>' +
+        '<div class="op-card-codename">' + op.codename +
+          (op.domestic ? ' <span style="background:#d4a04a;color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px;vertical-align:middle;margin-left:6px">DOMESTIC</span>' : '') +
+        '</div>' +
         '<div class="op-card-label">' + op.label + ' · ' + (op.location ? op.location.city : '?') + '</div>' +
       '</div>' +
       '<div class="op-card-right">' +
@@ -449,6 +451,21 @@
         } else if (optHasOvert) {
           html += '<div class="vigil-option-consequences" style="color:var(--green);border-color:var(--green);background:var(--green-dim)">' +
             'AUTHORIZED: ' + opCountry + ' (' + opStance.label + ') permits overt operations.' +
+          '</div>';
+        }
+      }
+
+      // Posse Comitatus warning for domestic operations
+      if (op.domestic) {
+        var optHasUnsanctioned = false;
+        for (var ua = 0; ua < assets.length; ua++) {
+          if (!assets[ua].domesticAuthority) { optHasUnsanctioned = true; break; }
+        }
+        if (optHasUnsanctioned) {
+          html += '<div class="vigil-option-consequences" style="color:#d4a04a;border-color:#d4a04a;background:rgba(212,160,74,0.06)">' +
+            'POSSE COMITATUS WARNING: This option includes assets without domestic authority. ' +
+            'Deploying military/CIA assets on US soil violates the Posse Comitatus Act. ' +
+            'Expected viability impact: SEVERE.' +
           '</div>';
         }
       }

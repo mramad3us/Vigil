@@ -120,6 +120,7 @@ function baseMatchesCategory(base, category) {
     ISR: ['AIR', 'DIA_FACILITY'],
     INTEL: ['CIA_STATION', 'DIA_FACILITY'],
     DIPLOMATIC: ['CIA_STATION'],
+    DOMESTIC: ['DOMESTIC_HQ'],
   };
   var types = map[category] || [];
   return types.indexOf(base.type) >= 0;

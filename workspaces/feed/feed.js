@@ -166,6 +166,7 @@
       '<div class="feed-threat-top">' +
         '<div class="feed-threat-name">' + threat.orgName + '</div>' +
         '<div class="feed-threat-level">' + threat.threatLevel + '/5</div>' +
+        (threat.domestic ? '<div class="feed-threat-urgent-badge" style="background:#d4a04a;color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">DOMESTIC</div>' : '') +
         (threat.urgent ? '<div class="feed-threat-urgent-badge" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">URGENT</div>' : '') +
       '</div>' +
       '<div class="feed-threat-type">' + threat.typeLabel + ' · ' + threat.location.city + ', ' + threat.location.country + '</div>' +
@@ -445,7 +446,9 @@
       html += renderDeployPanel(threat);
     } else {
       // Show summary + button
-      var availCount = typeof getCollectionAssets === 'function' ? getCollectionAssets().length : 0;
+      var _allCollection = typeof getCollectionAssets === 'function' ? getCollectionAssets() : [];
+      if (!threat.domestic) { _allCollection = _allCollection.filter(function(a) { return !a.domesticAuthority; }); }
+      var availCount = _allCollection.length;
       html += '<div class="threat-deploy-summary">' +
         availCount + ' collection-capable asset' + (availCount !== 1 ? 's' : '') + ' available for deployment.' +
       '</div>' +
@@ -471,6 +474,10 @@
 
   function renderDeployPanel(threat) {
     var available = typeof getCollectionAssets === 'function' ? getCollectionAssets() : [];
+    // Domestic agencies only available for domestic threats
+    if (!threat.domestic) {
+      available = available.filter(function(a) { return !a.domesticAuthority; });
+    }
 
     if (available.length === 0) {
       return '<div class="threat-deploy-empty">No collection-capable assets available. All assets are currently deployed or in transit.</div>' +
@@ -498,8 +505,14 @@
       assetData = assetData.filter(function(d) { return d.asset.deniability === 'COVERT'; });
     }
 
+    // For domestic threats, sort sanctioned (domesticAuthority) first
     assetData.sort(function(a, b) {
       if (a.unreachable !== b.unreachable) return a.unreachable ? 1 : -1;
+      if (threat.domestic) {
+        var aSanctioned = a.asset.domesticAuthority ? 0 : 1;
+        var bSanctioned = b.asset.domesticAuthority ? 0 : 1;
+        if (aSanctioned !== bSanctioned) return aSanctioned - bSanctioned;
+      }
       if (_deploySortMode === 'TIME') return a.transitMin - b.transitMin;
       return b.eff.rating - a.eff.rating;
     });
@@ -524,6 +537,15 @@
           '</div>';
         }
       }
+    }
+
+    // Posse Comitatus warning for domestic threats
+    if (threat.domestic) {
+      html += '<div class="threat-deploy-warning" style="margin-bottom:var(--sp-2);border-color:rgba(212,160,74,0.3);background:rgba(212,160,74,0.06)">' +
+        '◎ DOMESTIC OPERATION — Posse Comitatus Act restricts military deployment on US soil. ' +
+        'Sanctioned federal agency assets are listed first. Deploying unsanctioned military/CIA assets ' +
+        'will incur viability penalties.' +
+      '</div>';
     }
 
     html += '<div class="threat-deploy-list">';
@@ -563,6 +585,8 @@
           '<span>' + eff.effectiveFields + '/' + eff.totalUnrevealed + ' fields covered</span>' +
           '<span style="color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + (asset.deniability || 'OVERT') + '</span>' +
           (isReturning ? '<span style="color:var(--amber)">RTB — reroute available</span>' : '') +
+          (threat.domestic && !asset.domesticAuthority ? '<span style="color:var(--red);font-weight:700">UNSANCTIONED</span>' : '') +
+          (threat.domestic && asset.domesticAuthority ? '<span style="color:#d4a04a;font-weight:700">SANCTIONED</span>' : '') +
         '</div>' +
         '<div class="threat-deploy-card-caps">' + capTags + '</div>';
 

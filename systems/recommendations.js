@@ -18,6 +18,8 @@ function generateVigilOptions(op) {
 
   // Find all available assets with at least one required capability
   var eligible = getAvailableAssets().filter(function(a) {
+    // Domestic agencies only available for domestic ops
+    if (a.domesticAuthority && !op.domestic) return false;
     for (var i = 0; i < required.length; i++) {
       if (a.capabilities.indexOf(required[i]) >= 0) return true;
     }
@@ -34,6 +36,10 @@ function generateVigilOptions(op) {
     }
     for (var j = 0; j < required.length; j++) {
       if (a.capabilities.indexOf(required[j]) >= 0) capScore += 20;
+    }
+    // Domestic ops: penalize non-domestic-authority assets heavily
+    if (op.domestic && !a.domesticAuthority) {
+      capScore -= 40;
     }
     var dist = haversineKm(a.currentLat, a.currentLon, destLat, destLon);
     var distPenalty = Math.min(dist / 500, 20); // closer = better

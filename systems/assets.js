@@ -693,6 +693,7 @@ var ASSET_CATEGORIES = {
             unitComposition: tpl.unitComposition || '',
             collectionProfile: tpl.collectionProfile || {},
             deniability: tpl.deniability || 'OVERT',
+            domesticAuthority: tpl.domesticAuthority || false,
             diplomaticEffectiveness: tpl.diplomaticEffectiveness || 0,
             // Intel collection state
             assignedThreatId: null,

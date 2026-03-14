@@ -45,16 +45,28 @@ function generateCaseFileId() {
 }
 
 function generateRandomLocation() {
-  var theater = getRandomTheater();
-  var city = pick(theater.cities);
-  return {
-    theater: theater,
-    theaterId: theater.id,
-    city: city.city,
-    country: city.country,
-    lat: city.lat,
-    lon: city.lon,
-  };
+  // Foreign threats only — exclude US cities (domestic threats have their own spawner)
+  var attempts = 0;
+  while (attempts < 20) {
+    var theater = getRandomTheater();
+    var eligible = [];
+    for (var i = 0; i < theater.cities.length; i++) {
+      if (theater.cities[i].country !== 'United States') eligible.push(theater.cities[i]);
+    }
+    if (eligible.length > 0) {
+      var city = pick(eligible);
+      return {
+        theater: theater, theaterId: theater.id,
+        city: city.city, country: city.country,
+        lat: city.lat, lon: city.lon,
+      };
+    }
+    attempts++;
+  }
+  // Fallback — shouldn't happen
+  var fallbackTheater = THEATERS.EUROPE;
+  var fallbackCity = pick(fallbackTheater.cities);
+  return { theater: fallbackTheater, theaterId: 'EUROPE', city: fallbackCity.city, country: fallbackCity.country, lat: fallbackCity.lat, lon: fallbackCity.lon };
 }
 
 function generateTargetLocation(originCountry) {
@@ -75,14 +87,16 @@ function generateTargetLocation(originCountry) {
 function generateLocationInTheater(theaterId) {
   var theater = getTheater(theaterId);
   if (!theater) return generateRandomLocation();
-  var city = pick(theater.cities);
+  var eligible = [];
+  for (var i = 0; i < theater.cities.length; i++) {
+    if (theater.cities[i].country !== 'United States') eligible.push(theater.cities[i]);
+  }
+  if (eligible.length === 0) return generateRandomLocation();
+  var city = pick(eligible);
   return {
-    theater: theater,
-    theaterId: theater.id,
-    city: city.city,
-    country: city.country,
-    lat: city.lat,
-    lon: city.lon,
+    theater: theater, theaterId: theater.id,
+    city: city.city, country: city.country,
+    lat: city.lat, lon: city.lon,
   };
 }
 
@@ -541,6 +555,119 @@ INTEL_VALUE_POOLS.FACILITY_ID = [
   'Facility located 40km north of {city}. Constructed 2048-2050. Assessed as production facility based on thermal and electromagnetic signatures.',
   'Dual-use pharmaceutical plant in {city} industrial zone. SIGINT intercepts suggest clandestine production wing. IAEA denied access twice.',
   'Hardened bunker complex under mountain terrain. Tunnel entrances visible on imagery. Power consumption inconsistent with declared purpose.',
+];
+
+INTEL_VALUE_POOLS.DAMAGE_ASSESSMENT = [
+  'Vigil damage assessment ongoing. Preliminary analysis indicates compromise of 3 active intelligence programs and exposure of 12 source identities across the {theater} theater.',
+  'Full damage assessment will require 6-8 weeks. Initial review confirms compromise of classified collection methods and technical capabilities. Impact: SEVERE.',
+  'Damage scope: CRITICAL. Compromised material includes active operational plans, intelligence-sharing agreements, and signals intelligence capabilities.',
+];
+
+// --- Hostage Crisis Intel ---
+
+INTEL_VALUE_POOLS.HOSTAGE_LOCATION = [
+  'Vigil ISR confirms hostage location: fortified compound 15km east of {city}. Guards visible on exterior. Thermal signatures indicate 6-10 persons inside.',
+  'Hostages held in abandoned factory complex on the outskirts of {city}. Satellite imagery shows vehicle activity and armed perimeter patrols.',
+  'SIGINT triangulation places hostages in a residential building in central {city}. Dense urban environment complicates tactical approach.',
+  'Hostage site identified: diplomatic residence in {city}. Captors have barricaded interior. Vigil drone maintaining persistent overwatch.',
+];
+
+INTEL_VALUE_POOLS.HOSTAGE_COUNT = [
+  'Vigil assesses 4-6 hostages. Voice analysis from intercepted phone calls identifies at least 3 distinct individuals. Nationalities being confirmed.',
+  'Confirmed 8 hostages including 2 US nationals, 3 allied nationals, and 3 local citizens. Source: embassy records cross-referenced with missing persons.',
+  'Hostage count uncertain: estimates range from 3 to 12. Captors have restricted all communications. Vigil relying on thermal and audio signatures.',
+];
+
+INTEL_VALUE_POOLS.HOSTAGE_CONDITION = [
+  'Last proof-of-life received 18 hours ago. Hostages appear physically unharmed but distressed. Captors have threatened escalation if demands are not met.',
+  'Vigil audio intercept suggests one hostage is injured — references to medical treatment. Remaining hostages alive. Captor behavior is increasingly erratic.',
+  'No direct communication with hostages. Captors claim all hostages are alive. Vigil assessment: 70% confidence hostages are unharmed based on available SIGINT.',
+];
+
+INTEL_VALUE_POOLS.CAPTOR_ID = [
+  'Lead captor identified as senior {orgName} operative. Facial recognition match from Vigil database. Subject has directed 2 prior kidnappings in the {theater} theater.',
+  'Captors identified: 5-7 armed individuals affiliated with {orgName}. 3 positively identified via SIGINT device matching. Remaining subjects unknown.',
+  'Captor identification: primary subject is ex-military with tactical training. {orgName} affiliation confirmed via financial transactions traced in {city}.',
+];
+
+INTEL_VALUE_POOLS.CAPTOR_DEMANDS = [
+  'Captors demanding $25M ransom and prisoner exchange. Vigil assesses demands are a stalling tactic — real objective is political leverage in the {theater} theater.',
+  'No formal demands issued. Captors appear motivated by ideology rather than ransom. Vigil psychological profiling indicates high risk of hostage execution.',
+  'Demands communicated through intermediary: withdrawal of US forces from {theater} region. Vigil assesses demands as non-negotiable. Tactical resolution likely required.',
+];
+
+INTEL_VALUE_POOLS.ENTRY_POINTS = [
+  'Building analysis: 4 ground-floor entry points, rooftop access via stairwell, underground utility tunnel 50m from structure. Recommended breach: simultaneous 3-point entry.',
+  'Compound has single reinforced gate, 2 secondary access points on east wall, and vulnerable rooftop. Interior layout obtained from construction records filed in {city}.',
+  'Entry point analysis: main entrance is fortified. Optimal approach via drainage tunnel accessing basement. Wall thickness permits explosive breaching at 3 points.',
+];
+
+// --- HVT Intel ---
+
+INTEL_VALUE_POOLS.HVT_IDENTITY = [
+  'Target positively identified: {orgName} senior commander. Responsible for planning multiple attacks in the {theater} theater. On disposition matrix since 2049.',
+  'High-value target confirmed: {orgName} operational leader in {city}. Vigil facial recognition match from surveillance drone footage. Confidence: 95%.',
+  'Target identified as {orgName} — senior figure with direct command authority. Vigil HUMINT source confirms target is coordinating operations from {city}.',
+];
+
+INTEL_VALUE_POOLS.HVT_NETWORK = [
+  '{orgName} operates through a network of 12-18 associates in {city}. Inner circle of 3 controls operational planning. Vigil has identified all by SIGINT matching.',
+  'Target network spans {city} and 2 neighboring regions. Communications analysis reveals a 6-person security detail and 4 logistics coordinators.',
+  'Vigil network analysis: {orgName} has ties to 3 foreign intelligence services. Financial support flows through 5 intermediaries based in {city}.',
+];
+
+INTEL_VALUE_POOLS.COLLATERAL_RISK = [
+  'Target compound is located in residential area of {city}. Vigil ISR counts 20-30 civilians in adjacent buildings during daylight. Night window: 0200-0400 minimizes risk.',
+  'Collateral assessment: target vehicle convoy travels through densely populated market in {city}. Engagement during transit carries HIGH collateral risk.',
+  'Low collateral: target compound is isolated, 3km from nearest civilian structure. Engagement options include precision strike and ground assault.',
+];
+
+INTEL_VALUE_POOLS.ESCAPE_ROUTES = [
+  'Target has 2 prepared escape routes: overland to border crossing 4 hours south, and private airstrip 90 minutes east of {city}. Both are under Vigil surveillance.',
+  'Vigil pattern analysis indicates target will flee via maritime route from {city} port. Fishing vessel pre-positioned. Interdiction window: 6-12 hours after compromise.',
+  'Target has a fallback location in the mountains 200km from {city}. Road access limited to single track. Vigil recommends blocking force on approach route.',
+];
+
+// --- Asset Compromised Intel ---
+
+INTEL_VALUE_POOLS.ASSET_LAST_KNOWN = [
+  'Asset last known position: safe house in {city}. Missed scheduled dead-drop 48 hours ago. Emergency beacon briefly activated then ceased.',
+  'Last signal from asset placed them in central {city}. Moving on foot. Vigil satellite tasking being redirected for overwatch.',
+  'Asset\'s final transmission from {city}: "Cover blown. Being followed. Going dark." Position approximately 2km from nearest extraction point.',
+];
+
+INTEL_VALUE_POOLS.COMPROMISE_VECTOR = [
+  'Compromise traced to mole in host nation liaison service. Asset\'s identity was disclosed through intelligence sharing channel Vigil assessed as secure.',
+  'Source of compromise: asset\'s encrypted communication device was seized during routine security checkpoint in {city}. Device exploitation likely.',
+  'Vigil assessment: compromise originated from technical surveillance. Host nation CI detected asset\'s regular meetings with case officer via pattern-of-life analysis.',
+];
+
+INTEL_VALUE_POOLS.HOSTILE_CI_ACTIVITY = [
+  'Hostile counterintelligence activity in {city}: ELEVATED. Security services conducting systematic sweep. Checkpoints on all major routes. Curfew imposed.',
+  'SIGINT intercept confirms hostile CI has issued an all-points bulletin for asset. Facial recognition databases updated. Airports and border crossings alerted.',
+  'Hostile CI running a full surveillance grid in {city}. Vigil estimates 30-50 officers deployed. Electronic surveillance net covering 10km radius from last known position.',
+];
+
+INTEL_VALUE_POOLS.EXFIL_ROUTES = [
+  'Three exfiltration options from {city}: overland route north (18h to safe territory), maritime pickup from coastal village (8h transit), covert air extraction (requires 4h advance notice).',
+  'Primary exfil route compromised — hostile CI checkpoints on highway north. Alternative: riverboat extraction 30km downstream from {city}. Requires coordination with local asset.',
+  'Vigil has pre-positioned extraction resources: covert vehicle at safehouse, backup documents at dead-drop site, maritime asset on standby 40nm offshore of {city}.',
+];
+
+INTEL_VALUE_POOLS.ASSET_CONDITION = [
+  'Last report: asset is mobile but wounded. Minor injuries sustained during initial compromise. Sheltering with local contact. Has emergency funds and backup identity documents.',
+  'Asset condition unknown. Radio silence for 72 hours. Vigil unable to determine if asset is evading, captured, or deceased.',
+  'Asset alive and evading. Last dead-drop indicates subject is sheltering in {city} outskirts. Hostile CI is searching systematically. Window for extraction narrowing.',
+];
+
+INTEL_VALUE_POOLS.COVER_STATUS = [
+  'Cover identity fully compromised. Asset\'s real name, photograph, and agency affiliation known to hostile CI. No viable cover for continued operations in {country}.',
+  'Partial compromise. Hostile CI suspects asset but has not confirmed identity. Cover may hold 24-48 hours. Asset must avoid all known contacts and locations.',
+];
+
+INTEL_VALUE_POOLS.SAFE_HOUSE_NETWORK = [
+  'Vigil maintains 3 safe houses in {city}: Alpha (GREEN — uncompromised), Bravo (AMBER — hostile activity nearby), Charlie (RED — known to hostile CI).',
+  'Safe house network status: 2 locations available. Nearest is 4km from asset\'s last known position. Route assessment: moderate risk.',
 ];
 
 // --- Generate a single intel field value ---
