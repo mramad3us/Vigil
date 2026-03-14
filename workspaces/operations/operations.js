@@ -10,6 +10,7 @@
   var _selectedOpId = null;
   var _showArchive = false;
   var _expandedAssets = {}; // track which asset rows are expanded in option cards
+  var _customConfig = null; // { opId, baseOptionIdx, assetIds: [...] }
 
   registerWorkspace({
     id: 'operations',
@@ -212,9 +213,10 @@
       '<div class="op-detail-section-title">OPERATION DETAILS</div>' +
       '<div class="intel-fields">';
 
+    var illegalTag = (op.domestic && opTypeDef && opTypeDef.illegalDomestic) ? ' <span style="background:var(--red);color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px;vertical-align:middle;margin-left:6px">ILLEGAL</span>' : '';
     html += '<div class="intel-field-row">' +
       '<span class="intel-field-key">OPERATION TYPE</span>' +
-      '<span class="intel-field-val" data-tip="' + escTip(tipOpType(op.operationType)) + '">' + opTypeLabel + '</span>' +
+      '<span class="intel-field-val" data-tip="' + escTip(tipOpType(op.operationType)) + '">' + opTypeLabel + illegalTag + '</span>' +
     '</div>';
     html += intelRow('CODENAME', op.codename);
     html += intelRow('CLASSIFICATION', 'TOP SECRET // SCI // VIGIL');
@@ -228,7 +230,6 @@
       html += intelRow('TARGET ALIAS', op.targetAlias);
     }
     html += intelRow('URGENCY', op.urgencyHours ? op.urgencyHours + 'h operational window' : 'STANDARD');
-    html += intelRow('BUDGET ESTIMATE', '$' + (op.budgetCost || '?') + 'M');
     html += intelRow('DAY DETECTED', 'Day ' + op.daySpawned);
 
     html += '</div></div>';
@@ -488,11 +489,139 @@
         html += '<button class="op-action-btn execute vigil-select-btn" onclick="approveOption(\'' + op.id + '\',' + i + ')">SELECT THIS OPTION' + (unavailableCount > 0 ? ' (' + (assets.length - unavailableCount) + '/' + assets.length + ' AVAILABLE)' : '') + '</button>';
       }
 
+      // Deviate button
+      if (!(_customConfig && _customConfig.opId === op.id)) {
+        html += '<button class="op-action-btn cancel vigil-deviate-btn" onclick="openCustomConfig(\'' + op.id + '\',' + i + ')">DEVIATE FROM MODEL</button>';
+      }
+
       html += '</div>';
+    }
+
+    // Custom configuration panel
+    if (_customConfig && _customConfig.opId === op.id) {
+      html += renderCustomConfig(op);
     }
 
     html += '</div></div>';
     return html;
+  }
+
+  // --- Custom Force Configuration Panel ---
+
+  function renderCustomConfig(op) {
+    var cfg = _customConfig;
+    var baseOption = op.options[cfg.baseOptionIdx];
+
+    // Get all available assets
+    var allAvailable = getAvailableAssets();
+    var opType = getOperationType(op.operationType);
+
+    // Filter to assets with at least one relevant capability
+    var eligibleAvailable = allAvailable.filter(function(a) {
+      if (cfg.assetIds.indexOf(a.id) >= 0) return false; // already selected
+      if (a.domesticAuthority && !op.domestic) return false;
+      if (op.domestic && (a.category === 'NAVY' || a.category === 'AIR')) return false;
+      if (!opType) return true;
+      for (var i = 0; i < opType.requiredCapabilities.length; i++) {
+        if (a.capabilities.indexOf(opType.requiredCapabilities[i]) >= 0) return true;
+      }
+      for (var j = 0; j < opType.preferredCapabilities.length; j++) {
+        if (a.capabilities.indexOf(opType.preferredCapabilities[j]) >= 0) return true;
+      }
+      return false;
+    });
+
+    // Filter out NAVY assets that can't reach the target
+    eligibleAvailable = eligibleAvailable.filter(function(a) {
+      if (a.category !== 'NAVY') return true;
+      var rangeKm = a.effectiveRangeKm || 1000;
+      if (typeof findNavalStationPoint !== 'function') return true;
+      var station = findNavalStationPoint(a.currentLat, a.currentLon, op.geo.lat, op.geo.lon, rangeKm);
+      if (!station) return false;
+      a._stationPoint = station;
+      return true;
+    });
+
+    var selectedAssets = getAssetsByIds(cfg.assetIds);
+
+    // Recalculate stats
+    var recalc = typeof recalcCustomOption === 'function'
+      ? recalcCustomOption(op, cfg.assetIds)
+      : { confidencePercent: 0, riskLevel: 'CRITICAL', transitMinutes: 0 };
+
+    var riskCls = 'risk-' + recalc.riskLevel.toLowerCase();
+
+    var html = '<div class="vigil-option-card custom-config-card">' +
+      '<div class="vigil-rec-badge" style="color:var(--amber)">⚠ CUSTOM FORCE CONFIGURATION</div>' +
+      '<div class="vigil-option-label">MODIFIED: ' + baseOption.label + '</div>';
+
+    // Stats row
+    html += '<div class="vigil-option-stats">' +
+      '<div class="vigil-stat"><span class="vigil-stat-label">CONFIDENCE</span>' +
+      '<span class="vigil-stat-value" style="color:' + confColor(recalc.confidencePercent) + '">' + recalc.confidencePercent + '%</span></div>' +
+      '<div class="vigil-stat"><span class="vigil-stat-label">RISK</span>' +
+      '<span class="vigil-stat-value ' + riskCls + '">' + recalc.riskLevel + '</span></div>' +
+      '<div class="vigil-stat"><span class="vigil-stat-label">ETA</span>' +
+      '<span class="vigil-stat-value">' + formatTransitTime(recalc.transitMinutes) + '</span></div>' +
+      '<div class="vigil-stat"><span class="vigil-stat-label">ASSETS</span>' +
+      '<span class="vigil-stat-value">' + cfg.assetIds.length + '</span></div>' +
+    '</div>';
+
+    // Selected assets with remove buttons
+    html += '<div class="op-detail-section-title" style="margin-top:var(--sp-2)">SELECTED ASSETS</div>';
+    html += '<div class="vigil-option-assets">';
+    for (var s = 0; s < selectedAssets.length; s++) {
+      html += renderCustomAssetRow(selectedAssets[s], true);
+    }
+    if (selectedAssets.length === 0) {
+      html += '<div style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-muted);padding:var(--sp-2)">No assets selected</div>';
+    }
+    html += '</div>';
+
+    // Available assets to add
+    html += '<div class="op-detail-section-title" style="margin-top:var(--sp-3)">AVAILABLE TO ADD</div>';
+    html += '<div class="vigil-option-assets" style="max-height:240px;overflow-y:auto">';
+    for (var u = 0; u < eligibleAvailable.length; u++) {
+      html += renderCustomAssetRow(eligibleAvailable[u], false);
+    }
+    if (eligibleAvailable.length === 0) {
+      html += '<div style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-muted);padding:var(--sp-2)">No additional eligible assets available</div>';
+    }
+    html += '</div>';
+
+    // Deviation warning
+    html += '<div class="vigil-option-consequences" style="color:var(--amber);border-color:var(--amber);background:var(--amber-dim)">' +
+      'DEVIATION WARNING: Custom force configurations carry the same viability risk as selecting a non-recommended option. Failure with a deviated configuration incurs severe viability penalties.' +
+    '</div>';
+
+    // Actions
+    var canDeploy = cfg.assetIds.length > 0;
+    html += '<div style="display:flex;gap:var(--sp-2)">' +
+      '<button class="op-action-btn execute vigil-select-btn" style="flex:1"' +
+      (canDeploy ? '' : ' disabled style="opacity:0.4;cursor:not-allowed;flex:1"') +
+      ' onclick="approveCustomConfig(\'' + op.id + '\')">DEPLOY CUSTOM CONFIGURATION</button>' +
+      '<button class="op-action-btn cancel" style="flex:0 0 auto" onclick="cancelCustomConfig()">CANCEL</button>' +
+    '</div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderCustomAssetRow(asset, isSelected) {
+    var catInfo = ASSET_CATEGORIES[asset.category] || {};
+    var base = getBase(asset.currentBaseId || asset.homeBaseId);
+
+    var actionBtn = isSelected
+      ? '<span class="custom-asset-action remove" onclick="event.stopPropagation();removeCustomAsset(\'' + asset.id + '\')">✕</span>'
+      : '<span class="custom-asset-action add" onclick="event.stopPropagation();addCustomAsset(\'' + asset.id + '\')">+</span>';
+
+    return '<div class="vigil-asset-row expandable">' +
+      actionBtn +
+      '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
+      '<span class="vigil-asset-name">' + asset.name + '</span>' +
+      (asset.deniability ? '<span style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + asset.deniability + '</span>' : '') +
+      '<span class="vigil-asset-base">' + (base ? base.city + ', ' + base.country : '') + '</span>' +
+    '</div>';
   }
 
   // --- Asset Row with Expandable Detail ---
@@ -683,6 +812,79 @@
   window.toggleAssetExpand = function(key) {
     _expandedAssets[key] = !_expandedAssets[key];
     if (_selectedOpId) renderOpsDetail(_selectedOpId);
+  };
+
+  // --- Custom Force Configuration Actions ---
+
+  window.openCustomConfig = function(opId, optionIdx) {
+    var op = getOp(opId);
+    if (!op || !op.options || !op.options[optionIdx]) return;
+    var option = op.options[optionIdx];
+    _customConfig = {
+      opId: opId,
+      baseOptionIdx: optionIdx,
+      assetIds: option.assetIds.slice(),
+    };
+    renderOpsDetail(opId);
+  };
+
+  window.cancelCustomConfig = function() {
+    _customConfig = null;
+    if (_selectedOpId) renderOpsDetail(_selectedOpId);
+  };
+
+  window.addCustomAsset = function(assetId) {
+    if (!_customConfig) return;
+    if (_customConfig.assetIds.indexOf(assetId) < 0) {
+      _customConfig.assetIds.push(assetId);
+    }
+    if (_selectedOpId) renderOpsDetail(_selectedOpId);
+  };
+
+  window.removeCustomAsset = function(assetId) {
+    if (!_customConfig) return;
+    var idx = _customConfig.assetIds.indexOf(assetId);
+    if (idx >= 0) _customConfig.assetIds.splice(idx, 1);
+    if (_selectedOpId) renderOpsDetail(_selectedOpId);
+  };
+
+  window.approveCustomConfig = function(opId) {
+    if (!_customConfig || _customConfig.opId !== opId) return;
+    var op = getOp(opId);
+    if (!op || op.status !== 'OPTIONS_PRESENTED') return;
+
+    var recalc = typeof recalcCustomOption === 'function'
+      ? recalcCustomOption(op, _customConfig.assetIds)
+      : { confidencePercent: 50, riskLevel: 'ELEVATED', transitMinutes: 0 };
+
+    var baseOption = op.options[_customConfig.baseOptionIdx];
+    var customOption = {
+      label: 'CUSTOM CONFIGURATION',
+      description: 'Operator-defined force package deviating from Vigil model. Based on: ' + baseOption.label + '.',
+      assetIds: _customConfig.assetIds.slice(),
+      transitTimeHours: Math.round((recalc.transitMinutes / 60) * 10) / 10,
+      transitTimeMinutes: recalc.transitMinutes,
+      riskLevel: recalc.riskLevel,
+      confidencePercent: recalc.confidencePercent,
+      consequences: 'Custom force configuration. Deviation from Vigil recommendation.',
+      isRecommended: false,
+    };
+
+    op.options.push(customOption);
+    var customIdx = op.options.length - 1;
+
+    op.selectedOptionIdx = customIdx;
+    op.deviatedFromVigil = true;
+    op.status = 'APPROVED';
+
+    var assets = getAssetsByIds(customOption.assetIds);
+    op.fillVars = buildOpFillVars(op, assets);
+
+    addLog('OP ' + op.codename + ': Custom configuration approved. (DEVIATED FROM VIGIL)', 'log-decision');
+
+    _customConfig = null;
+    renderOpsDetail(opId);
+    renderOpsList();
   };
 
   // Re-render on state changes

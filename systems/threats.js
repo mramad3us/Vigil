@@ -25,6 +25,13 @@ var THREAT_TYPES = [
   { id: 'ASSET_COMPROMISED', label: 'Compromised Asset', weight: 1, threatRange: [3, 5] },
 ];
 
+// Military/strategic targets are DEFCON-1-only — never in the general weighted pool.
+// Spawned exclusively by the DEFCON 1 forced-spawn path in AT_WAR countries.
+var MILITARY_THREAT_TYPES = [
+  { id: 'MILITARY_TARGET', label: 'Military Target', threatRange: [4, 5] },
+  { id: 'STRATEGIC_TARGET', label: 'Strategic Target', threatRange: [5, 5] },
+];
+
 // --- Map threat types to operation types for the DA phase ---
 var THREAT_TO_OP_TYPE = {
   TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'DRONE_STRIKE', 'HVT_ELIMINATION', 'HOSTAGE_RESCUE'],
@@ -36,6 +43,8 @@ var THREAT_TO_OP_TYPE = {
   HOSTAGE_CRISIS: ['HOSTAGE_RESCUE', 'SOF_RAID', 'COUNTER_TERROR'],
   HVT_TARGET: ['HVT_ELIMINATION', 'HVT_CAPTURE', 'DRONE_STRIKE', 'TARGETED_KILLING', 'SOF_RAID'],
   ASSET_COMPROMISED: ['ASSET_EXTRACTION', 'SOF_RAID', 'HOSTAGE_RESCUE'],
+  MILITARY_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE', 'SOF_RAID'],
+  STRATEGIC_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE'],
 };
 
 // ===================================================================
@@ -73,9 +82,26 @@ function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
 //  SPAWN THREAT
 // ===================================================================
 
-function spawnThreat(theaterId) {
-  var type = weightedPick(THREAT_TYPES);
-  var loc = theaterId ? generateLocationInTheater(theaterId) : generateRandomLocation();
+function spawnThreat(theaterId, forcedTypeId) {
+  var type;
+  if (forcedTypeId) {
+    // Check both pools for the forced type
+    var allTypes = THREAT_TYPES.concat(MILITARY_THREAT_TYPES);
+    for (var ti = 0; ti < allTypes.length; ti++) {
+      if (allTypes[ti].id === forcedTypeId) { type = allTypes[ti]; break; }
+    }
+  }
+  if (!type) type = weightedPick(THREAT_TYPES);
+
+  // Military/strategic targets must only spawn in AT_WAR countries
+  var isMilitaryType = (type.id === 'MILITARY_TARGET' || type.id === 'STRATEGIC_TARGET');
+  var loc;
+  if (isMilitaryType && theaterId) {
+    loc = generateLocationInAtWarCountry(theaterId);
+    if (!loc) return null; // No AT_WAR countries in theater — skip spawn
+  } else {
+    loc = theaterId ? generateLocationInTheater(theaterId) : generateRandomLocation();
+  }
   var threatLevel = randInt(type.threatRange[0], type.threatRange[1]);
 
   // Expiration timer — higher threat = shorter window
@@ -185,6 +211,15 @@ function spawnThreat(theaterId) {
       'FLASH — COMPROMISED ASSET: A US intelligence officer has been burned in ' + loc.city + ', ' + loc.country + '. Asset is an American operative attempting to evade hostile surveillance. Extraction must be initiated before capture by local security services.',
       'Vigil has lost contact with a US intelligence officer operating under cover in ' + loc.city + '. Last transmission indicated compromise. American operative at risk of capture, interrogation, and exploitation. Asset extraction is time-critical.',
       'URGENT: US intelligence asset in ' + loc.city + ', ' + loc.country + ' has triggered emergency exfiltration protocol. American operative\'s cover identity compromised. Asset possesses knowledge of active US operations in the ' + loc.theater.name + ' theater. Extraction or sanitization required.',
+    ],
+    MILITARY_TARGET: [
+      'Vigil ISR has identified a hostile military installation near ' + loc.city + ', ' + loc.country + '. Satellite imagery confirms active force disposition including armored vehicles, air defense emplacements, and command infrastructure. Target poses direct threat to US forward-deployed forces in the ' + loc.theater.name + ' theater.',
+      'MILITARY TARGET: Vigil has designated a hostile military position in ' + loc.city + ' for strike assessment. SIGINT intercepts confirm this facility is coordinating operations against US and allied forces. Force protection demands rapid intelligence development and strike authorization.',
+      'Hostile military forces identified operating from ' + loc.city + ', ' + loc.country + '. Vigil assesses this position as a staging area for offensive operations against US personnel and allied partners. ISR assets tasked for detailed target development.',
+    ],
+    STRATEGIC_TARGET: [
+      'Vigil has designated a strategic facility near ' + loc.city + ', ' + loc.country + ' for target development. Facility output directly supports hostile military operations against US forces in the ' + loc.theater.name + ' theater. Precision strike package required — collateral assessment pending.',
+      'STRATEGIC TARGET: High-value hostile infrastructure identified in ' + loc.city + '. Vigil imagery analysis confirms this facility is critical to adversary war-fighting capability. Neutralization would significantly degrade threat to US forces in-theater. Full intelligence picture required before strike authorization.',
     ],
   };
 
@@ -387,7 +422,26 @@ function spawnThreat(theaterId) {
 
     for (var tid in V.theaters) {
       var theater = V.theaters[tid];
-      if (Math.random() < theater.volatility * 0.3) {
+      var defcon = theater.defcon || 5;
+      var defconMod = (typeof DEFCON_SPAWN_MOD !== 'undefined') ? (DEFCON_SPAWN_MOD[defcon] || 1.0) : 1.0;
+      var conflictMod = (typeof getConflictSpawnMultiplier === 'function') ? getConflictSpawnMultiplier(tid) : 1.0;
+      var prob = theater.volatility * 0.3 * defconMod * conflictMod;
+      if (Math.random() < prob) {
+        // At DEFCON 1 with AT_WAR countries, spawn military targets
+        if (defcon <= 1) {
+          var hasAtWar = false;
+          var theaterDef = THEATERS[tid];
+          if (theaterDef) {
+            for (var ci = 0; ci < theaterDef.countries.length; ci++) {
+              var cd = V.diplomacy[theaterDef.countries[ci]];
+              if (cd && cd.stance === 0) { hasAtWar = true; break; }
+            }
+          }
+          if (hasAtWar && Math.random() < 0.4) {
+            spawnThreat(tid, Math.random() < 0.6 ? 'MILITARY_TARGET' : 'STRATEGIC_TARGET');
+            continue;
+          }
+        }
         spawnThreat(tid);
       }
     }

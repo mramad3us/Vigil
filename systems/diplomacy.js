@@ -23,13 +23,25 @@ function getStanceTier(level) {
 
 // --- Permissions per stance level ---
 
-function getStancePermissions(level) {
+function getStancePermissions(level, theaterId) {
+  // At DEFCON <= 3, grant covert ops in hostile countries with reduced risk
+  var defconCovertOverride = false;
+  if (theaterId && V.theaters[theaterId] && V.theaters[theaterId].defcon <= 3) {
+    defconCovertOverride = true;
+  }
+
+  var covertRisk = getStanceTier(level).covertRisk;
+  if (defconCovertOverride && level <= 2) {
+    covertRisk = Math.max(0.10, covertRisk * 0.5); // 50% reduced risk at elevated DEFCON
+  }
+
   return {
     covertOps: true,  // always allowed, but risky at low stances
     flyover: level >= 4,
     station: level >= 6,
     overtOps: level >= 6,
-    covertRisk: getStanceTier(level).covertRisk,
+    covertRisk: covertRisk,
+    defconCovertAuth: defconCovertOverride,
   };
 }
 

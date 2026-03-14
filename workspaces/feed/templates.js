@@ -164,7 +164,7 @@ var FEED_TEMPLATES = {
       '{resource} levels have {direction} to {value}. {recommendation}',
     ],
     vars: {
-      resource: ['BUDGET', 'VIABILITY', 'ASSET AVAILABILITY'],
+      resource: ['VIABILITY', 'ASSET AVAILABILITY'],
       direction: ['fallen', 'risen'],
       value: ['critical levels', 'concerning levels', 'optimal range'],
       recommendation: ['Immediate attention recommended.', 'Continue monitoring.', 'Reallocate resources as necessary.'],

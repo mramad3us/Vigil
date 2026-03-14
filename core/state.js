@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.4.4';
+V.version = '0.5.1';
 
 function initState() {
 
@@ -28,7 +28,6 @@ function initState() {
   // Resources
   V.resources = {
     viability: 70,
-    budget: 100,
     intel: 0,
     xp: 0,
   };
@@ -61,6 +60,9 @@ function initState() {
   V.crises = [];
   V.crisisIdCounter = 0;
 
+  // Conflicts
+  V.conflicts = [];
+
   // Events
   V.events = {
     activeEffects: [],
@@ -83,6 +85,9 @@ function initState() {
         volatility: THEATERS[tid].volatility,
         activeEvents: [],
         eventCount: 0,
+        defcon: 5,
+        defconHistory: [],
+        pendingMigration: null,
       };
     }
   }

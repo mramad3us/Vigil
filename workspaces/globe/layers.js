@@ -28,6 +28,12 @@ var GLOBE_LAYERS = {
     visible: true,
     tip: 'In-transit and deployed military/intel assets',
   },
+  conflicts: {
+    label: 'Conflicts',
+    color: '#e04040',
+    visible: true,
+    tip: 'Active regional conflicts and hot zones',
+  },
 };
 
 function toggleGlobeLayer(layerId) {
@@ -66,6 +72,13 @@ function syncGlobeLayers(viewer) {
   } else {
     removePrefixMarkers(viewer, 'asset-');
     removePrefixMarkers(viewer, 'arc-');
+  }
+
+  // Sync conflicts
+  if (GLOBE_LAYERS.conflicts.visible) {
+    syncConflictMarkers(viewer);
+  } else {
+    removePrefixMarkers(viewer, 'conflict-');
   }
 }
 
@@ -155,7 +168,7 @@ function syncBaseMarkers(viewer) {
   }
 }
 
-// --- Assets (in-transit only, not stationed) ---
+// --- Assets (in-transit, deployed, and mobile bases always) ---
 
 function syncAssetMarkers(viewer) {
   if (!V.assets) return;
@@ -163,7 +176,9 @@ function syncAssetMarkers(viewer) {
 
   for (var i = 0; i < V.assets.length; i++) {
     var a = V.assets[i];
-    if (a.status !== 'IN_TRANSIT' && a.status !== 'RETURNING' && a.status !== 'DEPLOYED' && a.status !== 'COLLECTING') continue;
+    var isActive = a.status === 'IN_TRANSIT' || a.status === 'RETURNING' || a.status === 'DEPLOYED' || a.status === 'COLLECTING';
+    // Always show mobile bases (CSGs)
+    if (!isActive && !(a.isMobileBase && a.status === 'STATIONED')) continue;
 
     var markerId = 'asset-' + a.id;
     activeIds.add(markerId);
@@ -171,13 +186,15 @@ function syncAssetMarkers(viewer) {
     var catInfo = ASSET_CATEGORIES[a.category] || {};
     var color = catInfo.color || '#e0a030';
 
+    var markerSize = a.isMobileBase ? 7 : 5;
+
     if (!hasGlobeMarker(markerId)) {
       addGlobeMarker(viewer, markerId, {
         lat: a.currentLat,
         lon: a.currentLon,
         color: color,
-        size: 5,
-        outlineWidth: 3,
+        size: markerSize,
+        outlineWidth: a.isMobileBase ? 4 : 3,
         label: a.name,
       });
     } else {
@@ -204,36 +221,54 @@ function syncAssetMarkers(viewer) {
 function syncTransitArc(viewer, asset) {
   var arcId = 'arc-' + asset.id;
 
-  // Build a series of points along the great circle
+  // Build polyline from transit path if available, otherwise great circle
   var points = [];
-  var segments = 40;
-  for (var i = 0; i <= segments; i++) {
-    var frac = i / segments;
-    var pt = interpolateGreatCircle(
-      asset.originLat, asset.originLon,
-      asset.destinationLat, asset.destinationLon,
-      frac
-    );
-    points.push(pt.lon, pt.lat, 0);
+  if (asset._transitPath && asset._transitPath.length > 1) {
+    // Multi-segment maritime path — add sub-segments per leg for smoothness
+    for (var leg = 0; leg < asset._transitPath.length - 1; leg++) {
+      var from = asset._transitPath[leg];
+      var to = asset._transitPath[leg + 1];
+      var subSegs = 5;
+      for (var s = 0; s <= subSegs; s++) {
+        if (leg > 0 && s === 0) continue; // avoid duplicate points
+        var f = s / subSegs;
+        var pt = interpolateGreatCircle(from.lat, from.lon, to.lat, to.lon, f);
+        points.push(pt.lon, pt.lat, 0);
+      }
+    }
+  } else {
+    var segments = 40;
+    for (var i = 0; i <= segments; i++) {
+      var frac = i / segments;
+      var pt = interpolateGreatCircle(
+        asset.originLat, asset.originLon,
+        asset.destinationLat, asset.destinationLon,
+        frac
+      );
+      points.push(pt.lon, pt.lat, 0);
+    }
   }
 
-  if (!hasGlobeMarker(arcId)) {
-    // Create polyline entity
-    var positions = Cesium.Cartesian3.fromDegreesArrayHeights(points);
-    var entity = viewer.entities.add({
-      id: arcId,
-      polyline: {
-        positions: positions,
-        width: 1.5,
-        material: new Cesium.PolylineDashMaterialProperty({
-          color: Cesium.Color.fromCssColorString('#e0a03080'),
-          dashLength: 8,
-        }),
-        clampToGround: false,
-      },
-    });
-    _globeEntities[arcId] = entity;
+  // Remove existing arc to update it
+  if (hasGlobeMarker(arcId)) {
+    removeGlobeMarker(viewer, arcId);
   }
+
+  // Create polyline entity
+  var positions = Cesium.Cartesian3.fromDegreesArrayHeights(points);
+  var entity = viewer.entities.add({
+    id: arcId,
+    polyline: {
+      positions: positions,
+      width: 1.5,
+      material: new Cesium.PolylineDashMaterialProperty({
+        color: Cesium.Color.fromCssColorString('#e0a03080'),
+        dashLength: 8,
+      }),
+      clampToGround: false,
+    },
+  });
+  _globeEntities[arcId] = entity;
 }
 
 function cleanupArcs(viewer, activeAssetIds) {
@@ -245,6 +280,49 @@ function cleanupArcs(viewer, activeAssetIds) {
       }
     }
   }
+}
+
+// --- Conflicts ---
+
+function syncConflictMarkers(viewer) {
+  if (!V.conflicts) return;
+  var activeIds = new Set();
+
+  for (var i = 0; i < V.conflicts.length; i++) {
+    var c = V.conflicts[i];
+    if (!c.active || !c.hotZone) continue;
+    var markerId = 'conflict-' + c.id;
+    activeIds.add(markerId);
+
+    if (!hasGlobeMarker(markerId)) {
+      var entity = viewer.entities.add({
+        id: markerId,
+        position: Cesium.Cartesian3.fromDegrees(c.hotZone.lon, c.hotZone.lat),
+        ellipse: {
+          semiMinorAxis: c.hotZone.radiusKm * 1000,
+          semiMajorAxis: c.hotZone.radiusKm * 1000,
+          material: Cesium.Color.fromCssColorString('#e0404030'),
+          outline: true,
+          outlineColor: Cesium.Color.fromCssColorString('#e04040'),
+          outlineWidth: 1,
+        },
+        label: {
+          text: c.typeLabel,
+          font: '10px monospace',
+          fillColor: Cesium.Color.fromCssColorString('#e04040'),
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 2,
+          outlineColor: Cesium.Color.BLACK,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -10),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+      });
+      _globeEntities[markerId] = entity;
+    }
+  }
+
+  removeStaleMarkers(viewer, 'conflict-', activeIds);
 }
 
 // --- Helpers ---

@@ -268,6 +268,10 @@
         if (asset.description) {
           detail += '<div class="globe-info-desc">' + asset.description + '</div>';
         }
+        if (asset.isMobileBase) {
+          detail += '<div style="margin-top:4px;font-family:var(--font-mono);font-size:9px;color:var(--accent)">MOBILE BASE — Carrier Strike Group</div>';
+          detail += '<div style="font-size:10px;margin-top:2px;color:var(--text-dim)">Position: ' + asset.currentLat.toFixed(2) + '°, ' + asset.currentLon.toFixed(2) + '°</div>';
+        }
         if (asset.assignedOpId) {
           var assignedOp = getOp(asset.assignedOpId);
           if (assignedOp) detail += '<div style="margin-top:4px;font-family:var(--font-mono);font-size:9px;color:var(--accent)">ASSIGNED: ' + assignedOp.codename + '</div>';

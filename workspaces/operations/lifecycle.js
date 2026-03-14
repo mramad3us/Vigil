@@ -227,10 +227,6 @@
     // Apply viability impact
     var viabilityDelta = assessOptionOutcome(op, success);
 
-    // Budget cost
-    var budgetCost = op.budgetCost || randInt(5, 20);
-    V.resources.budget = clamp(V.resources.budget - budgetCost, 0, 200);
-
     // Intel gain on success
     if (success) {
       V.resources.intel += randInt(5, 15);
@@ -353,7 +349,7 @@
 
   // --- Build Fill Variables for Debrief Parametrization ---
 
-  function buildOpFillVars(op, assets) {
+  window.buildOpFillVars = function(op, assets) {
     var assetNames = assets.map(function(a) { return a.name; });
     var baseNames = [];
     var baseIds = {};
@@ -387,6 +383,6 @@
       primaryAsset: assetNames[0] || 'deployed forces',
       primaryBase: baseNames[0] || 'forward operating base',
     };
-  }
+  };
 
 })();

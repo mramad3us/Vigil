@@ -100,6 +100,26 @@ function generateLocationInTheater(theaterId) {
   };
 }
 
+function generateLocationInAtWarCountry(theaterId) {
+  var theater = getTheater(theaterId);
+  if (!theater) return null;
+  var eligible = [];
+  for (var i = 0; i < theater.cities.length; i++) {
+    var city = theater.cities[i];
+    var cd = V.diplomacy[city.country];
+    if (cd && cd.stance === 0) {
+      eligible.push(city);
+    }
+  }
+  if (eligible.length === 0) return null;
+  var city = pick(eligible);
+  return {
+    theater: theater, theaterId: theater.id,
+    city: city.city, country: city.country,
+    lat: city.lat, lon: city.lon,
+  };
+}
+
 // --- Progressive Intel Field Value Generation ---
 // Generates realistic values for each intel field key based on op context.
 

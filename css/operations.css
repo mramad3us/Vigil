@@ -706,3 +706,51 @@
   min-width: 90px;
   text-align: right;
 }
+
+/* --- Custom Force Configuration --- */
+.custom-config-card {
+  border-color: var(--amber) !important;
+  box-shadow: 0 0 0 1px var(--amber-dim);
+}
+
+.vigil-deviate-btn {
+  width: 100%;
+  margin-top: var(--sp-1);
+  font-size: 9px !important;
+  letter-spacing: 1px;
+}
+
+.custom-asset-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.custom-asset-action.remove {
+  color: var(--red);
+  background: var(--red-dim);
+}
+
+.custom-asset-action.remove:hover {
+  background: var(--red);
+  color: var(--bg-1);
+}
+
+.custom-asset-action.add {
+  color: var(--green);
+  background: var(--green-dim);
+}
+
+.custom-asset-action.add:hover {
+  background: var(--green);
+  color: var(--bg-1);
+}

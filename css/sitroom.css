@@ -1,6 +1,7 @@
 /* ============================================================
    VIGIL — css/sitroom.css
-   Situation room: crisis dashboard.
+   Situation room: DEFCON controls, force disposition, crises.
+   Three-column layout.
    ============================================================ */
 
 #ws-sitroom {
@@ -13,9 +14,9 @@
   overflow: hidden;
 }
 
-/* --- Threat Gauge (left panel) --- */
+/* --- Left Panel: Threat Gauge --- */
 .sitroom-gauge-panel {
-  width: 260px;
+  width: 240px;
   padding: var(--sp-4);
   border-right: 1px solid var(--border);
   background: var(--bg-2);
@@ -23,6 +24,7 @@
   flex-direction: column;
   gap: var(--sp-4);
   flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .gauge-section-title {
@@ -90,7 +92,141 @@
   text-align: center;
 }
 
-/* --- Theater Risk Bars --- */
+/* --- Center Panel: DEFCON Theater Cards --- */
+.sitroom-center {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+  border-right: 1px solid var(--border);
+}
+
+.sitroom-defcon-header {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-4);
+}
+
+.defcon-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.defcon-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  transition: all var(--transition-fast);
+}
+
+.defcon-card:hover {
+  border-color: var(--border-light);
+}
+
+.defcon-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-1);
+}
+
+.defcon-card-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  letter-spacing: 0.5px;
+}
+
+.defcon-card-level {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.defcon-card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-2);
+}
+
+/* --- DEFCON Selector --- */
+.defcon-selector {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--sp-3);
+}
+
+.defcon-level {
+  flex: 1;
+  text-align: center;
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 2px;
+  cursor: pointer;
+  background: var(--bg-4);
+  color: var(--text-dim);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.defcon-level:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+.defcon-level.active {
+  color: var(--bg-1);
+}
+
+.defcon-5 { border: 1px solid var(--green); }
+.defcon-5.active { background: var(--green); color: var(--bg-1); }
+
+.defcon-4 { border: 1px solid var(--accent); }
+.defcon-4.active { background: var(--accent); color: var(--bg-1); }
+
+.defcon-3 { border: 1px solid var(--amber); }
+.defcon-3.active { background: var(--amber); color: var(--bg-1); }
+
+.defcon-2 { border: 1px solid var(--severity-high); }
+.defcon-2.active { background: var(--severity-high); color: var(--bg-1); }
+
+.defcon-1 { border: 1px solid var(--red); }
+.defcon-1.active { background: var(--red); color: var(--bg-1); }
+
+/* --- Risk Row --- */
+.defcon-risk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.defcon-risk-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  width: 30px;
+  letter-spacing: 0.5px;
+}
+
+.defcon-risk-val {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  width: 20px;
+  text-align: right;
+}
+
+/* --- Theater Risk Bars (reused from old layout) --- */
 .theater-risks {
   display: flex;
   flex-direction: column;
@@ -133,9 +269,119 @@
   text-align: right;
 }
 
-/* --- Crisis Cards (main area) --- */
-.sitroom-crises {
+/* --- Force Disposition --- */
+.force-disposition {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.8;
+  margin-bottom: var(--sp-2);
+}
+
+/* --- Badges --- */
+.defcon-card-badges {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.conflict-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: var(--red);
+  background: var(--red-dim);
+}
+
+.threat-count-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+/* --- Migration Panel --- */
+.migration-panel {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--severity-high);
+  border-radius: var(--radius-md);
+}
+
+.migration-header {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--severity-high);
+  margin-bottom: var(--sp-2);
+}
+
+.migration-assets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+}
+
+.migration-asset-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.migration-asset-row span:first-child {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.migration-dest {
+  color: var(--text-dim);
+  font-size: 9px;
+}
+
+.migration-eta {
+  color: var(--accent);
+  font-size: 9px;
+  min-width: 50px;
+  text-align: right;
+}
+
+.migration-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+.migration-remove:hover {
+  color: var(--red);
+}
+
+.migration-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* --- Right Panel: Crisis Cards --- */
+.sitroom-crises {
+  width: 300px;
+  flex-shrink: 0;
   overflow-y: auto;
   padding: var(--sp-4);
 }
@@ -162,8 +408,8 @@
 }
 
 .crisis-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: var(--sp-3);
 }
 
@@ -171,7 +417,7 @@
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: var(--sp-4);
+  padding: var(--sp-3);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -222,7 +468,7 @@
 .crisis-card-title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
   color: var(--text-hi);
   margin-bottom: var(--sp-1);
 }
@@ -235,10 +481,10 @@
 }
 
 .crisis-card-desc {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   color: var(--text);
   line-height: 1.5;
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-2);
 }
 
 .crisis-card-actions {
@@ -252,7 +498,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300px;
+  height: 200px;
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: var(--fs-sm);

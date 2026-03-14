@@ -1,6 +1,8 @@
 /* ============================================================
    VIGIL — workspaces/sitroom/sitroom.js
-   Situation room workspace: crisis dashboard.
+   Situation room workspace: DEFCON controls, force disposition,
+   theater risk, crises, migration proposals.
+   Three-column layout.
    ============================================================ */
 
 (function() {
@@ -15,6 +17,7 @@
       container.innerHTML =
         '<div class="sitroom-layout">' +
           '<div class="sitroom-gauge-panel" id="sitroom-gauges"></div>' +
+          '<div class="sitroom-center" id="sitroom-defcon"></div>' +
           '<div class="sitroom-crises" id="sitroom-crises"></div>' +
         '</div>';
     },
@@ -24,11 +27,12 @@
 
     render: function() {
       renderSitroomGauges();
+      renderDefconPanel();
       renderSitroomCrises();
     },
   });
 
-  // --- Gauges Panel ---
+  // --- Left Column: Gauges Panel ---
 
   function renderSitroomGauges() {
     var el = $('sitroom-gauges');
@@ -65,24 +69,6 @@
         '<div class="threat-gauge-text">' + Math.round(riskPct) + '% RISK CAPACITY</div>' +
       '</div>';
 
-    // Theater risk bars
-    html += '<div class="gauge-section-title" style="margin-top:var(--sp-4)">THEATER RISK LEVELS</div>' +
-      '<div class="theater-risks">';
-
-    for (var id in THEATERS) {
-      var theater = THEATERS[id];
-      var risk = V.theaters[id] ? V.theaters[id].risk : theater.baseRisk;
-      var pct = (risk / 5) * 100;
-      var barColor = risk >= 4 ? 'var(--red)' : risk >= 3 ? 'var(--amber)' : 'var(--green)';
-
-      html += '<div class="theater-risk-row">' +
-        '<span class="theater-risk-name">' + theater.shortName + '</span>' +
-        '<div class="theater-risk-bar"><div class="theater-risk-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' +
-        '<span class="theater-risk-val">' + risk.toFixed(1) + '</span>' +
-      '</div>';
-    }
-    html += '</div>';
-
     // Stats
     html += '<div class="gauge-section-title" style="margin-top:var(--sp-4)">OPERATIONS SUMMARY</div>' +
       '<div style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim);line-height:2">' +
@@ -90,13 +76,156 @@
         'Completed: ' + V.playStats.opsCompleted + '<br>' +
         'Success Rate: ' + (V.playStats.opsCompleted > 0 ? Math.round(V.playStats.opsSucceeded / V.playStats.opsCompleted * 100) : 0) + '%<br>' +
         'Active Threats: ' + V.threats.filter(function(t) { return t.status === 'ACTIVE'; }).length + '<br>' +
+        'Active Conflicts: ' + (typeof getActiveConflicts === 'function' ? getActiveConflicts().length : 0) + '<br>' +
         'Days: ' + V.time.day +
       '</div>';
 
     el.innerHTML = html;
   }
 
-  // --- Crisis Cards ---
+  // --- Center Column: DEFCON Theater Cards ---
+
+  function renderDefconPanel() {
+    var el = $('sitroom-defcon');
+    if (!el) return;
+
+    var html = '<div class="sitroom-defcon-header">THEATER DEFCON STATUS</div>';
+    html += '<div class="defcon-cards">';
+
+    for (var tid in THEATERS) {
+      var theater = THEATERS[tid];
+      var ts = V.theaters[tid];
+      if (!ts) continue;
+
+      var defcon = ts.defcon || 5;
+      var defconInfo = typeof getDefconInfo === 'function' ? getDefconInfo(defcon) : { label: 'FADE OUT', color: 'var(--green)', desc: '' };
+      var risk = ts.risk || 0;
+      var riskPct = (risk / 5) * 100;
+      var riskColor = risk >= 4 ? 'var(--red)' : risk >= 3 ? 'var(--amber)' : 'var(--green)';
+
+      // Active conflicts in theater
+      var conflictCount = typeof getTheaterConflicts === 'function' ? getTheaterConflicts(tid).length : 0;
+
+      // Active threats in theater
+      var threatCount = 0;
+      for (var ti = 0; ti < V.threats.length; ti++) {
+        if (V.threats[ti].status === 'ACTIVE' && V.threats[ti].location && V.threats[ti].location.theaterId === tid) {
+          threatCount++;
+        }
+      }
+
+      // Force disposition
+      var forceCount = {};
+      for (var ai = 0; ai < V.assets.length; ai++) {
+        var asset = V.assets[ai];
+        if (asset.status === 'STATIONED' || asset.status === 'DEPLOYED' || asset.status === 'COLLECTING') {
+          var assetBase = getBase(asset.currentBaseId || asset.homeBaseId);
+          if (assetBase && theater.countries.indexOf(assetBase.country) >= 0) {
+            forceCount[asset.category] = (forceCount[asset.category] || 0) + 1;
+          }
+        }
+      }
+
+      html += '<div class="defcon-card" style="border-left:3px solid ' + defconInfo.color + '">';
+
+      // Theater name + DEFCON
+      html += '<div class="defcon-card-header">' +
+        '<span class="defcon-card-name">' + theater.shortName + '</span>' +
+        '<span class="defcon-card-level" style="color:' + defconInfo.color + '">DEFCON ' + defcon + '</span>' +
+      '</div>';
+
+      // DEFCON label
+      html += '<div class="defcon-card-label" style="color:' + defconInfo.color + '">' + defconInfo.label + '</div>';
+
+      // DEFCON selector
+      html += '<div class="defcon-selector">';
+      for (var d = 5; d >= 1; d--) {
+        var dInfo = typeof getDefconInfo === 'function' ? getDefconInfo(d) : DEFCON_LEVELS[d];
+        var activeCls = d === defcon ? ' active' : '';
+        var tipText = typeof TIPS !== 'undefined' && TIPS.defcon ? TIPS.defcon[d] : '';
+        html += '<div class="defcon-level defcon-' + d + activeCls + '"' +
+          ' onclick="setTheaterDefcon(\'' + tid + '\',' + d + ')"' +
+          ' data-tip="' + (tipText || '').replace(/"/g, '&quot;') + '" data-tip-align="bottom">' +
+          d + '</div>';
+      }
+      html += '</div>';
+
+      // Risk bar
+      html += '<div class="defcon-risk-row">' +
+        '<span class="defcon-risk-label">RISK</span>' +
+        '<div class="theater-risk-bar" style="flex:1"><div class="theater-risk-fill" style="width:' + riskPct + '%;background:' + riskColor + '"></div></div>' +
+        '<span class="defcon-risk-val">' + risk.toFixed(1) + '</span>' +
+      '</div>';
+
+      // Force disposition
+      var forceParts = [];
+      var catOrder = ['SOF', 'NAVY', 'AIR', 'ISR', 'INTEL', 'DIPLOMATIC', 'DOMESTIC'];
+      for (var ci = 0; ci < catOrder.length; ci++) {
+        var cat = catOrder[ci];
+        if (forceCount[cat]) {
+          var catInfo = typeof ASSET_CATEGORIES !== 'undefined' ? ASSET_CATEGORIES[cat] : null;
+          var catColor = catInfo ? catInfo.color : 'var(--text)';
+          var catLabel = catInfo ? catInfo.shortLabel : cat;
+          forceParts.push('<span style="color:' + catColor + '">' + catLabel + ': ' + forceCount[cat] + '</span>');
+        }
+      }
+      if (forceParts.length > 0) {
+        html += '<div class="force-disposition">' + forceParts.join(' <span style="color:var(--border)">|</span> ') + '</div>';
+      }
+
+      // Badges
+      html += '<div class="defcon-card-badges">';
+      if (conflictCount > 0) {
+        html += '<span class="conflict-badge">' + conflictCount + ' CONFLICT' + (conflictCount > 1 ? 'S' : '') + '</span>';
+      }
+      if (threatCount > 0) {
+        html += '<span class="threat-count-badge">' + threatCount + ' THREAT' + (threatCount > 1 ? 'S' : '') + '</span>';
+      }
+      html += '</div>';
+
+      // Pending migration
+      if (ts.pendingMigration && ts.pendingMigration.assets.length > 0) {
+        html += renderMigrationPanel(tid, ts.pendingMigration);
+      }
+
+      html += '</div>';
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  function renderMigrationPanel(theaterId, migration) {
+    var isCovert = migration.scope === 'covert';
+    var headerText = isCovert ? 'COVERT ASSET RELOCATION PROPOSAL' : 'FORCE MIGRATION PROPOSAL';
+    var borderColor = isCovert ? 'var(--amber)' : 'var(--severity-high)';
+    var html = '<div class="migration-panel" style="border-color:' + borderColor + '">' +
+      '<div class="migration-header" style="color:' + borderColor + '">' + headerText + '</div>' +
+      '<div class="migration-assets">';
+
+    for (var i = 0; i < migration.assets.length; i++) {
+      var entry = migration.assets[i];
+      var catInfo = typeof ASSET_CATEGORIES !== 'undefined' ? ASSET_CATEGORIES[entry.category] : null;
+      var catColor = catInfo ? catInfo.color : 'var(--text)';
+
+      html += '<div class="migration-asset-row">' +
+        '<span style="color:' + catColor + ';font-weight:600">' + entry.name + '</span>' +
+        '<span class="migration-dest">' + (entry.toStation || entry.toBaseName || '—') + '</span>' +
+        '<span class="migration-eta">' + formatTransitTime(entry.transitMinutes) + '</span>' +
+        '<button class="migration-remove" onclick="removeMigrationAsset(\'' + theaterId + '\',\'' + entry.id + '\')">✕</button>' +
+      '</div>';
+    }
+
+    html += '</div>';
+    html += '<div class="migration-actions">' +
+      '<button class="op-action-btn execute" onclick="approveMigration(\'' + theaterId + '\')">APPROVE MIGRATION</button>' +
+      '<button class="op-action-btn cancel" onclick="dismissMigration(\'' + theaterId + '\')">DISMISS</button>' +
+    '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  // --- Right Column: Crises ---
 
   function renderSitroomCrises() {
     var el = $('sitroom-crises');
@@ -164,11 +293,38 @@
     el.innerHTML = html;
   }
 
-  // Re-render on crisis events
+  // Re-render on events
   hook('crisis:spawned', function() {
     if (V.ui.activeWorkspace === 'sitroom') {
       renderSitroomCrises();
       renderSitroomGauges();
+    }
+  });
+
+  hook('defcon:changed', function() {
+    if (V.ui.activeWorkspace === 'sitroom') {
+      renderDefconPanel();
+      renderSitroomGauges();
+    }
+  });
+
+  hook('conflict:spawned', function() {
+    if (V.ui.activeWorkspace === 'sitroom') {
+      renderDefconPanel();
+      renderSitroomGauges();
+    }
+  });
+
+  hook('conflict:resolved', function() {
+    if (V.ui.activeWorkspace === 'sitroom') {
+      renderDefconPanel();
+      renderSitroomGauges();
+    }
+  });
+
+  hook('tick:hour', function() {
+    if (V.ui.activeWorkspace === 'sitroom') {
+      renderDefconPanel();
     }
   });
 

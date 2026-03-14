@@ -86,12 +86,6 @@ function renderStatusBar() {
     else confBar.style.background = 'var(--red)';
   }
 
-  // Budget
-  var budgetEl = $('sb-budget');
-  var budgetBar = $('sb-budget-bar');
-  if (budgetEl) budgetEl.textContent = '$' + Math.round(V.resources.budget) + 'M';
-  if (budgetBar) budgetBar.style.width = V.resources.budget + '%';
-
   // Intel
   var intelEl = $('sb-intel');
   if (intelEl) intelEl.textContent = V.resources.intel;

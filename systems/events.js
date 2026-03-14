@@ -90,7 +90,7 @@ var EVENT_CATALOG = [
     },
     hasChoice: true,
     choices: [
-      { label: 'EXTRACT IMMEDIATELY', desc: 'Pull the asset out before they can be detained.', effect: 'budget_cost' },
+      { label: 'EXTRACT IMMEDIATELY', desc: 'Pull the asset out before they can be detained.', effect: 'spawn_op' },
       { label: 'CONTINUE MONITORING', desc: 'Keep the source in place and assess the situation.', effect: 'intel_gain' },
     ],
   },
@@ -180,7 +180,7 @@ var EVENT_CATALOG = [
     },
     hasChoice: true,
     choices: [
-      { label: 'SCREEN AND ASSIST', desc: 'Deploy intelligence assets to screen while providing aid.', effect: 'budget_cost' },
+      { label: 'SCREEN AND ASSIST', desc: 'Deploy intelligence assets to screen while providing aid.', effect: 'spawn_op' },
       { label: 'BORDER REINFORCEMENT', desc: 'Prioritize security screening at border crossings.', effect: 'confidence_small' },
     ],
   },
@@ -305,9 +305,6 @@ var EVENT_CATALOG = [
           break;
         case 'confidence_small':
           V.resources.viability = clamp(V.resources.viability + randInt(1, 3), 0, 100);
-          break;
-        case 'budget_cost':
-          V.resources.budget = clamp(V.resources.budget - randInt(5, 15), 0, 200);
           break;
         case 'theater_risk_up':
           if (event.location && V.theaters[event.location.theaterId]) {

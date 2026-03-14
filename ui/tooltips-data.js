@@ -17,6 +17,8 @@ var TIPS = {
     HOSTAGE_CRISIS:    'Active hostage situation involving US citizens or allied nationals. Time-critical — hostage survival probability degrades over time.',
     HVT_TARGET:        'High-Value Target identified for capture or elimination. Senior leadership, bomb-makers, or key operational figures.',
     ASSET_COMPROMISED: 'A US intelligence asset (human source) has been identified by a hostile service. Extraction or protective action required.',
+    MILITARY_TARGET:   'Identified military installation or formation in a hostile theater. Requires DEFCON 2 or lower to engage.',
+    STRATEGIC_TARGET:  'Strategic facility — command center, weapons depot, or critical infrastructure in an AT_WAR country.',
   },
 
   // --- Operation Types ---
@@ -121,9 +123,25 @@ var TIPS = {
   // --- Status Bar ---
   statusBar: {
     viability: 'National security credibility. Drops from failed operations, civilian casualties, diplomatic incidents. At zero, you are relieved of command.',
-    budget:    'Operational budget in millions. Consumed by operations. Replenished periodically based on performance and political support.',
     intel:     'Intelligence reserve. Spent on diplomatic outreach, intel sharing, and advanced collection. Earned through successful operations.',
     threat:    'Global threat level based on active threats, recent attacks, and intelligence gaps. Drives political pressure.',
+  },
+
+  // --- DEFCON Levels ---
+  defcon: {
+    5: 'DEFCON 5 — FADE OUT. Peacetime readiness. Normal operations and baseline threat monitoring.',
+    4: 'DEFCON 4 — DOUBLE TAKE. Enhanced intelligence watch. Intel collection speed +50% in theater.',
+    3: 'DEFCON 3 — ROUND HOUSE. Covert ops authorized in hostile territory. SOF and intel assets relocate to theater. Threat spawn rate x1.5.',
+    2: 'DEFCON 2 — FAST PACE. Conventional forces routing to theater. Migration proposals generated. Threat spawn x2.0.',
+    1: 'DEFCON 1 — COCKED PISTOL. Maximum combat readiness. All covert ops authorized. Military targets generated. Threat spawn x2.5.',
+  },
+
+  // --- Conflict Types ---
+  conflict: {
+    BORDER_WAR:            'Active military conflict along a disputed border. High-intensity conventional operations.',
+    NAVAL_CONFRONTATION:   'Maritime standoff involving warships, blockades, or contested waterways.',
+    PROXY_CONFLICT:        'Conflict fought through intermediary forces, with state sponsors providing arms and funding.',
+    INSURGENT_OFFENSIVE:   'Large-scale insurgent offensive aimed at seizing territory or destabilizing the government.',
   },
 };
 

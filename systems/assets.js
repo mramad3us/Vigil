@@ -69,7 +69,7 @@ var ASSET_TEMPLATES = [
   // ======================= NAVY =======================
   {
     type: 'CSG_7', name: 'Carrier Strike Group 7', category: 'NAVY', deniability: 'OVERT',
-    homeBaseId: 'YOKOSUKA', speed: 55,
+    homeBaseId: 'YOKOSUKA', speed: 55, effectiveRangeKm: 1500,
     capabilities: ['NAVAL', 'STRIKE', 'ISR'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 1 },
     designation: 'Carrier Strike Group 7, U.S. 7th Fleet',
@@ -83,7 +83,7 @@ var ASSET_TEMPLATES = [
   },
   {
     type: 'CSG_2', name: 'Carrier Strike Group 2', category: 'NAVY', deniability: 'OVERT',
-    homeBaseId: 'NORFOLK', speed: 55,
+    homeBaseId: 'NORFOLK', speed: 55, effectiveRangeKm: 1500,
     capabilities: ['NAVAL', 'STRIKE', 'ISR'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 1 },
     designation: 'Carrier Strike Group 2, U.S. 2nd Fleet',
@@ -97,7 +97,7 @@ var ASSET_TEMPLATES = [
   },
   {
     type: 'CSG_3', name: 'Carrier Strike Group 3', category: 'NAVY', deniability: 'OVERT',
-    homeBaseId: 'PEARL_HARBOR', speed: 55,
+    homeBaseId: 'PEARL_HARBOR', speed: 55, effectiveRangeKm: 1500,
     capabilities: ['NAVAL', 'STRIKE', 'ISR'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 2 },
     designation: 'Carrier Strike Group 3, U.S. 3rd Fleet',
@@ -111,7 +111,7 @@ var ASSET_TEMPLATES = [
   },
   {
     type: 'DDG_SQUADRON', name: 'Destroyer Squadron 15', category: 'NAVY', deniability: 'OVERT',
-    homeBaseId: 'YOKOSUKA', speed: 60,
+    homeBaseId: 'YOKOSUKA', speed: 60, effectiveRangeKm: 1600,
     capabilities: ['NAVAL', 'STRIKE'],
     collectionProfile: { SIGINT: 1 },
     designation: 'Destroyer Squadron 15, U.S. 7th Fleet',
@@ -125,7 +125,7 @@ var ASSET_TEMPLATES = [
   },
   {
     type: 'SSN_SQUADRON', name: 'Submarine Squadron 8', category: 'NAVY', deniability: 'OVERT',
-    homeBaseId: 'NORFOLK', speed: 50,
+    homeBaseId: 'NORFOLK', speed: 50, effectiveRangeKm: 1600,
     capabilities: ['NAVAL', 'INTEL', 'STRIKE'],
     collectionProfile: { SIGINT: 3, ISR: 1 },
     designation: 'Submarine Squadron 8, U.S. Atlantic Fleet',
@@ -818,6 +818,10 @@ var ASSET_CATEGORIES = {
             assignedThreatId: null,
             rerouteCount: 0,
             maxReroutes: (tpl.readiness === 'TIER_1') ? 5 : 2,
+            // Mobile base flag for CSGs
+            isMobileBase: tpl.type.indexOf('CSG') === 0,
+            // Naval area of effectiveness (km from station point to target)
+            effectiveRangeKm: tpl.effectiveRangeKm || 0,
           });
         }
       }
@@ -846,12 +850,17 @@ var ASSET_CATEGORIES = {
         if (fraction >= 1) {
           arriveAsset(asset);
         } else {
-          // Interpolate position
-          var pos = interpolateGreatCircle(
-            asset.originLat, asset.originLon,
-            asset.destinationLat, asset.destinationLon,
-            fraction
-          );
+          // Interpolate position — use maritime path if available
+          var pos;
+          if (asset._transitPath) {
+            pos = interpolateAlongPath(asset._transitPath, fraction);
+          } else {
+            pos = interpolateGreatCircle(
+              asset.originLat, asset.originLon,
+              asset.destinationLat, asset.destinationLon,
+              fraction
+            );
+          }
           asset.currentLat = pos.lat;
           asset.currentLon = pos.lon;
         }
@@ -902,9 +911,34 @@ function getAssetsAtBase(baseId) {
 
 function calcTransitMinutes(asset, destLat, destLon) {
   if (asset.speed <= 0) return 0; // Cyber/remote — instant
+
+  // NAVY assets use maritime waypoint pathing — path to station point, not land target
+  if (asset.category === 'NAVY') {
+    var stationLat = destLat;
+    var stationLon = destLon;
+    if (asset._stationPoint) {
+      stationLat = asset._stationPoint.lat;
+      stationLon = asset._stationPoint.lon;
+    }
+    var path = findMaritimePath(asset.currentLat, asset.currentLon, stationLat, stationLon);
+    asset._transitPath = path;
+    var dist = calcPathDistance(path);
+    return Math.max(30, Math.round((dist / asset.speed) * 60));
+  }
+
+  // Air/ground assets — straight-line with warzone penalty
   var dist = haversineKm(asset.currentLat, asset.currentLon, destLat, destLon);
-  var hours = dist / asset.speed;
-  return Math.max(30, Math.round(hours * 60)); // Minimum 30 game-minutes
+  var transitMin = Math.max(30, Math.round((dist / asset.speed) * 60));
+
+  // Warzone airspace penalty for non-NAVY assets
+  if (typeof getAtWarCountriesOnRoute === 'function') {
+    var atWar = getAtWarCountriesOnRoute(asset.currentLat, asset.currentLon, destLat, destLon);
+    if (atWar.length > 0) {
+      transitMin = Math.round(transitMin * (1 + 0.10 + Math.random() * 0.05));
+    }
+  }
+
+  return transitMin;
 }
 
 function calcGroupTransitMinutes(assetIds, destLat, destLon) {
@@ -937,13 +971,21 @@ function deployAssets(assetIds, destLat, destLon, opId) {
 
     var transitMin = calcTransitMinutes(asset, destLat, destLon);
 
+    // NAVY assets go to their station point, not the land target
+    var actualDestLat = destLat;
+    var actualDestLon = destLon;
+    if (asset.category === 'NAVY' && asset._stationPoint) {
+      actualDestLat = asset._stationPoint.lat;
+      actualDestLon = asset._stationPoint.lon;
+    }
+
     asset.status = 'IN_TRANSIT';
     asset.assignedOpId = opId;
     asset.currentBaseId = null;
     asset.originLat = asset.currentLat;
     asset.originLon = asset.currentLon;
-    asset.destinationLat = destLat;
-    asset.destinationLon = destLon;
+    asset.destinationLat = actualDestLat;
+    asset.destinationLon = actualDestLon;
     asset.transitStartTotalMinutes = now;
     asset.transitDurationMinutes = transitMin;
   }
@@ -954,6 +996,8 @@ function returnAssetsToBase(assetIds) {
   for (var i = 0; i < assetIds.length; i++) {
     var asset = getAsset(assetIds[i]);
     if (!asset) continue;
+
+    asset._stationPoint = null; // Clear op station point before return path calc
 
     var homeBase = getBase(asset.homeBaseId);
     if (!homeBase) continue;
@@ -971,8 +1015,43 @@ function returnAssetsToBase(assetIds) {
   }
 }
 
+function repositionCSG(assetId, destLat, destLon) {
+  var asset = getAsset(assetId);
+  if (!asset || !asset.isMobileBase) return;
+  if (asset.status !== 'STATIONED') return;
+
+  var transitMin = calcTransitMinutes(asset, destLat, destLon);
+  var now = V.time.totalMinutes;
+
+  asset.status = 'IN_TRANSIT';
+  asset.assignedOpId = null;
+  asset.currentBaseId = null;
+  asset.originLat = asset.currentLat;
+  asset.originLon = asset.currentLon;
+  asset.destinationLat = destLat;
+  asset.destinationLon = destLon;
+  asset.transitStartTotalMinutes = now;
+  asset.transitDurationMinutes = transitMin;
+}
+
 function arriveAsset(asset) {
+  asset._transitPath = null;
+  asset._stationPoint = null;
+
   if (asset.status === 'IN_TRANSIT') {
+    // Mobile base repositioning (CSG without an assigned op)
+    if (asset.isMobileBase && !asset.assignedOpId && !asset.assignedThreatId) {
+      asset.status = 'STATIONED';
+      asset.currentLat = asset.destinationLat;
+      asset.currentLon = asset.destinationLon;
+      asset.currentBaseId = null;
+      asset.originLat = null;
+      asset.originLon = null;
+      asset.destinationLat = null;
+      asset.destinationLon = null;
+      fire('asset:arrived', { asset: asset });
+      return;
+    }
     // Check if this is a collection deployment (assigned to threat, not op)
     if (asset.assignedThreatId && !asset.assignedOpId) {
       asset.status = 'COLLECTING';

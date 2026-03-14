@@ -37,6 +37,20 @@ function generateVigilOptions(op) {
 
   if (eligible.length === 0) return [];
 
+  // Pre-compute naval station points; exclude unreachable naval assets
+  eligible = eligible.filter(function(a) {
+    if (a.category !== 'NAVY') return true;
+    var rangeKm = a.effectiveRangeKm || 1000;
+    var station = typeof findNavalStationPoint === 'function'
+      ? findNavalStationPoint(a.currentLat, a.currentLon, destLat, destLon, rangeKm)
+      : null;
+    if (!station) return false; // Target unreachable from any ocean position within range
+    a._stationPoint = station; // Cache for transit calculation and deployment
+    return true;
+  });
+
+  if (eligible.length === 0) return [];
+
   // Score and sort by relevance (preferred capabilities + distance)
   var scored = eligible.map(function(a) {
     var capScore = 0;
@@ -46,11 +60,14 @@ function generateVigilOptions(op) {
     for (var j = 0; j < required.length; j++) {
       if (a.capabilities.indexOf(required[j]) >= 0) capScore += 20;
     }
-    // Domestic ops: penalize non-domestic-authority assets heavily
-    if (op.domestic && !a.domesticAuthority) {
-      capScore -= 40;
+    // Note: domestic ops use separate sanctioned/covert pools, no penalty needed here
+    // NAVY uses station point path distance; others use straight-line
+    var dist;
+    if (a.category === 'NAVY' && a._stationPoint) {
+      dist = a._stationPoint.pathDistance;
+    } else {
+      dist = haversineKm(a.currentLat, a.currentLon, destLat, destLon);
     }
-    var dist = haversineKm(a.currentLat, a.currentLon, destLat, destLon);
     var distPenalty = Math.min(dist / 500, 20); // closer = better
     return { asset: a, score: capScore - distPenalty, dist: dist };
   });
@@ -59,37 +76,104 @@ function generateVigilOptions(op) {
 
   var options = [];
 
-  // --- Option A: RECOMMENDED — optimal mix ---
-  var optA = buildOption(scored, destLat, destLon, op, opType, 'optimal');
-  if (optA) {
-    optA.label = 'VIGIL RECOMMENDATION';
-    optA.isRecommended = true;
-    options.push(optA);
-  }
+  // --- Domestic ops: generate separate sanctioned vs covert options ---
+  if (op.domestic) {
+    var isIllegal = opType.illegalDomestic;
 
-  // --- Option B: LIGHT — fewer/faster assets ---
-  var optB = buildOption(scored, destLat, destLon, op, opType, 'light');
-  if (optB && !sameAssets(optA, optB)) {
-    optB.label = 'RAPID DEPLOYMENT';
-    optB.isRecommended = false;
-    options.push(optB);
-  }
+    if (!isIllegal) {
+      // Non-illegal domestic ops: offer sanctioned option + covert option
+      var sanctionedPool = scored.filter(function(s) { return s.asset.domesticAuthority; });
+      var covertPool = scored.filter(function(s) { return !s.asset.domesticAuthority; });
 
-  // --- Option C: HEAVY — more force ---
-  var optC = buildOption(scored, destLat, destLon, op, opType, 'heavy');
-  if (optC && !sameAssets(optA, optC) && !sameAssets(optB, optC)) {
-    optC.label = 'OVERWHELMING FORCE';
-    optC.isRecommended = false;
-    options.push(optC);
-  }
+      // Option A: Sanctioned (recommended)
+      if (sanctionedPool.length > 0) {
+        var optSanctioned = buildOption(sanctionedPool, destLat, destLon, op, opType, 'optimal');
+        if (optSanctioned) {
+          optSanctioned.label = 'SANCTIONED RESPONSE';
+          optSanctioned.isRecommended = true;
+          options.push(optSanctioned);
+        }
+      }
 
-  // --- Option D: UNCONVENTIONAL (ISR/cyber only, if applicable) ---
-  if (hasUnconventionalOption(opType)) {
-    var optD = buildOption(scored, destLat, destLon, op, opType, 'unconventional');
-    if (optD && !sameAssets(optA, optD)) {
-      optD.label = 'UNCONVENTIONAL APPROACH';
-      optD.isRecommended = false;
-      options.push(optD);
+      // Option B: Covert military (unsanctioned)
+      if (covertPool.length > 0) {
+        var optCovert = buildOption(covertPool, destLat, destLon, op, opType, 'optimal');
+        if (optCovert) {
+          optCovert.label = 'COVERT MILITARY RESPONSE';
+          optCovert.isRecommended = false;
+          optCovert.consequences = (optCovert.consequences || '') + ' POSSE COMITATUS VIOLATION: Deploying military assets on US soil without authorization. Severe viability impact on failure.';
+          options.push(optCovert);
+        }
+      }
+
+      // Option C: Light sanctioned if we have a sanctioned option
+      if (sanctionedPool.length > 0) {
+        var optLight = buildOption(sanctionedPool, destLat, destLon, op, opType, 'light');
+        if (optLight && !sameAssets(options[0], optLight)) {
+          optLight.label = 'RAPID SANCTIONED RESPONSE';
+          optLight.isRecommended = false;
+          options.push(optLight);
+        }
+      }
+    } else {
+      // Illegal domestic ops: covert military only
+      var covertOnlyPool = scored.filter(function(s) { return !s.asset.domesticAuthority && s.asset.deniability === 'COVERT'; });
+
+      if (covertOnlyPool.length > 0) {
+        var optIllegalA = buildOption(covertOnlyPool, destLat, destLon, op, opType, 'optimal');
+        if (optIllegalA) {
+          optIllegalA.label = 'COVERT OPERATION';
+          optIllegalA.isRecommended = true;
+          optIllegalA.consequences = (optIllegalA.consequences || '') + ' ILLEGAL DOMESTIC OPERATION: This action is unsanctioned on US soil. Extreme viability risk.';
+          options.push(optIllegalA);
+        }
+      }
+
+      if (covertOnlyPool.length > 0) {
+        var optIllegalB = buildOption(covertOnlyPool, destLat, destLon, op, opType, 'light');
+        if (optIllegalB && !sameAssets(options[0], optIllegalB)) {
+          optIllegalB.label = 'MINIMAL FOOTPRINT';
+          optIllegalB.isRecommended = false;
+          optIllegalB.consequences = (optIllegalB.consequences || '') + ' ILLEGAL DOMESTIC OPERATION: This action is unsanctioned on US soil. Extreme viability risk.';
+          options.push(optIllegalB);
+        }
+      }
+    }
+  } else {
+    // --- Foreign ops: standard option generation ---
+
+    // --- Option A: RECOMMENDED — optimal mix ---
+    var optA = buildOption(scored, destLat, destLon, op, opType, 'optimal');
+    if (optA) {
+      optA.label = 'VIGIL RECOMMENDATION';
+      optA.isRecommended = true;
+      options.push(optA);
+    }
+
+    // --- Option B: LIGHT — fewer/faster assets ---
+    var optB = buildOption(scored, destLat, destLon, op, opType, 'light');
+    if (optB && !sameAssets(optA, optB)) {
+      optB.label = 'RAPID DEPLOYMENT';
+      optB.isRecommended = false;
+      options.push(optB);
+    }
+
+    // --- Option C: HEAVY — more force ---
+    var optC = buildOption(scored, destLat, destLon, op, opType, 'heavy');
+    if (optC && !sameAssets(optA, optC) && !sameAssets(optB, optC)) {
+      optC.label = 'OVERWHELMING FORCE';
+      optC.isRecommended = false;
+      options.push(optC);
+    }
+
+    // --- Option D: UNCONVENTIONAL (ISR/cyber only, if applicable) ---
+    if (hasUnconventionalOption(opType)) {
+      var optD = buildOption(scored, destLat, destLon, op, opType, 'unconventional');
+      if (optD && !sameAssets(optA, optD)) {
+        optD.label = 'UNCONVENTIONAL APPROACH';
+        optD.isRecommended = false;
+        options.push(optD);
+      }
     }
   }
 
@@ -265,6 +349,9 @@ function buildOptionDescription(assets, op, transitHours, strategy) {
 
     if (a.speed <= 0) {
       lines.push(a.name + ' — remote operation from ' + baseName + ', ' + baseLocation);
+    } else if (a.category === 'NAVY' && a._stationPoint) {
+      var wpName = a._stationPoint.waypointId.replace(/_/g, ' ');
+      lines.push(a.name + ' from ' + baseName + ', ' + baseLocation + ' → station near ' + wpName + ' (' + Math.round(a._stationPoint.distToTarget) + 'km from target, ETA: ' + formatTransitTime(transit) + ')');
     } else {
       lines.push(a.name + ' from ' + baseName + ', ' + baseLocation + ' (ETA: ' + formatTransitTime(transit) + ')');
     }
@@ -296,7 +383,6 @@ function buildConsequences(op, strategy, riskLevel) {
 
   if (strategy === 'heavy') {
     consequences.push('High visibility in ' + theaterName + '. Theater risk may increase.');
-    consequences.push('Significant budget expenditure required.');
   } else if (strategy === 'light') {
     consequences.push('Lower footprint. Reduced chance of collateral escalation.');
     consequences.push('Fewer assets committed — higher risk of operational failure.');
@@ -337,6 +423,53 @@ function sameAssets(optA, optB) {
     if (sorted1[i] !== sorted2[i]) return false;
   }
   return true;
+}
+
+// --- Recalculate for Custom Force Configuration ---
+
+function recalcCustomOption(op, assetIds) {
+  var opType = getOperationType(op.operationType);
+  var assets = getAssetsByIds(assetIds);
+  if (!opType || assets.length === 0) {
+    return { confidencePercent: 0, riskLevel: 'CRITICAL', transitMinutes: 0 };
+  }
+
+  var destLat = op.geo.lat;
+  var destLon = op.geo.lon;
+
+  // Pre-compute station points for NAVY assets in custom selection
+  for (var n = 0; n < assets.length; n++) {
+    if (assets[n].category === 'NAVY' && !assets[n]._stationPoint) {
+      var rangeKm = assets[n].effectiveRangeKm || 1000;
+      if (typeof findNavalStationPoint === 'function') {
+        assets[n]._stationPoint = findNavalStationPoint(assets[n].currentLat, assets[n].currentLon, destLat, destLon, rangeKm);
+      }
+    }
+  }
+
+  var transitMinutes = calcGroupTransitMinutes(assetIds, destLat, destLon);
+  var transitHours = transitMinutes / 60;
+
+  // Check capability coverage
+  var allCovered = true;
+  for (var r = 0; r < opType.requiredCapabilities.length; r++) {
+    var found = false;
+    for (var s = 0; s < assets.length; s++) {
+      if (assets[s].capabilities.indexOf(opType.requiredCapabilities[r]) >= 0) {
+        found = true; break;
+      }
+    }
+    if (!found) { allCovered = false; break; }
+  }
+
+  var riskLevel = calcOptionRisk(assets, transitHours, op.threatLevel, allCovered, 'optimal');
+  var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered, 'optimal');
+
+  return {
+    confidencePercent: confidencePercent,
+    riskLevel: riskLevel,
+    transitMinutes: transitMinutes,
+  };
 }
 
 function hasUnconventionalOption(opType) {

@@ -16,6 +16,7 @@ var OPERATION_TYPES = {
     preferredCapabilities: ['STRIKE', 'ISR'],
     execHoursRange: [4, 12],
     baseSuccessRate: 70,
+    illegalDomestic: true,
   },
   SOF_RAID: {
     id: 'SOF_RAID', label: 'Special Operations Raid', shortLabel: 'SOF RAID',
@@ -23,6 +24,7 @@ var OPERATION_TYPES = {
     preferredCapabilities: ['SOF', 'ISR', 'INTEL'],
     execHoursRange: [2, 8],
     baseSuccessRate: 65,
+    illegalDomestic: true,
   },
   SURVEILLANCE: {
     id: 'SURVEILLANCE', label: 'Surveillance Operation', shortLabel: 'SURV',
@@ -79,6 +81,7 @@ var OPERATION_TYPES = {
     preferredCapabilities: ['ISR', 'STRIKE'],
     execHoursRange: [1, 4],
     baseSuccessRate: 85,
+    illegalDomestic: true,
   },
   // --- HVT / Hostage Operation Types ---
   HVT_ELIMINATION: {
@@ -87,6 +90,7 @@ var OPERATION_TYPES = {
     preferredCapabilities: ['SOF', 'STRIKE', 'ISR', 'INTEL'],
     execHoursRange: [1, 6],
     baseSuccessRate: 60,
+    illegalDomestic: true,
   },
   HVT_CAPTURE: {
     id: 'HVT_CAPTURE', label: 'HVT Capture Operation', shortLabel: 'HVT CAP',
@@ -108,6 +112,7 @@ var OPERATION_TYPES = {
     preferredCapabilities: ['STRIKE', 'SOF', 'ISR', 'INTEL'],
     execHoursRange: [1, 4],
     baseSuccessRate: 70,
+    illegalDomestic: true,
   },
   ASSET_EXTRACTION: {
     id: 'ASSET_EXTRACTION', label: 'Asset Extraction', shortLabel: 'EXTRACT',
@@ -223,6 +228,23 @@ var THREAT_INTEL_FIELDS = {
     { key: 'ESCALATION_POSTURE', label: 'Weaponization Timeline',      difficulty: 'VERY_HARD', source: 'HUMINT' },
   ],
 
+  // === MILITARY / STRATEGIC TARGETS ===
+  MILITARY_TARGET: [
+    { key: 'FORCE_DISPOSITION', label: 'Force Disposition',             difficulty: 'EASY',      source: 'IMAGERY' },
+    { key: 'DEFENSIVE_POSITIONS', label: 'Defensive Positions',         difficulty: 'EASY',      source: 'ISR' },
+    { key: 'AIR_DEFENSE_POSTURE', label: 'Air Defenses',               difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'COMMAND_STRUCTURE', label: 'Command Structure',             difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'SUPPLY_LINES',     label: 'Supply Lines',                   difficulty: 'HARD',      source: 'ISR' },
+    { key: 'REINFORCEMENT_ROUTES', label: 'Reinforcement Routes',      difficulty: 'HARD',      source: 'IMAGERY' },
+  ],
+  STRATEGIC_TARGET: [
+    { key: 'FACILITY_ID',      label: 'Facility Type',                  difficulty: 'EASY',      source: 'IMAGERY' },
+    { key: 'DEFENSIVE_PERIMETER', label: 'Defensive Perimeter',        difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'PERSONNEL_COUNT',  label: 'Personnel Count',                difficulty: 'MEDIUM',    source: 'IMAGERY' },
+    { key: 'OUTPUT_CAPACITY',  label: 'Output Capacity',                difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'HARDENING_LEVEL',  label: 'Hardening Level',                difficulty: 'HARD',      source: 'IMAGERY' },
+    { key: 'COLLATERAL_RISK',  label: 'Collateral Assessment',          difficulty: 'VERY_HARD', source: 'ISR' },
+  ],
   // === HOSTAGE / HVT / ASSET THREAT TYPES ===
   HOSTAGE_CRISIS: [
     { key: 'HOSTAGE_LOCATION',    label: 'Hostage Location',               difficulty: 'EASY',      source: 'SIGINT' },
