@@ -95,6 +95,9 @@ var SOF_BREACH_DETAIL = [
   'Simultaneous breach — front and rear. Both charges detonated within 50ms of each other. Total surprise achieved.',
   'Silent breach — hydraulic ram on the door frame. Hinges popped without a sound. Team entered on NODs.',
   'Charge on the wall itself — created a new entry point where none existed. Team poured through the ragged opening.',
+  'Mechanical breach — halligan bar jammed into the doorframe. Two sharp blows. Door split off the hinges. Flashbang in, team in.',
+  'Thermite charge on the reinforced door. Metal glowed orange, sagged. Team kicked through the weakened frame. Smoke boiling.',
+  'Window entry — operators fast-roped onto the balcony, smashed through floor-to-ceiling glass. Inside in under two seconds.',
 ];
 
 var SOF_ROOM_CLEAR = [
@@ -104,6 +107,47 @@ var SOF_ROOM_CLEAR = [
   'Stairwell. Fragmentation grenade from above. Team pulled back. Waited. Grenade detonated on empty landing. Team surged up the stairs, clearing by sectors.',
   'Second floor. Three rooms. First — empty. Second — non-combatant, flex-cuffed and moved to collection point. Third — hostile with suicide vest. Precision headshot from 4m.',
   'Long corridor with no cover. Operator laid suppressive fire while number two flanked through an adjacent room. Caught the hostile in crossfire.',
+  'Bedroom — door slightly ajar. Point man pushed it with his boot. Hostile behind the bed, PKM braced on the mattress. Burst of fire shredded the door frame. Team pulled back, tossed a frag. Detonation. Silence. Entered. Hostile KIA, weapon destroyed.',
+  'Storage room. Empty on visual sweep. Operator heard breathing behind stacked crates. IR laser found the man crouched with an AK pointed at the door. Two suppressed rounds from the HK416 before he could pull the trigger.',
+  'Bathroom. Hostile tried to barricade the door. Operator shouldered it open — the man stumbled backward into the tub. Sidearm drawn, two rounds. Threat down. Checked his hands — no dead man\'s switch. Clear.',
+  'Open courtyard. Three hostiles caught in the open, scrambling for weapons stacked against the far wall. Sniper from overwatch dropped the first. Assault team engaged the other two from the doorway — four rounds, both down. "Courtyard clear."',
+  'Back room. Helmet cam caught the muzzle flash before the sound registered — rounds snapping past the point man\'s head. He dropped to a knee, returned fire. His IR laser found the hostile\'s chest. Three rounds. Hostile slid down the wall.',
+  'Main hallway. Two hostiles appeared from a side door, AKs up. Point man dropped the first with a controlled pair to the head. Number two engaged the second — three rounds center mass, hostile stumbled back through the doorway. Team advanced past the bodies, weapons still smoking.',
+  'Second floor landing. Hostile leaned over the railing with an RPG. Sniper saw it first — "RPG, second floor!" — single round through the man\'s shoulder. RPG clattered to the ground unfired. Follow-up shot from the assault team as they crested the stairs.',
+  'Side room. Door was booby-trapped — tripwire visible on NODs. Breacher cut the wire, team entered through the window instead. One hostile inside, back turned, talking on a radio. Operator grabbed his collar, pulled him to the ground. Flex-cuffed. Radio seized.',
+  'Narrow stairway to the roof. Blood trail on the steps — wounded hostile had crawled up. Found him on the landing, pistol in hand, trying to aim through the pain. Operator kicked the weapon away. Medic applied a tourniquet. Detained.',
+  'Ground floor corridor. Team stacked on a T-intersection. Point man used a mirror — two hostiles with RPKs covering the hallway. Frag grenade around the corner. Explosion. Team flowed in. Both hostiles down, one still moving. Controlled pair. "Intersection clear."',
+];
+
+// --- Extended Combat Sequences (multi-step engagement narratives) ---
+
+var SOF_GROUND_FLOOR_CLEAR = [
+  'Ground floor: team split into two elements. Alpha took the east wing — first room empty, overturned furniture, radio still warm. Bravo pushed west, stacking on a closed metal door. Banging from inside. Breacher set a charge. "Breaching." Door blew. Two hostiles behind a flipped table — one firing blind over the top. Alpha-1 put two rounds through the table surface. Second hostile threw his weapon and put his hands up.',
+  'Ground floor was a maze of narrow corridors. Point man moved in a combat glide, muzzle tracking every doorway. First contact — hostile stepped into the hall carrying an ammunition can. Didn\'t even see the team. Two suppressed rounds. He went down without a sound. Team stepped over the body and pushed forward.',
+  'Ground floor. Kitchen was the first room off the hallway. Point man sliced the pie on the doorframe — hostile sitting at a table, disassembling a phone. He looked up. Saw the IR laser on his chest. Raised his hands. Flex-cuffed in three seconds. Team pushed to the next room.',
+  'Main entrance hall. Overhead light swinging from the breach detonation. Glass crunching underfoot. Two hostiles ran from a back room, one carrying documents. Lead operator shouted the challenge word. No response. Both men raised weapons. Four rounds from two shooters. Both hostile down. Documents scattered across the floor — SSE team would collect later.',
+];
+
+var SOF_UPPER_FLOOR_CLEAR = [
+  'Second floor. The stairwell was the funnel — worst part of any assault. Point man held a ballistic shield. Rounds pinging off the steel as he climbed. Number two fired past his shoulder, suppressed. Hostile at the top of the stairs took two rounds and fell backward. Team surged over the body and split left and right.',
+  'Upper floor. First door — locked from inside. Flashbang through the gap above the door frame. BANG. Kick. Two hostiles, ears bleeding, stumbling. Near man got two rounds before he could orient. Far man tripped over a chair trying to reach his rifle. Operator closed the distance and put him on the ground. Flex-cuffed.',
+  'Top floor. Helmet cam showed the hallway stretching out in green-tinted NOD vision. IR lasers criss-crossing the walls. Sound of someone racking a bolt. Team froze. Point man located the sound — last door on the left. Grenade. Wait. BOOM. Entry. One hostile KIA, slumped against the wall with an SVD sniper rifle across his lap.',
+  'Second floor corridor. A burst of automatic fire raked the doorway as the team entered. Plaster and splinters everywhere. Point man pulled back — round had creased his plate carrier. Number two went low, leaned around the corner, and fired three rounds under a table where the hostile was crouched. Hits confirmed. Team moved up.',
+  'Third floor. Two rooms remaining. First: blood on the floor, drag marks leading to the window. Hostile had jumped — overwatch reported a body in the alley below. Second room: reinforced door. Strip charge. Breach. Inside: communications equipment, maps, a cot. Recently occupied. Cigarette still burning in an ashtray. But the room was empty.',
+];
+
+var SOF_FINAL_CONTACT = [
+  'Last room. Door was heavier than the others — steel-reinforced. Breacher used a double charge. The blast rattled the whole building. First man in. Movement behind an overturned desk. IR laser found a hand reaching for a pistol. "DON\'T. HANDS." The hand froze. Target pulled from behind the desk. Positive ID confirmed under white light.',
+  'Master bedroom at the end of the hall. Two hostiles guarding the door — one with an AK, one with a chest rig full of magazines. Team engaged simultaneously. Point man dropped the AK-holder with a headshot. Number two put three rounds into the chest rig. Both down. Door breached. Inside: the target, alone, sitting on the bed. No weapon. No resistance.',
+  'Final room. A hostile burst through the door before the team reached it — spraying AK fire wildly down the corridor. Rounds stitched across the ceiling. Point man dropped to prone and fired upward — two rounds caught the hostile in the pelvis. He crumpled. Team advanced. Through the door. Target was in the corner, hands visible, shaking.',
+  'End of the corridor. The target\'s bodyguard made a stand in the doorway — emptied an entire magazine down the hall. Team pressed against the walls. Return fire. Bodyguard took four rounds and went down hard. Team entered over the body. Target was in the bathroom. Mirror showed his reflection — he was trying to flush a phone. Operator grabbed his arm. Target secured.',
+];
+
+var SOF_SNIPER_ENGAGEMENT = [
+  '"Overwatch, I have a squirter — one pax east side, moving to a vehicle." "Roger, tracking." Pause. "He\'s got a weapon. Engaging." Single crack of the .300 Win Mag. "Target down. No movement."',
+  'Sniper team reported movement on the compound roof. One hostile setting up an RPG aimed at the assault element\'s approach route. "Taking the shot." Suppressed .308 — impact confirmed. RPG tumbled off the roof unfired.',
+  '"All stations, be advised — I have three pax exiting the south gate on foot, moving fast. Appear to be unarmed but one is carrying a bag." "Can you interdict?" "Negative, they\'re in civilian traffic." "Track only, do not engage." Ground team dispatched to intercept.',
+  '"Overwatch to assault lead. You have two hostiles one room ahead of your position, both armed, facing the door. Recommend breach from the adjacent window." "Copy, rerouting." The sniper\'s thermal view guided the team around a fatal funnel they never saw.',
 ];
 
 var SOF_COMMS = [
@@ -128,6 +172,10 @@ var SOF_FAILURE_DETAIL = [
   'Hostile reinforcements arrived from an adjacent building — estimated squad-sized element. Team was outnumbered 3-to-1.',
   'RPG impacted the wall above the team\'s position. Debris injuries to two operators. Team leader called immediate withdrawal.',
   'Target escaped through a pre-prepared tunnel system. By the time the team located the exit, the target had a 20-minute head start.',
+  'First room was rigged. Tripwire on the doorframe — breacher caught it at the last second but the blast blew out the interior wall. Two operators down with concussion injuries. Building structurally compromised.',
+  'Heavy PKM fire from a prepared fighting position at the top of the stairs. Rounds punching through the plaster walls. Team couldn\'t advance. Called for gun support but the helicopter couldn\'t get a firing solution without risking the hostage.',
+  'Hostile threw a thermite grenade into the server room before the team could reach it. Critical intelligence — hard drives, phones, documents — destroyed in seconds. The room was an inferno by the time operators got there.',
+  'Ambush. The compound was a trap. Team entered through the breach point and immediately took fire from three directions. Prepared positions with interlocking fields of fire. The whole thing was a setup.',
 ];
 
 var DOMESTIC_LOCATIONS = [
@@ -396,26 +444,62 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
   entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(0, 5)), type: 'normal', text: 'Assault element in final assault position. Snipers in overwatch — ' + randInt(2, 4) + ' positions covering all egress routes. "All stations, I have control. Stand by... stand by..."' });
 
   if (success) {
-    // --- Climax: successful breach and clear ---
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 10)), type: 'critical', text: '"EXECUTE EXECUTE EXECUTE." ' + pick(SOF_BREACH_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(10, 12)), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 15)), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(15, 18)), type: 'critical', text: '"All stations, JACKPOT. I say again, JACKPOT." Target ' + (v.targetAlias || 'HVT') + ' positively identified and ' + pick(['secured', 'neutralized', 'detained']) + '. ' + randInt(3, 7) + ' hostile KIA. ' + randInt(0, 3) + ' detained.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 22)), type: 'normal', text: 'Compound secured. All rooms cleared. Team accounting: all ' + teamSize + ' operators present and accounted for. ' + randInt(0, 2) + ' minor injuries — shrapnel and abrasions.' });
+    // --- Climax: successful breach and clear (expanded room-by-room) ---
+    var kia = 0;
+    var detained = 0;
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 8)), type: 'critical', text: '"EXECUTE EXECUTE EXECUTE." ' + pick(SOF_BREACH_DETAIL) });
+
+    // Ground floor fighting
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(8, 9)), type: 'critical', text: pick(SOF_GROUND_FLOOR_CLEAR) });
+    kia += randInt(1, 3);
+
+    // Room-by-room clearing
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(9, 11)), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
+    kia += randInt(1, 2);
+
+    // Sniper engagement during assault
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(11, 12)), type: 'critical', text: pick(SOF_SNIPER_ENGAGEMENT) });
+    kia += 1;
+
+    // Upper floor push
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 14)), type: 'critical', text: pick(SOF_UPPER_FLOOR_CLEAR) });
+    kia += randInt(1, 2);
+
+    // Additional contact
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(14, 16)), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
+
+    // Final target contact
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(16, 18)), type: 'critical', text: pick(SOF_FINAL_CONTACT) });
+    detained += randInt(0, 2);
+
+    // JACKPOT call
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 20)), type: 'critical', text: '"All stations, JACKPOT. I say again, JACKPOT." Target ' + (v.targetAlias || 'HVT') + ' positively identified and ' + pick(['secured', 'neutralized', 'detained']) + '. ' + kia + ' hostile KIA. ' + detained + ' detained.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(20, 24)), type: 'normal', text: 'Compound secured. All rooms cleared. Helmet cams reviewed — every engagement accounted for. Team accounting: all ' + teamSize + ' operators present. ' + randInt(0, 2) + ' minor injuries — shrapnel and abrasions treated on site.' });
 
     // --- SSE ---
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(22, 30)), type: 'normal', text: pick(SOF_SSE) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(24, 30)), type: 'normal', text: pick(SOF_SSE) });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(30, 40)), type: 'normal', text: 'SSE complete. Total time on objective: ' + randInt(25, 45) + ' minutes. All items catalogued and packaged for transport. Demolition charges set on remaining weapons cache.' });
 
     // --- Extract ---
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(40, 55)), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. ' + (v.targetAlias || 'HVT') + ' secured aboard extract aircraft. Zero friendly KIA.' });
   } else {
-    // --- Climax: compromised assault ---
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 10)), type: 'critical', text: '"EXECUTE EXECUTE EXECUTE." ' + pick(SOF_BREACH_DETAIL) });
+    // --- Climax: compromised assault (expanded with combat detail) ---
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 8)), type: 'critical', text: '"EXECUTE EXECUTE EXECUTE." ' + pick(SOF_BREACH_DETAIL) });
+
+    // Initial contact — things seem normal
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(8, 10)), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
+
+    // Then it goes wrong
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(10, 12)), type: 'critical', text: pick(SOF_FAILURE_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 16)), type: 'failure', text: pick(SOF_ROOM_CLEAR) + ' But ' + pick(DEBRIEF_COMPROMISE) + '. Compound alarm triggered. Hostile QRF mobilizing from ' + randInt(2, 5) + ' blocks away.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(16, 20)), type: 'failure', text: 'Target ' + (v.targetAlias || 'HVT') + ' not located in expected position. Intelligence indicated room ' + pick(['2A', '3B', '1C', 'ground floor east']) + ' — room was empty. ' + pick(['Evidence of recent occupation — warm tea, still-lit cigarette', 'Bed unmade, personal effects removed', 'Room had been stripped clean within the last hour']) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(20, 25)), type: 'normal', text: 'Team leader: "We\'re dry on the objective. Calling abort." ' + randInt(1, 3) + ' WIA — ' + pick(['gunshot wound to the leg, non-life-threatening', 'fragmentation injuries from improvised explosive', 'blast concussion from RPG near-miss']) + '. Medic applying treatment under fire.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 14)), type: 'failure', text: pick(SOF_ROOM_CLEAR) + ' But ' + pick(DEBRIEF_COMPROMISE) + '. Compound alarm triggered. Hostile QRF mobilizing from ' + randInt(2, 5) + ' blocks away.' });
+
+    // Target not found
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(14, 18)), type: 'failure', text: 'Target ' + (v.targetAlias || 'HVT') + ' not located in expected position. Intelligence indicated room ' + pick(['2A', '3B', '1C', 'ground floor east']) + ' — room was empty. ' + pick(['Evidence of recent occupation — warm tea, still-lit cigarette', 'Bed unmade, personal effects removed', 'Room had been stripped clean within the last hour']) + '.' });
+
+    // Continued fighting during withdrawal
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 22)), type: 'failure', text: pick(SOF_SNIPER_ENGAGEMENT) + ' But hostiles are massing at the compound perimeter. Muzzle flashes from adjacent rooftops.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(22, 25)), type: 'normal', text: 'Team leader: "We\'re dry on the objective. Calling abort." ' + randInt(1, 3) + ' WIA — ' + pick(['gunshot wound to the leg, non-life-threatening', 'fragmentation injuries from improvised explosive', 'blast concussion from RPG near-miss']) + '. Medic applying treatment under fire.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(25, 35)), type: 'normal', text: 'Emergency extraction. Gun runs by escort helicopters suppressed hostile reinforcements. Team extracted under fire. All wounded stable.' });
   }
 
@@ -537,17 +621,20 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function(op, v, success) {
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"GREEN GREEN GREEN." Simultaneous breach on all entry points. Flashbangs deployed. ' + pick(SOF_BREACH_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'First room: ' + randInt(2, 4) + ' captors engaged. All neutralized in under ' + randInt(3, 8) + ' seconds. Hostages on the floor — screaming but alive. "FRIENDLIES, STAY DOWN."' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Entry hall. Two captors scrambled for weapons. Point man\'s IR laser found the first — double tap, center mass. He dropped. Second hostile raised an AK. Number two operator put three rounds through his chest before the muzzle came level. "FRIENDLIES, STAY DOWN." Screaming from the hostages on the floor.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' Clearing toward hostage holding area.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: 'Hostage room breached. ' + randInt(2, 4) + ' captors guarding hostages — one reached for a detonator. Sniper took the shot through the window simultaneously with the breach team entry. All captors down. All ' + hostageCount + ' hostages recovered alive.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'normal', text: '"Precious cargo secure. ' + hostageCount + ' souls, all breathing." Hostages evacuated to casualty collection point. ' + randInt(0, 3) + ' minor injuries — shock and minor abrasions. No life-threatening conditions.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: 'Building secured. ' + randInt(4, 8) + ' hostile KIA. ' + randInt(0, 2) + ' captured alive. EOD team cleared ' + randInt(1, 3) + ' IEDs that had been rigged to the hostage room — the captors were prepared to kill the hostages.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: pick(SOF_SNIPER_ENGAGEMENT) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: 'Hostage room. Helmet cam showed the door — reinforced, barricaded from inside. Breacher placed a water charge to minimize fragmentation. BANG. Door blew in. ' + randInt(2, 4) + ' captors guarding hostages — one reached for a detonator on the table. Sniper took the shot through the window simultaneously with the breach team entry. Round caught the man\'s hand. Detonator skittered across the floor. Operators engaged the remaining captors — controlled pairs, all targets down in under two seconds. All ' + hostageCount + ' hostages recovered alive.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 6), type: 'normal', text: '"Precious cargo secure. ' + hostageCount + ' souls, all breathing." Hostages evacuated to casualty collection point. ' + randInt(0, 3) + ' minor injuries — shock and minor abrasions. No life-threatening conditions.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: 'Building secured. ' + randInt(4, 8) + ' hostile KIA. ' + randInt(0, 2) + ' captured alive. EOD team cleared ' + randInt(1, 3) + ' IEDs that had been rigged to the hostage room — the captors were prepared to kill the hostages if the rescue took ten seconds longer.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. Hostages transferred to medical facility. All operators accounted for — zero friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"GREEN GREEN GREEN." Breach initiated. ' + pick(SOF_BREACH_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Immediate heavy contact in the entry hallway. ' + pick(DEBRIEF_COMPROMISE) + '. Captors were alerted.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'failure', text: 'Explosion in the hostage holding area. Captors detonated a prepared charge. Assault team fought through to the room — ' + randInt(1, Math.max(1, Math.floor(hostageCount / 3))) + ' hostages killed, ' + randInt(1, 3) + ' critically wounded. Remaining hostages recovered alive with injuries.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 8), type: 'normal', text: 'Building secured. All captors neutralized. ' + randInt(1, 2) + ' operators WIA. Emergency medical evacuation for wounded hostages and team members. Multiple ambulances on scene.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Immediate heavy contact in the entry hallway. PKM fire from a prepared position shredded the doorframe. Point man took fragments to the plate carrier — knocked back but functional. Team returned fire, suppressed. ' + pick(DEBRIEF_COMPROMISE) + '. Captors were alerted.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' But the clock was running — captors knew the team was inside.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'failure', text: 'Explosion in the hostage holding area. Captors detonated a prepared charge. The blast wave knocked the assault team flat in the corridor. Ears ringing, dust everywhere. Team fought through to the room — ' + randInt(1, Math.max(1, Math.floor(hostageCount / 3))) + ' hostages killed, ' + randInt(1, 3) + ' critically wounded. Remaining hostages recovered alive with injuries.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'critical', text: 'Remaining captors engaged in a last stand from a back room. ' + pick(SOF_ROOM_CLEAR) + ' All captors neutralized.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 8), type: 'normal', text: 'Building secured. ' + randInt(1, 2) + ' operators WIA. Emergency medical evacuation for wounded hostages and team members. Multiple ambulances on scene.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Scene secured. Evidence preservation underway. Casualty notification process initiated for hostage fatalities.' });
   }
 
@@ -575,13 +662,17 @@ DEBRIEF_GENERATORS.COUNTER_TERROR = function(op, v, success) {
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"All stations: execute." Simultaneous raids across ' + raidLocations + ' locations. Doors breached at ' + String(raidLocations) + ' sites within a 30-second window.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'critical', text: 'Location Alpha: ' + randInt(2, 4) + ' suspects detained without resistance. Location Bravo: brief firefight — ' + randInt(1, 3) + ' hostile KIA. Location Charlie: ' + randInt(1, 3) + ' suspects surrendered upon seeing the assault team.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'All locations secured. ' + randInt(4, 10) + ' total suspects detained. ' + v.orgName + ' cell leadership — including the attack planner — in custody.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' ' + randInt(2, 4) + ' suspects inside — one dove for a weapon under the mattress. Operator pinned his arm, kicked the pistol away. All suspects flex-cuffed face-down.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: 'Location Bravo: hostile opened fire through the door as the team stacked. Rounds punching through the wood. Team pulled offline. Flashbang through the window. Re-entry. ' + randInt(1, 3) + ' hostile KIA. One suspect hiding in a closet — dragged out and detained.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'critical', text: 'Location Charlie: ' + randInt(1, 3) + ' suspects surrendered immediately upon seeing the assault team. Hands up before the first operator was fully through the door. Apartment full of bombmaking materials — wires, detonators, bags of ammonium nitrate.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'All locations secured. ' + randInt(6, 12) + ' total suspects detained. ' + v.orgName + ' cell leadership — including the attack planner — in custody. Helmet cam footage captured everything for prosecution.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Attack materiel recovered: ' + pick(DEBRIEF_EVIDENCE) + '. EOD team rendered safe ' + randInt(1, 4) + ' IEDs found ready for deployment. Planned attack disrupted prior to execution.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(3), type: 'normal', text: 'All detained subjects transferred to secure facility for interrogation. Initial interrogation producing intelligence on wider ' + v.orgName + ' network. No civilian casualties. No friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"All stations: execute." Raids initiated simultaneously. However, ' + pick(DEBRIEF_COMPROMISE) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: 'Location Alpha: premises empty — recently vacated. Warm food on the table, electronics wiped. Location Bravo: ' + randInt(1, 2) + ' low-level operatives detained. Cell leadership not present at any target location.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' Premises empty — recently vacated. Warm food on the table, electronics wiped. Smell of soldering flux — bombmaking happened here.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: 'Location Bravo: brief contact. ' + randInt(1, 2) + ' low-level operatives detained after a scuffle in the stairwell. One tried to swallow a SIM card. Cell leadership not present at any target location.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'failure', text: 'Location Charlie: door was booby-trapped. Breacher detected the tripwire — EOD called in. By the time the room was cleared, any occupants were long gone. Back window open, fire escape ladder deployed.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'normal', text: 'Sweep of all target locations complete. Only ' + randInt(1, 3) + ' of ' + cellSize + ' cell members apprehended. Core network — including the attack planner — has dispersed. Attack materiel not recovered.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: v.orgName + ' posted a statement on encrypted channels claiming credit for evading the operation. Attack timeline may have been accelerated or redirected to alternate target.' });
   }
@@ -705,15 +796,21 @@ DEBRIEF_GENERATORS.HVT_ELIMINATION = function(op, v, success) {
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." ' + pick(SOF_BREACH_DETAIL) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: pick(SOF_GROUND_FLOOR_CLEAR) });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: 'Target room. ' + (v.targetAlias || 'HVT') + ' identified. Target reached for a weapon. ' + randInt(2, 4) + ' rounds center mass. Target down. "JACKPOT is EKIA." Biometric confirmation initiated — fingerprints and facial match: positive.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'normal', text: pick(SOF_SSE) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 25), type: 'normal', text: 'SSE complete. Compound secured. ' + randInt(3, 7) + ' hostile KIA total. ' + randInt(0, 3) + ' detained. All team members accounted for.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: pick(SOF_SNIPER_ENGAGEMENT) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: pick(SOF_UPPER_FLOOR_CLEAR) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 6), type: 'critical', text: 'Target room. ' + (v.targetAlias || 'HVT') + ' identified by the IR strobe on the helmet cam. Target reached for a weapon under the desk. Point man didn\'t hesitate — ' + randInt(2, 4) + ' rounds center mass. Target slumped forward. "JACKPOT is EKIA." Biometric confirmation initiated — fingerprints and facial match: positive.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 12), type: 'normal', text: pick(SOF_SSE) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 25), type: 'normal', text: 'SSE complete. Compound secured. ' + randInt(5, 9) + ' hostile KIA total. ' + randInt(0, 3) + ' detained. All team members accounted for.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. ' + (v.targetAlias || 'HVT') + '\'s remains recovered for DNA confirmation. Zero friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." ' + pick(SOF_BREACH_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'failure', text: pick(SOF_FAILURE_DETAIL) + ' ' + (v.targetAlias || 'HVT') + ' not found at expected location within the compound.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'failure', text: pick(SOF_FAILURE_DETAIL) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: pick(SOF_ROOM_CLEAR) + ' But the compound is emptying. ' + (v.targetAlias || 'HVT') + ' not found at expected location.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 8), type: 'failure', text: 'Full compound sweep complete. ' + (v.targetAlias || 'HVT') + ' is not present. Evidence suggests departure via ' + pick(['underground tunnel system', 'concealed vehicle exit', 'rooftop escape to adjacent building']) + ' within minutes of team arrival. Security was tighter than intelligence predicted.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 12), type: 'normal', text: pick(SOF_SNIPER_ENGAGEMENT) + ' Hostile reinforcements arriving from the east.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'Emergency extraction. ' + randInt(1, 3) + ' operators WIA. ' + pick(DEBRIEF_EXFIL) + '. Target remains at large.' });
   }
 
@@ -739,13 +836,18 @@ DEBRIEF_GENERATORS.HVT_CAPTURE = function(op, v, success) {
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." CS gas deployed into target structure via windows. ' + pick(SOF_BREACH_DETAIL) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_GROUND_FLOOR_CLEAR) + ' Operators calling targets before engaging — priority is keeping the principal alive.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' Non-lethal protocols observed where possible.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 6), type: 'critical', text: (v.targetAlias || 'HVT') + ' located in ' + pick(['a locked interior room', 'attempting to destroy documents', 'hiding in a concealed space behind a bookshelf']) + '. Target detained without lethal force. Flex-cuffed, hooded, and moved to collection point. "PRECIOUS CARGO SECURE."' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: pick(SOF_UPPER_FLOOR_CLEAR) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 6), type: 'critical', text: (v.targetAlias || 'HVT') + ' located in ' + pick(['a locked interior room — could hear coughing from the CS gas', 'attempting to destroy documents — shredder jammed, papers half-fed', 'hiding in a concealed space behind a bookshelf — thermal signature gave him away']) + '. Target detained without lethal force. Flex-cuffed, hooded, and moved to collection point. "PRECIOUS CARGO SECURE."' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: pick(SOF_SSE) });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: (v.targetAlias || 'HVT') + ' transported to secure interrogation facility via ' + pick(['helicopter', 'armored vehicle convoy', 'fixed-wing aircraft']) + '. Initial health screening complete — no injuries. Zero friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." ' + pick(SOF_BREACH_DETAIL) + ' Target structure more fortified than intelligence indicated.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: (v.targetAlias || 'HVT') + ' barricaded in an interior room. Bodyguards engaged the assault team. During the firefight, target ' + pick(['ingested a cyanide capsule — team medic unable to revive', 'was caught in crossfire — GSW to the chest, pronounced dead on scene', 'escaped through a concealed exit before the room was breached']) + '.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: pick(SOF_FAILURE_DETAIL) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: (v.targetAlias || 'HVT') + ' barricaded in an interior room. Bodyguards engaged the assault team — helmet cam showed muzzle flashes from two positions. During the firefight, target ' + pick(['ingested a cyanide capsule — team medic unable to revive', 'was caught in crossfire — GSW to the chest, pronounced dead on scene', 'escaped through a concealed exit before the room was breached']) + '.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'normal', text: pick(SOF_SNIPER_ENGAGEMENT) });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: 'Compound secured. ' + randInt(2, 5) + ' hostile KIA, ' + randInt(0, 3) + ' detained. ' + (v.targetAlias || 'HVT') + ' ' + pick(['confirmed dead — intelligence value lost', 'at large — all checkpoints alerted', 'critically wounded — medevac attempted but DOA at field hospital']) + '.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. Mission objective — live capture — not achieved.' });
   }
@@ -834,15 +936,20 @@ DEBRIEF_GENERATORS.DOMESTIC_HOSTAGE_RESCUE = function(op, v, success) {
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Green light. Execute." Simultaneous entry — ' + pick(SOF_BREACH_DETAIL) + ' CS gas deployed through ventilation system to disorient captors.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' Operators moving toward hostage location.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: 'Hostage room breached. ' + randInt(2, 5) + ' captors neutralized. All ' + hostageCount + ' hostages recovered alive. One captor attempted to detonate a vest — tackled by an operator before activation. "ALL CLEAR. PRECIOUS CARGO SECURE."' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'normal', text: 'Hostages evacuated to triage. ' + randInt(0, 3) + ' minor injuries — stress reactions and abrasions. No life-threatening conditions. All team members accounted for.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Scene secured and turned over to FBI Evidence Response Team. ' + randInt(1, 3) + ' surviving ' + v.orgName + ' members in federal custody. Media briefing coordinated with DOJ public affairs.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Lobby area. Two captors coughing from the gas, weapons lowered. Lead operator rushed the nearest — controlled the rifle barrel, drove him into the wall. Flex-cuffed in seconds. Second captor raised his hands, choking. Detained.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' Operators advancing toward hostage location.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: pick(SOF_SNIPER_ENGAGEMENT) });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: 'Hostage room. Reinforced door. Breacher placed a shaped water charge to avoid fragmentation toward hostages. BANG. Door flew in. ' + randInt(2, 5) + ' captors inside — one lunged for a detonator on the table. Sniper round came through the window at the same instant the breach team entered. Hit the man\'s wrist. Detonator went spinning. Second captor raised a pistol toward the hostages — two operators fired simultaneously. He crumpled. Remaining captors threw themselves flat. "ALL CLEAR. PRECIOUS CARGO SECURE."' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 6), type: 'normal', text: 'All ' + hostageCount + ' hostages recovered alive. Evacuated to triage. ' + randInt(0, 3) + ' minor injuries — stress reactions and abrasions. No life-threatening conditions. All team members accounted for.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: 'Building secured. ' + randInt(4, 8) + ' hostile KIA or detained. EOD team cleared ' + randInt(1, 3) + ' IEDs rigged to the hostage room. Scene turned over to FBI Evidence Response Team. Media briefing coordinated with DOJ.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: randInt(1, 3) + ' surviving ' + v.orgName + ' members in federal custody. Hostages transported to local hospitals for evaluation. Zero friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Green light. Execute." Assault initiated. ' + pick(SOF_BREACH_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'failure', text: 'Captors triggered prepared explosive device in the hostage area upon hearing the breach. ' + randInt(1, Math.max(1, Math.floor(hostageCount / 4))) + ' hostages killed. Team fought through heavy resistance to reach the remaining hostages.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 8), type: 'normal', text: 'Building secured. ' + (hostageCount - randInt(1, 3)) + ' hostages recovered alive, some with serious injuries. All captors neutralized or detained. ' + randInt(0, 2) + ' operators WIA.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Mass casualty response initiated. Wounded transported to area hospitals. FBI assuming jurisdiction for criminal investigation. Vigil providing intelligence support for prosecution.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Entry hallway. Immediate contact — captor opened fire from behind a barricade of furniture. Rounds snapping down the corridor. Point man returned fire, suppressed. Number two flanked through a side office. Captor engaged from both sides — went down.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'failure', text: 'Captors triggered prepared explosive device in the hostage area upon hearing the gunfire. The blast wave blew out the windows on the south side. Assault team fought through smoke and debris to reach the room — ' + randInt(1, Math.max(1, Math.floor(hostageCount / 4))) + ' hostages killed, ' + randInt(1, 3) + ' critically wounded. Remaining hostages recovered alive with injuries.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 4), type: 'critical', text: pick(SOF_ROOM_CLEAR) + ' Remaining captors making a last stand. All neutralized.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 8), type: 'normal', text: 'Building secured. ' + (hostageCount - randInt(1, 3)) + ' hostages recovered alive, some with serious injuries. ' + randInt(0, 2) + ' operators WIA.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Mass casualty response initiated. Wounded transported to area hospitals. FBI assuming jurisdiction for criminal investigation. Casualty notification process initiated.' });
   }
 
   var assessment = success ?
