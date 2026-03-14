@@ -1,0 +1,430 @@
+/* ============================================================
+   VIGIL — css/diplomacy.css
+   Diplomacy workspace styling.
+   ============================================================ */
+
+/* --- Country List --- */
+.diplo-country-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.diplo-country-row:hover {
+  background: var(--bg-hover);
+}
+
+.diplo-country-row.selected {
+  border-left-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.diplo-stance-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.diplo-country-name {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diplo-stance-chip {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.diplo-indicators {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.diplo-indicator {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+/* --- Stance Group Headers --- */
+.diplo-stance-group {
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diplo-stance-group:hover {
+  color: var(--text);
+}
+
+.diplo-stance-group-count {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+/* --- Stance Bar (0-7 gauge) --- */
+.diplo-stance-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  margin: var(--sp-2) 0;
+}
+
+.diplo-stance-bar-seg {
+  flex: 1;
+  border-radius: 1px;
+  background: var(--bg-3);
+}
+
+.diplo-stance-bar-seg.filled {
+  opacity: 0.9;
+}
+
+/* --- Detail Header --- */
+.diplo-detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.diplo-detail-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+}
+
+.diplo-detail-stance {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+/* --- Permissions Grid --- */
+.diplo-perm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0;
+}
+
+.diplo-perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.diplo-perm-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+
+.diplo-perm-value {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.diplo-perm-value.authorized {
+  color: var(--green);
+}
+
+.diplo-perm-value.denied {
+  color: var(--red);
+}
+
+.diplo-perm-value.risky {
+  color: var(--amber);
+}
+
+/* --- Section Headers --- */
+.diplo-section {
+  margin-top: var(--sp-4);
+}
+
+.diplo-section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-2);
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--border);
+}
+
+/* --- Action Cards --- */
+.diplo-action-card {
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.diplo-action-card:hover {
+  border-color: var(--accent);
+}
+
+.diplo-action-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.diplo-action-card.expanded {
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+
+.diplo-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-1);
+}
+
+.diplo-action-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-hi);
+}
+
+.diplo-action-cost {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.diplo-action-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.diplo-action-disabled-reason {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--red);
+  margin-top: var(--sp-1);
+}
+
+/* --- Asset Selection Panel --- */
+.diplo-asset-panel {
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border);
+}
+
+.diplo-asset-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2);
+  margin-bottom: var(--sp-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  transition: all var(--transition-fast);
+}
+
+.diplo-asset-option:hover {
+  border-color: var(--accent);
+}
+
+.diplo-asset-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.diplo-asset-name {
+  font-size: var(--fs-xs);
+  color: var(--text);
+}
+
+.diplo-asset-meta {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+.diplo-send-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 2px;
+  background: var(--accent);
+  color: var(--bg-0);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.diplo-send-btn:hover {
+  filter: brightness(1.2);
+}
+
+/* --- Mission Row --- */
+.diplo-mission-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  margin-bottom: var(--sp-1);
+}
+
+.diplo-mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diplo-mission-type {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.diplo-mission-status {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+.diplo-mission-status.in-transit {
+  background: var(--amber);
+  color: var(--bg-0);
+}
+
+.diplo-mission-status.executing {
+  background: var(--accent);
+  color: var(--bg-0);
+}
+
+.diplo-mission-bar {
+  height: 3px;
+  background: var(--bg-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.diplo-mission-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.diplo-mission-detail {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+/* --- Stance History --- */
+.diplo-history-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.diplo-history-time {
+  color: var(--text-muted);
+  min-width: 80px;
+}
+
+.diplo-history-arrow {
+  color: var(--text-muted);
+}
+
+/* --- Toolbar Filter Buttons --- */
+.diplo-toolbar {
+  display: flex;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.diplo-filter-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.diplo-filter-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.diplo-filter-btn.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* --- Empty State --- */
+.diplo-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: var(--sp-4);
+}

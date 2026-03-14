@@ -222,3 +222,30 @@
   background: var(--bg-hover);
   border-color: var(--border-focus);
 }
+
+/* --- Multi-button urgent actions --- */
+.urgent-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.urgent-actions .urgent-dismiss {
+  width: auto;
+  flex: 1;
+}
+
+.urgent-action-primary {
+  color: var(--text-hi);
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.urgent-action-primary:hover {
+  background: var(--accent-mid);
+  box-shadow: var(--shadow-glow);
+}
+
+.urgent-action-secondary {
+  color: var(--text);
+  background: var(--bg-4);
+}

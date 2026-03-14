@@ -37,7 +37,18 @@ function activateWorkspace(id) {
   // Update taskbar buttons
   var btns = qsa('.tb-app');
   for (var i = 0; i < btns.length; i++) {
-    btns[i].classList.toggle('active', btns[i].dataset.workspace === id);
+    var isActive = btns[i].dataset.workspace === id;
+    btns[i].classList.toggle('active', isActive);
+
+    // Re-trigger SVG animation on the newly active tab
+    if (isActive) {
+      var svg = btns[i].querySelector('.tb-svg');
+      if (svg) {
+        svg.style.animation = 'none';
+        svg.offsetHeight; // Force reflow
+        svg.style.animation = '';
+      }
+    }
   }
 
   // Render the workspace
@@ -149,6 +160,8 @@ function initKeyboard() {
       case '2': activateWorkspace('feed'); break;
       case '3': activateWorkspace('operations'); break;
       case '4': activateWorkspace('sitroom'); break;
+      case '5': activateWorkspace('media'); break;
+      case '6': activateWorkspace('diplomacy'); break;
       case ' ':
         e.preventDefault();
         togglePause();
@@ -182,7 +195,7 @@ function startGame() {
   renderWorkspace('globe');
 
   // Start engine at default speed
-  setSpeed(2);
+  setSpeed(1);
   startEngine();
 
   fire('game:start', V);

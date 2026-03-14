@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="css/sitroom.css">
   <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/debrief.css">
+  <link rel="stylesheet" href="css/tooltip.css">
+  <link rel="stylesheet" href="css/media.css">
+  <link rel="stylesheet" href="css/diplomacy.css">
 
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
@@ -112,25 +115,25 @@
         <span class="sb-powered">ORTHANC SYSTEMS</span>
       </div>
       <div class="sb-center">
-        <div class="sb-stat">
+        <div class="sb-stat" data-tip="Operator viability score. Vigil evaluates your performance monthly. Reaches 0 = neural chip termination." data-tip-align="bottom">
           <span class="sb-stat-label">VIABILITY</span>
           <span class="sb-stat-value" id="sb-viability">70%</span>
           <div class="sb-stat-bar">
             <div class="sb-stat-bar-fill" id="sb-viability-bar" style="width:70%;background:var(--green)"></div>
           </div>
         </div>
-        <div class="sb-stat">
+        <div class="sb-stat" data-tip="Operational budget in millions. Consumed by each operation. Replenished monthly." data-tip-align="bottom">
           <span class="sb-stat-label">BUDGET</span>
           <span class="sb-stat-value" id="sb-budget">$100M</span>
           <div class="sb-stat-bar">
             <div class="sb-stat-bar-fill" id="sb-budget-bar" style="width:100%;background:var(--accent)"></div>
           </div>
         </div>
-        <div class="sb-stat">
+        <div class="sb-stat" data-tip="Accumulated intelligence points. Gained from successful operations and intelligence collection." data-tip-align="bottom">
           <span class="sb-stat-label">INTEL</span>
           <span class="sb-stat-value" id="sb-intel">0</span>
         </div>
-        <div class="sb-stat">
+        <div class="sb-stat" data-tip="Global threat level across all theaters. Based on the highest-risk theater." data-tip-align="bottom">
           <span class="sb-stat-label">THREAT</span>
           <span class="sb-threat" id="sb-threat" style="color:var(--amber);border-color:var(--amber)">ELEVATED</span>
         </div>
@@ -138,10 +141,10 @@
       <div class="sb-right">
         <div class="sb-clock" id="sb-clock">0800 · 1 JAN 2052</div>
         <div class="tb-speed" id="speed-controls">
-          <button class="speed-btn paused" data-speed="0" title="Pause">⏸</button>
-          <button class="speed-btn active" data-speed="1" title="Normal">▶</button>
-          <button class="speed-btn" data-speed="2" title="Fast">▶▶</button>
-          <button class="speed-btn" data-speed="3" title="V. Fast">▶▶▶</button>
+          <button class="speed-btn paused" data-speed="0" data-tip="Pause simulation (Space)" data-tip-align="bottom">⏸</button>
+          <button class="speed-btn active" data-speed="1" data-tip="Normal speed — 1 minute per tick (+/-)" data-tip-align="bottom">▶</button>
+          <button class="speed-btn" data-speed="2" data-tip="Fast — 1 hour per tick (+/-)" data-tip-align="bottom">▶▶</button>
+          <button class="speed-btn" data-speed="3" data-tip="Maximum — 12 hours per tick (+/-)" data-tip-align="bottom">▶▶▶</button>
         </div>
       </div>
     </header>
@@ -152,36 +155,48 @@
       <div class="workspace" id="ws-feed" data-workspace="feed"></div>
       <div class="workspace" id="ws-operations" data-workspace="operations"></div>
       <div class="workspace" id="ws-sitroom" data-workspace="sitroom"></div>
+      <div class="workspace" id="ws-media" data-workspace="media"></div>
+      <div class="workspace" id="ws-diplomacy" data-workspace="diplomacy"></div>
     </div>
 
     <!-- Taskbar -->
     <footer id="taskbar">
       <div class="tb-apps">
-        <button class="tb-app active" data-workspace="globe" onclick="activateWorkspace('globe')">
-          <span class="tb-icon">◎</span>
+        <button class="tb-app active" data-workspace="globe" onclick="activateWorkspace('globe')" data-tip="3D tactical globe — view bases, assets, threats, and operations worldwide. Press 1." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="7.5" /><ellipse class="tb-svg-stroke" cx="10" cy="10" rx="3" ry="7.5" /><line class="tb-svg-stroke" x1="2.5" y1="10" x2="17.5" y2="10" /></svg></span>
           <span class="tb-label">Globe</span>
           <span class="tb-badge" id="badge-globe"></span>
         </button>
-        <button class="tb-app" data-workspace="feed" onclick="activateWorkspace('feed')">
-          <span class="tb-icon">⫘</span>
+        <button class="tb-app" data-workspace="feed" onclick="activateWorkspace('feed')" data-tip="Intelligence feed — SIGINT, HUMINT, IMAGERY, and analyst reports. Press 2." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="2" /><path class="tb-svg-stroke" d="M10 4.5 A5.5 5.5 0 0 1 15.5 10" /><path class="tb-svg-stroke" d="M10 1.5 A8.5 8.5 0 0 1 18.5 10" /><line class="tb-svg-stroke" x1="10" y1="12" x2="10" y2="18" /><line class="tb-svg-stroke" x1="6" y1="18" x2="14" y2="18" /></svg></span>
           <span class="tb-label">Intel Feed</span>
           <span class="tb-badge" id="badge-feed"></span>
         </button>
-        <button class="tb-app" data-workspace="operations" onclick="activateWorkspace('operations')">
-          <span class="tb-icon">⬡</span>
+        <button class="tb-app" data-workspace="operations" onclick="activateWorkspace('operations')" data-tip="Operations board — approve deployments, monitor transit, review debriefs. Press 3." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke" points="10,1.5 17.5,5.75 17.5,14.25 10,18.5 2.5,14.25 2.5,5.75" /><circle class="tb-svg-fill" cx="10" cy="10" r="2" /></svg></span>
           <span class="tb-label">Operations</span>
           <span class="tb-badge" id="badge-operations"></span>
         </button>
-        <button class="tb-app" data-workspace="sitroom" onclick="activateWorkspace('sitroom')">
-          <span class="tb-icon">◉</span>
+        <button class="tb-app" data-workspace="sitroom" onclick="activateWorkspace('sitroom')" data-tip="Situation room — theater risk assessment, active crises, global overview. Press 4." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="8" /><circle class="tb-svg-stroke" cx="10" cy="10" r="4.5" /><circle class="tb-svg-fill" cx="10" cy="10" r="1.5" /><line class="tb-svg-stroke" x1="10" y1="2" x2="10" y2="5" /><line class="tb-svg-stroke" x1="10" y1="15" x2="10" y2="18" /><line class="tb-svg-stroke" x1="2" y1="10" x2="5" y2="10" /><line class="tb-svg-stroke" x1="15" y1="10" x2="18" y2="10" /></svg></span>
           <span class="tb-label">Sit Room</span>
           <span class="tb-badge" id="badge-sitroom"></span>
         </button>
+        <button class="tb-app" data-workspace="media" onclick="activateWorkspace('media')" data-tip="Media monitoring — international news coverage of your operations. Press 5." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><rect class="tb-svg-stroke" x="2" y="3" width="16" height="14" rx="1.5" /><line class="tb-svg-stroke" x1="2" y1="7" x2="18" y2="7" /><line class="tb-svg-stroke" x1="2" y1="11" x2="18" y2="11" /><line class="tb-svg-stroke" x1="2" y1="15" x2="12" y2="15" /><line class="tb-svg-stroke" x1="10" y1="7" x2="10" y2="17" /></svg></span>
+          <span class="tb-label">Media</span>
+          <span class="tb-badge" id="badge-media"></span>
+        </button>
+        <button class="tb-app" data-workspace="diplomacy" onclick="activateWorkspace('diplomacy')" data-tip="Diplomatic relations — manage stances, deploy envoys, request clearances. Press 6." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke" points="10,2 16,10 10,18 4,10" /><line class="tb-svg-stroke" x1="7" y1="6" x2="13" y2="14" /><line class="tb-svg-stroke" x1="13" y1="6" x2="7" y2="14" /></svg></span>
+          <span class="tb-label">Diplomacy</span>
+          <span class="tb-badge" id="badge-diplomacy"></span>
+        </button>
       </div>
       <div class="tb-right">
-        <button class="tb-sys" id="btn-save" onclick="showSaveModal()">SAVE</button>
-        <button class="tb-sys tb-logout" id="btn-logout" onclick="logoutGame()">LOG OUT</button>
-        <div class="tb-status" id="tb-status">OPERATIONAL</div>
+        <button class="tb-sys" id="btn-save" onclick="showSaveModal()" data-tip="Save current game state" data-tip-align="top">SAVE</button>
+        <button class="tb-sys tb-logout" id="btn-logout" onclick="logoutGame()" data-tip="Autosave and return to login screen" data-tip-align="top">LOG OUT</button>
+        <div class="tb-status" id="tb-status" data-tip="System operational status" data-tip-align="top">OPERATIONAL</div>
       </div>
     </footer>
 
@@ -212,6 +227,7 @@
   <script src="ui/shell.js"></script>
   <script src="ui/modal.js"></script>
   <script src="ui/notifications.js"></script>
+  <script src="ui/tooltip.js"></script>
   <script src="ui/login.js"></script>
 
   <!-- Systems -->
@@ -225,6 +241,7 @@
   <script src="systems/events.js"></script>
   <script src="systems/threats.js"></script>
   <script src="systems/geopolitics.js"></script>
+  <script src="systems/diplomacy.js"></script>
   <script src="systems/saves.js"></script>
 
   <!-- Workspaces -->
@@ -238,6 +255,8 @@
   <script src="workspaces/operations/operations.js"></script>
   <script src="workspaces/sitroom/crises.js"></script>
   <script src="workspaces/sitroom/sitroom.js"></script>
+  <script src="workspaces/media/media.js"></script>
+  <script src="workspaces/diplomacy/diplomacy.js"></script>
 
 </body>
 </html>

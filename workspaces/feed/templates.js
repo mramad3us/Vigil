@@ -5,7 +5,7 @@
 
 var FEED_TEMPLATES = {
   SIGINT_INTERCEPT: {
-    severity: ['HIGH', 'ELEVATED', 'CRITICAL'],
+    severity: ['HIGH', 'ELEVATED'],
     headers: [
       'SIGINT INTERCEPT — {region} THEATER',
       'COMMS INTERCEPT — {city}, {country}',
@@ -28,7 +28,7 @@ var FEED_TEMPLATES = {
   },
 
   HUMINT_REPORT: {
-    severity: ['HIGH', 'ELEVATED'],
+    severity: ['ELEVATED'],
     headers: [
       'HUMINT FLASH — SOURCE {source}',
       'HUMAN INTELLIGENCE REPORT — {region}',

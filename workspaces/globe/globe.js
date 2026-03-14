@@ -9,6 +9,21 @@
   var _viewer = null;
   var _globeReady = false;
 
+  /* Collapsible base category state */
+  var _baseExpandedCats = {};
+
+  window.toggleBaseCategory = function(key) {
+    _baseExpandedCats[key] = !_baseExpandedCats[key];
+    var content = document.getElementById('base-cat-' + key);
+    var arrow = document.getElementById('base-cat-arrow-' + key);
+    if (content) {
+      content.style.display = _baseExpandedCats[key] ? 'block' : 'none';
+    }
+    if (arrow) {
+      arrow.textContent = _baseExpandedCats[key] ? '\u25BE' : '\u25B8';
+    }
+  };
+
   registerWorkspace({
     id: 'globe',
     label: 'Globe',
@@ -186,20 +201,76 @@
         var assetsHere = getAssetsAtBase(base.id);
         title = base.name;
         typeLabel = (baseTypeInfo.label || base.type) + ' · ' + base.country;
-        detail = 'Location: ' + base.city + ', ' + base.country +
-          '<br>Assets stationed: ' + assetsHere.length;
+        detail = '<div class="globe-info-detail-grid">' +
+          '<span class="globe-info-key">LOCATION</span><span class="globe-info-val">' + base.city + ', ' + base.country + '</span>' +
+          '<span class="globe-info-key">ASSETS</span><span class="globe-info-val">' + assetsHere.length + ' stationed</span>' +
+          '</div>';
+        if (assetsHere.length > 0) {
+          /* Summary line: count per category */
+          var catGroups = {};
+          for (var bi = 0; bi < assetsHere.length; bi++) {
+            var cat = assetsHere[bi].category;
+            if (!catGroups[cat]) catGroups[cat] = [];
+            catGroups[cat].push(assetsHere[bi]);
+          }
+          var summaryParts = [];
+          for (var sCat in catGroups) {
+            var sCatInfo = ASSET_CATEGORIES[sCat] || {};
+            summaryParts.push('<span style="color:' + (sCatInfo.color || 'var(--text)') + '">' + catGroups[sCat].length + ' ' + (sCatInfo.shortLabel || sCat) + '</span>');
+          }
+          detail += '<div style="font-size:10px;margin-top:4px">' + summaryParts.join(' &middot; ') + '</div>';
+
+          /* Collapsible category groups */
+          for (var gCat in catGroups) {
+            var catKey = base.id + '-' + gCat;
+            var isExpanded = _baseExpandedCats[catKey];
+            var catInfo = ASSET_CATEGORIES[gCat] || {};
+
+            detail += '<div style="margin-top:6px">';
+            detail += '<div onclick="toggleBaseCategory(\'' + catKey + '\')" style="cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--border);user-select:none">';
+            detail += '<span id="base-cat-arrow-' + catKey + '" style="font-size:8px;color:var(--text-muted);width:10px">' + (isExpanded ? '\u25BE' : '\u25B8') + '</span>';
+            detail += '<span style="color:' + (catInfo.color || 'var(--text)') + ';font-family:var(--font-mono);font-size:9px;font-weight:600">' + (catInfo.shortLabel || gCat) + '</span>';
+            detail += '<span style="font-size:9px;color:var(--text-dim)">' + catGroups[gCat].length + ' unit' + (catGroups[gCat].length > 1 ? 's' : '') + '</span>';
+            detail += '</div>';
+
+            detail += '<div id="base-cat-' + catKey + '" style="display:' + (isExpanded ? 'block' : 'none') + '">';
+            for (var ai = 0; ai < catGroups[gCat].length; ai++) {
+              var bAsset = catGroups[gCat][ai];
+              var bDen = DENIABILITY_DISPLAY[bAsset.deniability] || DENIABILITY_DISPLAY.OVERT;
+              detail += '<div style="display:flex;align-items:center;gap:6px;padding:2px 0 2px 16px;font-size:10px"' +
+                ' data-tip="' + (bAsset.designation || bAsset.name) + ' &middot; ' + (bAsset.personnel || '?') + ' personnel &middot; ' + (bAsset.platform || '?') + '"' +
+                ' data-tip-align="right">' +
+                '<span style="color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + bAsset.name + '</span>' +
+                '<span style="font-family:var(--font-mono);font-size:8px;color:' + bDen.color + '">' + bDen.label + '</span>' +
+              '</div>';
+            }
+            detail += '</div></div>';
+          }
+        }
         action = '';
       }
     } else if (type === 'asset') {
       var asset = getAsset(id);
       if (asset) {
         var assetCat = ASSET_CATEGORIES[asset.category] || {};
+        var homeBase = getBase(asset.homeBaseId);
+        var readinessColor = asset.readiness === 'TIER_1' ? 'var(--red)' : asset.readiness === 'TIER_2' ? 'var(--amber)' : 'var(--green)';
         title = asset.name;
-        typeLabel = (assetCat.label || asset.category) + ' · ' + asset.status;
-        detail = 'Status: ' + asset.status;
+        typeLabel = (asset.designation || (assetCat.label || asset.category)) + ' · ' + asset.status;
+        detail = '<div class="globe-info-detail-grid">' +
+          '<span class="globe-info-key">PLATFORM</span><span class="globe-info-val">' + (asset.platform || '—') + '</span>' +
+          '<span class="globe-info-key">PERSONNEL</span><span class="globe-info-val">' + (asset.personnel ? asset.personnel.toLocaleString() : '—') + '</span>' +
+          '<span class="globe-info-key">READINESS</span><span class="globe-info-val" style="color:' + readinessColor + '">' + (asset.readiness || 'FULL').replace('_', ' ') + '</span>' +
+          '<span class="globe-info-key">HOME BASE</span><span class="globe-info-val">' + (homeBase ? homeBase.name : '—') + '</span>' +
+          '<span class="globe-info-key">SPEED</span><span class="globe-info-val">' + (asset.speed > 0 ? asset.speed + ' km/h' : 'REMOTE') + '</span>' +
+          '<span class="globe-info-key">STATUS</span><span class="globe-info-val">' + asset.status + '</span>' +
+          '</div>';
+        if (asset.description) {
+          detail += '<div class="globe-info-desc">' + asset.description + '</div>';
+        }
         if (asset.assignedOpId) {
           var assignedOp = getOp(asset.assignedOpId);
-          if (assignedOp) detail += '<br>Assigned: ' + assignedOp.codename;
+          if (assignedOp) detail += '<div style="margin-top:4px;font-family:var(--font-mono);font-size:9px;color:var(--accent)">ASSIGNED: ' + assignedOp.codename + '</div>';
         }
         action = asset.assignedOpId ? '<button class="feed-action-btn primary" onclick="viewOperationFromGlobe(\'' + asset.assignedOpId + '\')">VIEW OPERATION</button>' : '';
       }

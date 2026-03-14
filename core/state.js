@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.2.0';
+V.version = '0.3.1';
 
 function initState() {
 
@@ -68,6 +68,12 @@ function initState() {
     nextEventDay: 3,
   };
 
+  // Diplomacy (populated by diplomacy.js at game:start)
+  V.diplomacy = {};
+
+  // Media
+  V.media = [];
+
   // Geopolitics
   V.theaters = {};
   if (typeof THEATERS !== 'undefined') {
@@ -91,8 +97,8 @@ function initState() {
   // UI
   V.ui = {
     activeWorkspace: 'globe',
-    speed: 2,
-    lastSpeed: 2,
+    speed: 1,
+    lastSpeed: 1,
     notifications: [],
   };
 
@@ -109,6 +115,8 @@ function initState() {
     crisesResolved: 0,
     recommendationsFollowed: 0,
     recommendationsDeviated: 0,
+    threatsManifested: 0,
+    intelFieldsRevealed: 0,
   };
 }
 

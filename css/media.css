@@ -1,0 +1,72 @@
+/* ============================================================
+   VIGIL — css/media.css
+   Media monitoring workspace — news feed styling.
+   ============================================================ */
+
+/* --- Media Story Cards --- */
+.media-story {
+  padding: var(--sp-4);
+  margin: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  transition: border-color var(--transition-fast);
+}
+
+.media-story + .media-story {
+  margin-top: var(--sp-1);
+}
+
+.media-story:hover {
+  border-color: var(--border-light);
+}
+
+/* --- Story Header --- */
+.media-story-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-2);
+}
+
+.media-source {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  background: var(--accent-dim);
+  border-radius: 2px;
+}
+
+.media-timestamp {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* --- Headline --- */
+.media-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  margin-bottom: var(--sp-2);
+  line-height: 1.4;
+}
+
+.media-headline.negative {
+  color: var(--severity-high);
+}
+
+.media-headline.positive {
+  color: var(--green);
+}
+
+/* --- Body --- */
+.media-body {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.7;
+}

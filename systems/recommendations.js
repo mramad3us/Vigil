@@ -298,6 +298,16 @@ function buildConsequences(op, strategy, riskLevel) {
     consequences.push('Threat level ' + op.threatLevel + '/5 — hostile response likely.');
   }
 
+  // Diplomatic consequences
+  if (op.location && op.location.country && op.location.country !== 'United States' && typeof getCountryStance === 'function') {
+    var country = op.location.country;
+    var stance = getCountryStance(country);
+    var perms = typeof getCountryPermissions === 'function' ? getCountryPermissions(country) : {};
+    if (!perms.overtOps) {
+      consequences.push('WARNING: ' + country + ' (' + stance.label + ') has not authorized overt operations. Sovereignty violation risk.');
+    }
+  }
+
   return consequences.join(' ');
 }
 

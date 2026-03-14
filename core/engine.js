@@ -84,7 +84,7 @@ function setSpeed(speed) {
 
 function togglePause() {
   if (_speed === 0) {
-    setSpeed(V.ui.lastSpeed || 2);
+    setSpeed(V.ui.lastSpeed || 1);
   } else {
     V.ui.lastSpeed = _speed;
     setSpeed(0);

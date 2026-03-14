@@ -8,21 +8,25 @@ var GLOBE_LAYERS = {
     label: 'Active Threats',
     color: '#e04040',
     visible: true,
+    tip: 'Known threat organizations and hostile actors',
   },
   operations: {
     label: 'Active Operations',
     color: '#3dcc70',
     visible: true,
+    tip: 'Current operations across all phases',
   },
   bases: {
     label: 'US Bases',
     color: '#4a8fd4',
     visible: true,
+    tip: 'Military installations, naval stations, CIA stations, DIA facilities',
   },
   assets: {
     label: 'Deployed Assets',
     color: '#e0a030',
     visible: true,
+    tip: 'In-transit and deployed military/intel assets',
   },
 };
 
@@ -159,7 +163,7 @@ function syncAssetMarkers(viewer) {
 
   for (var i = 0; i < V.assets.length; i++) {
     var a = V.assets[i];
-    if (a.status !== 'IN_TRANSIT' && a.status !== 'RETURNING' && a.status !== 'DEPLOYED') continue;
+    if (a.status !== 'IN_TRANSIT' && a.status !== 'RETURNING' && a.status !== 'DEPLOYED' && a.status !== 'COLLECTING') continue;
 
     var markerId = 'asset-' + a.id;
     activeIds.add(markerId);
@@ -268,7 +272,8 @@ function renderLayerPanel() {
   for (var lid in GLOBE_LAYERS) {
     var layer = GLOBE_LAYERS[lid];
     var disabledClass = layer.visible ? '' : ' disabled';
-    html += '<div class="globe-layer-row' + disabledClass + '" onclick="toggleGlobeLayer(\'' + lid + '\')">' +
+    var tipAttr = layer.tip ? ' data-tip="' + layer.tip + '" data-tip-align="left"' : '';
+    html += '<div class="globe-layer-row' + disabledClass + '" onclick="toggleGlobeLayer(\'' + lid + '\')"' + tipAttr + '>' +
       '<div class="globe-layer-dot" style="background:' + layer.color + '"></div>' +
       '<span class="globe-layer-label">' + layer.label + '</span>' +
       '</div>';

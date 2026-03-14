@@ -44,6 +44,19 @@ function showUrgentAlert(feedItem) {
   var severityCls = (feedItem.severity || 'HIGH').toLowerCase();
   var timeStr = formatTimestamp(feedItem.timestamp);
 
+  var actionsHtml = '';
+  if (feedItem.actions && feedItem.actions.length > 0) {
+    actionsHtml = '<div class="urgent-actions">';
+    for (var i = 0; i < feedItem.actions.length; i++) {
+      var act = feedItem.actions[i];
+      var btnCls = act.primary ? 'urgent-dismiss urgent-action-primary' : 'urgent-dismiss urgent-action-secondary';
+      actionsHtml += '<button class="' + btnCls + '" onclick="' + act.onclick + '">' + act.label + '</button>';
+    }
+    actionsHtml += '</div>';
+  } else {
+    actionsHtml = '<button class="urgent-dismiss" onclick="dismissUrgentAlert()">ACKNOWLEDGED</button>';
+  }
+
   overlay.innerHTML =
     '<div class="urgent-panel">' +
       '<div class="urgent-header">' +
@@ -52,7 +65,7 @@ function showUrgentAlert(feedItem) {
       '</div>' +
       '<div class="urgent-title">' + feedItem.header + '</div>' +
       '<div class="urgent-body">' + feedItem.body + '</div>' +
-      '<button class="urgent-dismiss" onclick="dismissUrgentAlert()">ACKNOWLEDGED</button>' +
+      actionsHtml +
     '</div>';
 
   overlay.classList.remove('hidden');

@@ -1,6 +1,7 @@
 /* ============================================================
    VIGIL — css/operations.css
-   Operations board: cards, phases, detail panel.
+   Operations board: cards, phases, detail panel, asset details,
+   progressive intel, archive section.
    ============================================================ */
 
 /* --- Op Card Grid --- */
@@ -168,10 +169,11 @@
 
 .intel-field-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: var(--sp-2) 0;
   border-bottom: 1px solid var(--border);
   font-size: var(--fs-sm);
+  gap: var(--sp-3);
 }
 
 .intel-field-key {
@@ -179,63 +181,27 @@
   font-size: var(--fs-xs);
   color: var(--text-dim);
   letter-spacing: 0.5px;
-  width: 140px;
+  width: 160px;
   flex-shrink: 0;
+  padding-top: 1px;
 }
 
 .intel-field-val {
   color: var(--text);
+  flex: 1;
+  line-height: 1.5;
 }
 
 .intel-field-val.hidden {
   color: var(--text-muted);
   font-style: italic;
+  font-size: var(--fs-xs);
 }
 
 .intel-field-val.revealed {
   color: var(--green);
-}
-
-/* --- Department Assignment --- */
-.dept-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--sp-2);
-}
-
-.dept-chip {
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-align: center;
-}
-
-.dept-chip:hover {
-  border-color: var(--border-light);
-  background: var(--bg-hover);
-  color: var(--text);
-}
-
-.dept-chip.selected {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  color: var(--accent);
-}
-
-.dept-chip.unavailable {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.dept-chip-avail {
-  font-size: 8px;
-  color: var(--text-muted);
-  margin-top: 2px;
+  line-height: 1.6;
 }
 
 /* --- Op Action Buttons --- */
@@ -352,6 +318,7 @@
   display: flex;
   gap: var(--sp-4);
   margin-bottom: var(--sp-3);
+  flex-wrap: wrap;
 }
 
 .vigil-stat {
@@ -383,7 +350,7 @@
 .vigil-option-assets {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   margin-bottom: var(--sp-3);
 }
 
@@ -392,7 +359,20 @@
   align-items: center;
   gap: var(--sp-2);
   font-size: var(--fs-xs);
-  padding: 2px 0;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.vigil-asset-row.expandable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  padding: 4px var(--sp-2);
+  margin: 0 calc(-1 * var(--sp-2));
+  border-radius: var(--radius-sm);
+}
+
+.vigil-asset-row.expandable:hover {
+  background: var(--bg-hover);
 }
 
 .vigil-asset-cat {
@@ -413,6 +393,13 @@
   color: var(--text-dim);
 }
 
+.asset-expand-icon {
+  font-size: 9px;
+  color: var(--text-muted);
+  min-width: 12px;
+  text-align: center;
+}
+
 .vigil-option-consequences {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -426,6 +413,112 @@
 
 .vigil-select-btn {
   width: 100%;
+}
+
+/* --- Asset Detail Card (expandable dropdown) --- */
+.asset-detail-card {
+  padding: var(--sp-3);
+  margin: var(--sp-1) 0 var(--sp-2) 0;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.asset-detail-header {
+  margin-bottom: var(--sp-3);
+}
+
+.asset-detail-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  letter-spacing: 0.5px;
+}
+
+.asset-detail-designation {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.asset-detail-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-1) var(--sp-4);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.asset-detail-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--fs-xs);
+  padding: 2px 0;
+}
+
+.asset-detail-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.asset-detail-stat-val {
+  color: var(--text);
+  font-size: var(--fs-xs);
+}
+
+.asset-detail-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2);
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+}
+
+.asset-detail-subsection {
+  margin-bottom: var(--sp-2);
+}
+
+.asset-detail-subsection-title {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-1);
+}
+
+.asset-detail-subsection-text {
+  font-size: var(--fs-xs);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.asset-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.asset-detail-list-item {
+  font-size: var(--fs-xs);
+  color: var(--text);
+  padding: 2px 0;
+  padding-left: var(--sp-2);
+  border-left: 2px solid var(--border);
+}
+
+.asset-detail-caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
 }
 
 /* --- Transit Progress --- */
@@ -489,6 +582,120 @@
   padding-right: var(--sp-2);
 }
 
-/* --- Department Grid (removed, kept for legacy compat) --- */
-.dept-grid { display: none; }
-.dept-chip { display: none; }
+/* --- Archive Section --- */
+.ops-archive-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-3);
+  margin-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ops-archive-header:hover {
+  background: var(--bg-hover);
+}
+
+.ops-archive-toggle {
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 12px;
+}
+
+.ops-archive-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  flex: 1;
+}
+
+.ops-archive-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.ops-archive-grid .op-card {
+  opacity: 0.7;
+}
+
+.ops-archive-grid .op-card:hover {
+  opacity: 1;
+}
+
+/* --- Globe Info Detail Grid --- */
+.globe-info-detail-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px var(--sp-3);
+  font-size: var(--fs-xs);
+}
+
+.globe-info-key {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.globe-info-val {
+  color: var(--text);
+  font-size: var(--fs-xs);
+}
+
+.globe-info-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-top: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border);
+}
+
+/* --- Intel Progress Bars --- */
+.intel-source-tag {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: var(--bg-4);
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.intel-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+}
+
+.intel-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-4);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.intel-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.intel-progress-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  min-width: 90px;
+  text-align: right;
+}

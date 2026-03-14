@@ -87,8 +87,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--sp-3);
-  min-width: 200px;
-  max-width: 320px;
+  min-width: 240px;
+  max-width: 380px;
   z-index: 10;
   display: none;
 }
@@ -118,6 +118,8 @@
   font-size: var(--fs-sm);
   color: var(--text);
   line-height: 1.5;
+  max-height: 340px;
+  overflow-y: auto;
 }
 
 .globe-info-actions {

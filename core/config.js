@@ -82,6 +82,104 @@ var OPERATION_TYPES = {
   },
 };
 
+// --- Intel Difficulty Tiers ---
+// ticksRange: game-minutes of passive collection needed to reveal.
+// preRevealChance: probability the field starts already revealed at threat spawn.
+
+var INTEL_DIFFICULTY = {
+  EASY:      { ticksRange: [10, 40],   label: 'EASY',      preRevealChance: 0.6 },
+  MEDIUM:    { ticksRange: [60, 180],  label: 'MEDIUM',    preRevealChance: 0.15 },
+  HARD:      { ticksRange: [240, 480], label: 'HARD',      preRevealChance: 0.02 },
+  VERY_HARD: { ticksRange: [480, 960], label: 'VERY HARD', preRevealChance: 0.0 },
+};
+
+// --- Threat Intel Fields ---
+// Per threat type: what intel Vigil tries to collect. Each field has a difficulty
+// that determines how many game-minutes of collection are needed to reveal it.
+
+var THREAT_INTEL_FIELDS = {
+  TERROR_CELL: [
+    { key: 'CELL_LOCATION',     label: 'Cell Location',                 difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'CELL_STRUCTURE',    label: 'Cell Structure',                difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'MEMBER_COUNT',      label: 'Member Count',                  difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'ATTACK_PLANNING',   label: 'Attack Planning Intel',         difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'WEAPONS_CACHE',     label: 'Weapons Cache Location',        difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'LEADERSHIP_ID',     label: 'Leadership Identification',     difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'SUPPORT_NETWORK',   label: 'Support & Financing Network',   difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'INTERNAL_COMMS',    label: 'Internal Communications',       difficulty: 'VERY_HARD', source: 'SIGINT' },
+    { key: 'TARGET_INTENT',     label: 'Target & Intent Assessment',    difficulty: 'VERY_HARD', source: 'HUMINT' },
+  ],
+  STATE_ACTOR: [
+    { key: 'ACTOR_ID',          label: 'State Actor Identification',    difficulty: 'EASY',      source: 'OSINT' },
+    { key: 'FORCE_DISPOSITION', label: 'Force Disposition',             difficulty: 'EASY',      source: 'IMAGERY' },
+    { key: 'COMMS_PATTERN',     label: 'Communications Pattern',        difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'AIR_DEFENSE_POSTURE', label: 'Air Defense Posture',         difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'MOVEMENT_PATTERNS', label: 'Military Movement Patterns',    difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'COMMAND_STRUCTURE', label: 'Command Authority Structure',   difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'STRATEGIC_INTENT',  label: 'Strategic Intent',              difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'ESCALATION_POSTURE', label: 'Escalation Posture',          difficulty: 'VERY_HARD', source: 'SIGINT' },
+  ],
+  CYBER_GROUP: [
+    { key: 'NETWORK_TOPOLOGY',  label: 'Network Topology',             difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'ATTRIBUTION_CONF',  label: 'Attribution Confidence',        difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'VULNERABILITY_SCAN', label: 'Vulnerability Assessment',     difficulty: 'MEDIUM',    source: 'CYBER' },
+    { key: 'ACCESS_VECTORS',    label: 'Access Vectors',                difficulty: 'MEDIUM',    source: 'CYBER' },
+    { key: 'COUNTER_INTRUSION', label: 'Counter-Intrusion Risk',        difficulty: 'HARD',      source: 'CYBER' },
+    { key: 'TARGET_INTENT',     label: 'Target & Intent',               difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'INTERNAL_COMMS',    label: 'Operator Communications',       difficulty: 'VERY_HARD', source: 'SIGINT' },
+  ],
+  CRIMINAL_ORG: [
+    { key: 'ORG_LOCATION',      label: 'Organization Location',         difficulty: 'EASY',      source: 'HUMINT' },
+    { key: 'VESSEL_IDENTIFICATION', label: 'Transport Identification',  difficulty: 'EASY',      source: 'IMAGERY' },
+    { key: 'CARGO_MANIFEST',    label: 'Cargo/Shipment Intel',          difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'ROUTE_PREDICTION',  label: 'Route Prediction',              difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'NETWORK_MAPPING',   label: 'Criminal Network Map',          difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'LEADERSHIP_ID',     label: 'Leadership Identification',     difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'FINANCIAL_FLOWS',   label: 'Financial Flow Analysis',       difficulty: 'VERY_HARD', source: 'SIGINT' },
+  ],
+  INSURGENCY: [
+    { key: 'AREA_OF_INTEREST',  label: 'Area of Operations',            difficulty: 'EASY',      source: 'ISR' },
+    { key: 'GUARD_FORCE',       label: 'Force Estimate',                difficulty: 'EASY',      source: 'ISR' },
+    { key: 'ACTIVITY_BASELINE', label: 'Activity Baseline',             difficulty: 'MEDIUM',    source: 'IMAGERY' },
+    { key: 'WEAPONS_CACHE',     label: 'Weapons Cache Location',        difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'INGRESS_ROUTES',    label: 'Supply Routes',                 difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'LEADERSHIP_ID',     label: 'Leadership Identification',     difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'QRF_PROXIMITY',     label: 'QRF / Reinforcement Proximity', difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'TARGET_INTENT',     label: 'Strategic Intent',              difficulty: 'VERY_HARD', source: 'HUMINT' },
+  ],
+  PROLIFERATOR: [
+    { key: 'FACILITY_ID',       label: 'Facility Identification',       difficulty: 'EASY',      source: 'IMAGERY' },
+    { key: 'TARGET_HARDENING',  label: 'Facility Hardening',            difficulty: 'MEDIUM',    source: 'IMAGERY' },
+    { key: 'ACTIVITY_BASELINE', label: 'Activity Baseline',             difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'CARGO_MANIFEST',    label: 'Materials Shipment Intel',      difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'CIVILIAN_PROXIMITY', label: 'Civilian Proximity',           difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'NETWORK_MAPPING',   label: 'Procurement Network',           difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'COMMAND_STRUCTURE', label: 'Program Authority',             difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'ESCALATION_POSTURE', label: 'Weaponization Timeline',      difficulty: 'VERY_HARD', source: 'HUMINT' },
+  ],
+};
+
+// --- Threat Expiration Ranges (game-minutes) ---
+// Higher threat level = shorter window before the threat manifests.
+
+var THREAT_EXPIRATION = {
+  1: [525600, 1051200],  // 1-2 years (365-730 days)
+  2: [129600, 525600],   // 3 months - 1 year
+  3: [43200, 172800],    // 1-4 months
+  4: [10080, 43200],     // 1 week - 1 month
+  5: [4320, 14400],      // 3-10 days
+};
+
+// --- Collection Source Types ---
+// Intel fields have a 'source' property (HUMINT, SIGINT, IMAGERY, ISR, CYBER, OSINT).
+// Each asset has a collectionProfile mapping source types → effectiveness multiplier.
+// If an asset has no rating for a source type, it contributes NOTHING to that field
+// beyond passive collection. This means deploying a Reaper for a HUMINT field is
+// flagged as ineffective — it won't advance that field any faster.
+//
+// Effectiveness scale: 0 = no capability, 1 = marginal, 2-3 = decent, 4-5 = excellent.
+// Profiles are defined on each asset template in assets.js.
+
 // --- Theaters ---
 
 var THEATERS = {

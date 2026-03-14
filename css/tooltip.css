@@ -1,0 +1,99 @@
+/* ============================================================
+   VIGIL — css/tooltip.css
+   Global tooltip styling.
+   ============================================================ */
+
+.vigil-tooltip {
+  position: fixed;
+  z-index: 10000;
+  max-width: 360px;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.vigil-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Rich tooltip sections --- */
+
+.tip-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text-hi);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.tip-subtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  margin-bottom: var(--sp-2);
+}
+
+.tip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+  font-size: var(--fs-xs);
+}
+
+.tip-key {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.tip-val {
+  color: var(--text);
+  text-align: right;
+}
+
+.tip-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--sp-1) 0;
+}
+
+.tip-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-top: var(--sp-1);
+}
+
+.tip-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-right: 3px;
+  margin-bottom: 2px;
+}
+
+.tip-tag.sof { color: #e04040; background: rgba(224, 64, 64, 0.1); }
+.tip-tag.navy { color: #4a8fd4; background: rgba(74, 143, 212, 0.1); }
+.tip-tag.air { color: #5a9fe4; background: rgba(90, 159, 228, 0.1); }
+.tip-tag.isr { color: #9060cc; background: rgba(144, 96, 204, 0.1); }
+.tip-tag.intel { color: #e0a030; background: rgba(224, 160, 48, 0.1); }
+.tip-tag.green { color: var(--green); background: var(--green-dim); }
+.tip-tag.amber { color: var(--amber); background: var(--amber-dim); }
+.tip-tag.red { color: var(--red); background: var(--red-dim); }
