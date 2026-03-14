@@ -599,29 +599,22 @@ function assessThreatReadiness(threat) {
 // --- Operator Response to Vigil Assessment ---
 
 function approveMoveThreatToOps(threatId) {
-  console.log('[DISMISS-DEBUG] approveMoveThreatToOps called. threatId:', threatId, 'activeWorkspace:', V.ui.activeWorkspace);
   var threat = getThreat(threatId);
   if (!threat || threat.phase !== 'INTEL') {
-    console.log('[DISMISS-DEBUG] early return — threat:', threat ? threat.phase : 'null');
     dismissUrgentAlert();
     return;
   }
 
-  console.log('[DISMISS-DEBUG] threat.phase BEFORE:', threat.phase, 'orgName:', threat.orgName);
   threat.vigilRecommendsOps = false;
   vigilMoveThreatToOps(threat);
-  console.log('[DISMISS-DEBUG] threat.phase AFTER vigilMoveThreatToOps:', threat.phase);
   dismissUrgentAlert();
 
   addLog('OPERATOR: Approved transition of ' + threat.orgName + ' to Operations.', 'log-info');
 
-  // Force full workspace re-render to clear detail panel
+  // threat:moved:ops hook handles feed list re-render and detail panel clearing
+  // Force a full workspace re-render to ensure detail panel is cleared
   if (V.ui.activeWorkspace === 'feed' && typeof renderWorkspace === 'function') {
-    console.log('[DISMISS-DEBUG] calling renderWorkspace("feed")');
     renderWorkspace('feed');
-    // Also directly clear the detail panel as a belt-and-suspenders fix
-    var detailEl = document.getElementById('feed-detail');
-    console.log('[DISMISS-DEBUG] after renderWorkspace, detail innerHTML length:', detailEl ? detailEl.innerHTML.length : 'NO ELEMENT');
   }
 }
 

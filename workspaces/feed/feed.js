@@ -63,6 +63,9 @@
       renderFeedList();
       if (_selectedThreatId) {
         renderThreatDetail(_selectedThreatId);
+      } else {
+        var detailEl = $('feed-detail');
+        if (detailEl) detailEl.innerHTML = '';
       }
     },
   });
