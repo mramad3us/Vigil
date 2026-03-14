@@ -259,18 +259,40 @@
       if (cl.status === 'PENDING') {
         var remaining = cl.estimatedCompletion - V.time.totalMinutes;
         var approvalChance = getClearanceApprovalChance(cd.stance, country);
-        html += '<div style="font-size:var(--fs-sm);color:var(--text)">' +
+        var modeLabel = cl.mode === 'IN_PERSON' ? 'In-person envoy' : 'Diplomatic cable';
+
+        // Check if the assigned asset is still in transit
+        var assetInTransit = false;
+        var assetTransitRemaining = 0;
+        if (cl.assetId) {
+          var clAsset = getAsset(cl.assetId);
+          if (clAsset && clAsset.status === 'IN_TRANSIT') {
+            assetInTransit = true;
+            assetTransitRemaining = Math.max(0, (clAsset.transitStartTotalMinutes + clAsset.transitDurationMinutes) - V.time.totalMinutes);
+          }
+        }
+
+        html += '<div style="font-size:var(--fs-sm);color:var(--text);line-height:1.8">' +
           'Status: <span style="color:var(--amber)">PENDING</span> &middot; ' +
-          'ETA: ' + formatTransitTime(Math.max(0, remaining)) + ' &middot; ' +
-          'Approval: ' + Math.round(approvalChance * 100) + '%' +
-          (cl.mode ? ' &middot; Mode: ' + cl.mode : '') +
+          modeLabel + '<br>';
+
+        if (assetInTransit) {
+          html += 'Envoy in transit to capital: <span style="color:var(--amber)">' + formatTransitTime(Math.round(assetTransitRemaining)) + ' remaining</span><br>' +
+            'Negotiation begins on arrival. ';
+        }
+
+        html += 'Expected response: <span style="color:var(--text)">' + formatTransitTime(Math.max(0, remaining)) + '</span> &middot; ' +
+          'Approval likelihood: ' + Math.round(approvalChance * 100) + '%' +
         '</div>';
       } else {
         var statusColor = cl.status === 'GRANTED' ? 'var(--green)' : 'var(--red)';
-        html += '<div style="font-size:var(--fs-sm);color:' + statusColor + '">' + cl.status + '</div>';
+        var statusLabel = cl.status === 'GRANTED'
+          ? 'CLEARANCE GRANTED — ' + country + ' has authorized overt operations'
+          : 'CLEARANCE DENIED — ' + country + ' has refused authorization';
+        html += '<div style="font-size:var(--fs-sm);color:' + statusColor + '">' + statusLabel + '</div>';
       }
     } else {
-      html += '<div style="font-size:var(--fs-xs);color:var(--text-muted)">No active clearance</div>';
+      html += '<div style="font-size:var(--fs-xs);color:var(--text-muted)">No active clearance request</div>';
     }
     html += '</div>';
 
@@ -498,14 +520,32 @@
   function renderClearanceAssetPanel(country) {
     var assets = getDiplomaticAssets();
     var capital = getCountryCapital(country);
+    var cd = V.diplomacy[country];
+    var stance = cd ? cd.stance : 3;
+    var approvalPct = Math.round(getClearanceApprovalChance(stance, country) * 100);
+
+    // Delay ranges mirror systems/diplomacy.js requestProactiveClearance
+    var delayRanges = {
+      7: [60, 120], 6: [120, 360], 5: [360, 720], 4: [720, 1440],
+      3: [1440, 2880], 2: [1440, 2880], 1: [1440, 2880], 0: [1440, 2880],
+    };
+    var range = delayRanges[stance] || delayRanges[3];
+    var remoteMin = range[0];
+    var remoteMax = range[1];
 
     var html = '<div class="diplo-asset-panel">';
 
     // Remote option
     html += '<div class="diplo-asset-option">' +
       '<div class="diplo-asset-info">' +
-        '<span class="diplo-asset-name">REMOTE (Standard timeline)</span>' +
-        '<span class="diplo-asset-meta">Approval: ' + Math.round(getClearanceApprovalChance(V.diplomacy[country].stance, country) * 100) + '%</span>' +
+        '<span class="diplo-asset-name">REMOTE — Diplomatic cable via embassy</span>' +
+        '<span class="diplo-asset-meta">' +
+          'Approval: ' + approvalPct + '% &middot; ' +
+          'Processing: ' + formatTransitTime(remoteMin) + '–' + formatTransitTime(remoteMax) +
+        '</span>' +
+        '<span class="diplo-asset-meta" style="color:var(--text-muted)">' +
+          'Formal request transmitted through existing diplomatic channels. No envoy required — standard bureaucratic timeline.' +
+        '</span>' +
       '</div>' +
       '<span class="diplo-send-btn" onclick="event.stopPropagation(); startClearanceRequest(\'' + country.replace(/'/g, "\\'") + '\', null)">REQUEST</span>' +
     '</div>';
@@ -516,13 +556,22 @@
       if (a.status !== 'STATIONED') continue;
 
       var transit = calcTransitMinutes(a, capital.lat, capital.lon);
+      // In-person reduces negotiation time by 40-60%
+      var negoMin = Math.round(remoteMin * 0.40);
+      var negoMax = Math.round(remoteMax * 0.60);
+      var totalMin = transit + negoMin;
+      var totalMax = transit + negoMax;
 
       html += '<div class="diplo-asset-option">' +
         '<div class="diplo-asset-info">' +
           '<span class="diplo-asset-name">' + a.name + '</span>' +
           '<span class="diplo-asset-meta">' +
-            (transit > 0 ? 'Transit: ' + formatTransitTime(transit) + ' &middot; ' : '') +
-            '40-60% faster resolution' +
+            'Approval: ' + approvalPct + '% &middot; ' +
+            'Est. total: ' + formatTransitTime(totalMin) + '–' + formatTransitTime(totalMax) +
+          '</span>' +
+          '<span class="diplo-asset-meta" style="color:var(--text-muted)">' +
+            (transit > 0 ? 'Transit to capital: ' + formatTransitTime(transit) + '. ' : '') +
+            'In-person engagement accelerates host nation deliberation.' +
           '</span>' +
         '</div>' +
         '<span class="diplo-send-btn" onclick="event.stopPropagation(); startClearanceRequest(\'' + country.replace(/'/g, "\\'") + '\', \'' + a.id + '\')">REQUEST</span>' +
