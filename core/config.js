@@ -6,7 +6,8 @@
 
 // --- Operation Types ---
 // Maps event/threat categories to the type of operation Vigil will plan.
-// requiredCapabilities: assets MUST have at least one of these.
+// requiredCapabilities: the force package must collectively cover ALL of these.
+// assetMustHaveAll: if set, each individual asset must have ALL these caps to be eligible (e.g. armed drones need ISR+STRIKE on the same platform).
 // preferredCapabilities: assets with these score higher in recommendations.
 
 var OPERATION_TYPES = {
@@ -78,6 +79,8 @@ var OPERATION_TYPES = {
   DRONE_STRIKE: {
     id: 'DRONE_STRIKE', label: 'Drone Strike', shortLabel: 'UAS STRIKE',
     requiredCapabilities: ['ISR', 'STRIKE'],
+    assetMustHaveAll: ['ISR', 'STRIKE'],  // Each asset must be an armed ISR platform
+    restrictToCategories: ['ISR'],          // Only unmanned/ISR platforms, not manned fighters
     preferredCapabilities: ['ISR', 'STRIKE'],
     execHoursRange: [1, 4],
     baseSuccessRate: 85,

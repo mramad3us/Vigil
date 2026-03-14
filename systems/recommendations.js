@@ -16,7 +16,12 @@ function generateVigilOptions(op) {
   var destLat = op.geo.lat;
   var destLon = op.geo.lon;
 
-  // Find all available assets with at least one required capability
+  // Per-asset mandatory capabilities (e.g. DRONE_STRIKE needs each asset to have ISR+STRIKE)
+  var mustHaveAll = opType.assetMustHaveAll || null;
+  // Category restriction (e.g. DRONE_STRIKE only admits ISR-category platforms)
+  var restrictCats = opType.restrictToCategories || null;
+
+  // Find all available assets with relevant capabilities
   var eligible = getAvailableAssets().filter(function(a) {
     // Domestic agencies only available for domestic ops
     if (a.domesticAuthority && !op.domestic) return false;
@@ -29,8 +34,24 @@ function generateVigilOptions(op) {
       if (!a.domesticAuthority && a.deniability !== 'COVERT') return false;
     }
 
+    // Category restriction
+    if (restrictCats && restrictCats.indexOf(a.category) < 0) return false;
+
+    // If op requires each asset to have ALL listed caps, enforce that
+    if (mustHaveAll) {
+      for (var m = 0; m < mustHaveAll.length; m++) {
+        if (a.capabilities.indexOf(mustHaveAll[m]) < 0) return false;
+      }
+      return true;
+    }
+
+    // Otherwise: asset must have at least one required capability
     for (var i = 0; i < required.length; i++) {
       if (a.capabilities.indexOf(required[i]) >= 0) return true;
+    }
+    // Also admit assets that have preferred capabilities (support roles)
+    for (var p = 0; p < preferred.length; p++) {
+      if (a.capabilities.indexOf(preferred[p]) >= 0) return true;
     }
     return false;
   });
@@ -244,7 +265,7 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
 
   if (selected.length === 0) return null;
 
-  // Check all required capabilities are covered
+  // Check all required capabilities are covered by the force package
   var allCovered = true;
   for (var r = 0; r < opType.requiredCapabilities.length; r++) {
     if (!coveredRequired[opType.requiredCapabilities[r]]) {
@@ -259,6 +280,9 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
       if (!found) allCovered = false;
     }
   }
+
+  // Reject option entirely if required capabilities aren't covered
+  if (!allCovered) return null;
 
   var assetIds = selected.map(function(a) { return a.id; });
   var transitMinutes = calcGroupTransitMinutes(assetIds, destLat, destLon);

@@ -516,12 +516,23 @@
     var allAvailable = getAvailableAssets();
     var opType = getOperationType(op.operationType);
 
-    // Filter to assets with at least one relevant capability
+    // Filter to assets with relevant capabilities
+    var mustHaveAll = opType ? opType.assetMustHaveAll : null;
+    var restrictCats = opType ? opType.restrictToCategories : null;
     var eligibleAvailable = allAvailable.filter(function(a) {
       if (cfg.assetIds.indexOf(a.id) >= 0) return false; // already selected
       if (a.domesticAuthority && !op.domestic) return false;
       if (op.domestic && (a.category === 'NAVY' || a.category === 'AIR')) return false;
       if (!opType) return true;
+      // Category restriction (e.g. DRONE_STRIKE only ISR-category)
+      if (restrictCats && restrictCats.indexOf(a.category) < 0) return false;
+      // If op requires each asset to have ALL listed caps, enforce that
+      if (mustHaveAll) {
+        for (var m = 0; m < mustHaveAll.length; m++) {
+          if (a.capabilities.indexOf(mustHaveAll[m]) < 0) return false;
+        }
+        return true;
+      }
       for (var i = 0; i < opType.requiredCapabilities.length; i++) {
         if (a.capabilities.indexOf(opType.requiredCapabilities[i]) >= 0) return true;
       }

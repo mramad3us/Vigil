@@ -37,7 +37,6 @@ function getStancePermissions(level, theaterId) {
 
   return {
     covertOps: true,  // always allowed, but risky at low stances
-    flyover: level >= 4,
     station: level >= 6,
     overtOps: level >= 6,
     covertRisk: covertRisk,
