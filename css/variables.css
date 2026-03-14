@@ -8,47 +8,47 @@
 
 :root {
   /* === BACKGROUNDS === */
-  --bg-0:           #040608;
-  --bg-1:           #0a0e14;
-  --bg-2:           #0f1319;
-  --bg-3:           #141a22;
-  --bg-4:           #1a2029;
-  --bg-hover:       #1e2633;
-  --bg-active:      #242e3c;
-  --bg-glass:       rgba(10, 14, 20, 0.88);
-  --bg-glass-light: rgba(14, 20, 28, 0.75);
+  --bg-0:           #060a0f;
+  --bg-1:           #0c1018;
+  --bg-2:           #111820;
+  --bg-3:           #171e28;
+  --bg-4:           #1d2530;
+  --bg-hover:       #222c3a;
+  --bg-active:      #293444;
+  --bg-glass:       rgba(12, 16, 24, 0.92);
+  --bg-glass-light: rgba(17, 24, 32, 0.82);
   --bg-overlay:     rgba(4, 6, 8, 0.7);
 
   /* === BORDERS === */
-  --border:         #1a2029;
-  --border-light:   #242e3a;
-  --border-focus:   #3a4a5e;
-  --border-glow:    rgba(74, 143, 212, 0.2);
+  --border:         #1e2838;
+  --border-light:   #2a3648;
+  --border-focus:   #3e5068;
+  --border-glow:    rgba(74, 143, 212, 0.25);
 
   /* === TEXT === */
-  --text:           #b0b8c4;
-  --text-dim:       #5a6672;
-  --text-hi:        #e4e8ec;
-  --text-muted:     #3a4450;
-  --text-inverse:   #0a0e14;
+  --text:           #c4ccd8;
+  --text-dim:       #788694;
+  --text-hi:        #e8ecf0;
+  --text-muted:     #4e5c6c;
+  --text-inverse:   #0c1018;
 
   /* === ACCENT (muted Palantir blue) === */
   --accent:         #4a8fd4;
-  --accent-dim:     rgba(74, 143, 212, 0.10);
-  --accent-mid:     rgba(74, 143, 212, 0.25);
+  --accent-dim:     rgba(74, 143, 212, 0.12);
+  --accent-mid:     rgba(74, 143, 212, 0.28);
   --accent-hover:   #5a9fe4;
   --accent-glow:    rgba(74, 143, 212, 0.3);
 
   /* === SEMANTIC === */
   --green:          #3dcc70;
-  --green-dim:      rgba(61, 204, 112, 0.10);
-  --green-mid:      rgba(61, 204, 112, 0.25);
+  --green-dim:      rgba(61, 204, 112, 0.12);
+  --green-mid:      rgba(61, 204, 112, 0.28);
   --red:            #e04040;
-  --red-dim:        rgba(224, 64, 64, 0.10);
-  --red-mid:        rgba(224, 64, 64, 0.25);
+  --red-dim:        rgba(224, 64, 64, 0.12);
+  --red-mid:        rgba(224, 64, 64, 0.28);
   --amber:          #e0a030;
-  --amber-dim:      rgba(224, 160, 48, 0.10);
-  --amber-mid:      rgba(224, 160, 48, 0.25);
+  --amber-dim:      rgba(224, 160, 48, 0.12);
+  --amber-mid:      rgba(224, 160, 48, 0.28);
   --purple:         #9060cc;
   --purple-dim:     rgba(144, 96, 204, 0.10);
   --blue:           #4a8fd4;
@@ -59,7 +59,7 @@
   --severity-high:      #e07030;
   --severity-elevated:  #e0a030;
   --severity-routine:   #4a8fd4;
-  --severity-low:       #5a6672;
+  --severity-low:       #788694;
 
   /* === CLASSIFICATION === */
   --class-bg:       rgba(224, 160, 48, 0.05);
@@ -112,7 +112,7 @@
   --shadow-md:      0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg:      0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-xl:      0 16px 40px rgba(0, 0, 0, 0.6);
-  --shadow-glow:    0 0 12px rgba(74, 143, 212, 0.12);
+  --shadow-glow:    0 0 12px rgba(74, 143, 212, 0.18);
   --shadow-inset:   inset 0 1px 3px rgba(0, 0, 0, 0.3);
 
   /* === GLASS === */

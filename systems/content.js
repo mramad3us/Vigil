@@ -288,6 +288,8 @@ var INTEL_VALUE_POOLS = {
     'Source reports hostages under duress. Medical attention needed for one.',
     'No proof of life for 72h. Condition unknown — urgency CRITICAL.',
     'Video released shows hostages alive. Conditions deteriorating.',
+    'Medical emergency — hostage requires medical intervention within 24 hours or risk of death.',
+    'Captors have threatened execution within 48 hours if demands not met. Assessment: credible.',
   ],
   CAPTOR_FORCE: [
     '6-8 armed captors. AK-pattern rifles, at least 1 RPG observed.',
@@ -312,6 +314,9 @@ var INTEL_VALUE_POOLS = {
     'Window closing — captor reinforcements expected within 24h.',
     'Weather window: 6h of darkness, low moon. Favorable.',
     'No clear window — continuous guard presence. Forced entry required.',
+    'Captors preparing to move hostages within 12 hours. Window closing rapidly.',
+    'Source reports captors have issued 48h ultimatum to government. Action required before deadline.',
+    'Hostage transfer to secondary location imminent — within 36 hours. Rescue significantly harder after move.',
   ],
 
   // Counter-Terror
@@ -326,6 +331,10 @@ var INTEL_VALUE_POOLS = {
     'Advanced planning — materials acquisition in progress. Timeline: 2-4 weeks.',
     'Imminent — operational communications suggest attack window of 48-72 hours.',
     'Early planning phase. Aspirational rather than operational capability assessed.',
+    'Operational go-code intercepted. Execution assessed within 24 hours.',
+    'Source reporting: cell leadership has set operational deadline at 1-2 weeks.',
+    'Communications analysis indicates final coordination phase. Window closing — within 96 hours.',
+    'HUMINT source reports operational rehearsal completed. Attack imminent — estimated 36-48 hours.',
   ],
   WEAPONS_CACHE: [
     'Source reports safe house in industrial district. Weapons stored in basement.',

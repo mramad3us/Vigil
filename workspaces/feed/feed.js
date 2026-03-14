@@ -170,7 +170,8 @@
         (threat.urgent ? '<div class="feed-threat-urgent-badge" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">URGENT</div>' : '') +
       '</div>' +
       '<div class="feed-threat-type">' + threat.typeLabel + ' · ' + threat.location.city + ', ' + threat.location.country + '</div>' +
-      (threat.foreignTarget ? '<div class="feed-threat-foreign-target">NON-US TARGET: ' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + '</div>' : '') +
+      (threat.foreignTarget && threat.foreignTarget.country !== 'United States' ? '<div class="feed-threat-foreign-target">NON-US TARGET: ' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + '</div>' : '') +
+      (threat.foreignTarget && threat.foreignTarget.country === 'United States' ? '<div class="feed-threat-foreign-target" style="color:var(--red)">HOMELAND TARGET: ' + (threat.foreignTarget.city || 'United States') + '</div>' : '') +
       '<div class="feed-threat-bars">' +
         '<div class="feed-threat-bar-row">' +
           '<span class="feed-threat-bar-label">INTEL</span>' +
@@ -386,7 +387,16 @@
     }
 
     // --- Foreign Target Section ---
-    if (threat.foreignTarget && !threat.foreignTarget.disclosed) {
+    if (threat.foreignTarget && threat.foreignTarget.country === 'United States') {
+      // US-targeted threats — no disclosure options, show homeland target info
+      html += '<div class="threat-section">' +
+        '<div class="threat-section-title" style="color:var(--red)">HOMELAND TARGET</div>' +
+        '<div style="font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text);margin-bottom:var(--sp-3)">' +
+          'Target intent analysis confirms this threat targets <span style="color:var(--red);font-weight:600">' + (threat.foreignTarget.city || 'the United States') + '</span>. ' +
+          'Domestic defense protocols apply.' +
+        '</div>' +
+      '</div>';
+    } else if (threat.foreignTarget && !threat.foreignTarget.disclosed) {
       html += '<div class="threat-section">' +
         '<div class="threat-section-title">FOREIGN TARGET</div>' +
         '<div style="font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text);margin-bottom:var(--sp-3)">' +

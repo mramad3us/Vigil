@@ -322,6 +322,9 @@ function spawnThreat(theaterId) {
           }
         }
 
+        // Smart urgency: timing-related intel adjusts threat window
+        adjustUrgencyFromIntel(threat);
+
         // Vigil assessment: is this threat "cooked" enough for direct action?
         assessThreatReadiness(threat);
       }
@@ -770,6 +773,16 @@ function spawnOperationFromThreat(threat) {
   } else {
     opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
   }
+
+  // AT_WAR: no diplomacy — strip DIPLOMATIC_RESPONSE and use direct action
+  if (threat.location && threat.location.country && typeof getCountryStance === 'function') {
+    var countryStance = getCountryStance(threat.location.country);
+    if (countryStance && countryStance.level === 0) {
+      opTypes = opTypes.filter(function(t) { return t !== 'DIPLOMATIC_RESPONSE'; });
+      if (opTypes.length === 0) opTypes = ['MILITARY_STRIKE'];
+    }
+  }
+
   var opType = pick(opTypes);
 
   var codename = generateCodename();
@@ -928,6 +941,109 @@ function spawnOperationFromEvent(event, urgent) {
 // ===================================================================
 //  HELPERS
 // ===================================================================
+
+// --- Smart Urgency: intel fields that reveal timing info adjust threat window ---
+// Timing-sensitive field keys and the urgency windows they can impose (in minutes)
+var URGENCY_INTEL_KEYS = {
+  ATTACK_PLANNING: true,
+  COMMS_PATTERN: true,
+  RESCUE_WINDOW: true,
+  HOSTAGE_CONDITION: true,
+  ESCALATION_POSTURE: true,
+  OPERATIONAL_TIMELINE: true,
+  STRATEGIC_INTENT: true,
+};
+
+// Parse a revealed intel value for timing indicators and return new expiry minutes from now
+function parseUrgencyFromValue(value) {
+  if (!value) return null;
+  var v = value.toLowerCase();
+
+  // Imminent / hours-based windows
+  if (v.indexOf('imminent') >= 0 || v.indexOf('48-72 hours') >= 0 || v.indexOf('48h') >= 0) {
+    return randInt(48 * 60, 72 * 60); // 48-72h
+  }
+  if (/within (\d+)h/.test(v)) {
+    var h = parseInt(RegExp.$1);
+    return randInt(h * 45, h * 60); // slight compression
+  }
+  if (/within (\d+) hours?/.test(v)) {
+    var h2 = parseInt(RegExp.$1);
+    return randInt(h2 * 45, h2 * 60);
+  }
+  if (/(\d+)h ultimatum/.test(v) || /(\d+)h deadline/.test(v)) {
+    var h3 = parseInt(RegExp.$1);
+    return randInt(h3 * 50, h3 * 60);
+  }
+  // "window closing" = urgent but unspecified → 24-48h
+  if (v.indexOf('window closing') >= 0 || v.indexOf('reinforcements expected') >= 0) {
+    return randInt(24 * 60, 48 * 60);
+  }
+  // "no proof of life for 72h" or "condition unknown" = urgent
+  if (v.indexOf('no proof of life') >= 0 || v.indexOf('condition unknown') >= 0 || v.indexOf('urgency critical') >= 0) {
+    return randInt(12 * 60, 36 * 60);
+  }
+  // "medical intervention within 24 hours" or similar
+  if (/medical.{0,30}within (\d+)/.test(v)) {
+    var h4 = parseInt(RegExp.$1);
+    return randInt(h4 * 40, h4 * 60);
+  }
+  // Week-range: "2-4 weeks", "timeline: 2-4 weeks"
+  if (/(\d+)-(\d+) weeks?/.test(v)) {
+    var w1 = parseInt(RegExp.$1), w2 = parseInt(RegExp.$2);
+    return randInt(w1 * 7 * 24 * 60, w2 * 7 * 24 * 60);
+  }
+  // "elevated alert", "strategic rocket forces" = days
+  if (v.indexOf('elevated alert') >= 0 || v.indexOf('being fueled') >= 0) {
+    return randInt(3 * 24 * 60, 7 * 24 * 60);
+  }
+
+  return null; // No actionable timing info
+}
+
+function adjustUrgencyFromIntel(threat) {
+  if (!threat.intelFields || threat._urgencyAdjusted) return;
+
+  for (var i = 0; i < threat.intelFields.length; i++) {
+    var field = threat.intelFields[i];
+    if (!field.revealed || !URGENCY_INTEL_KEYS[field.key]) continue;
+    if (field._urgencyProcessed) continue;
+
+    field._urgencyProcessed = true;
+    var newExpiryMinutes = parseUrgencyFromValue(field.value);
+    if (!newExpiryMinutes) continue;
+
+    var now = V.time.totalMinutes;
+    var newExpiresAt = now + newExpiryMinutes;
+    var oldExpiresAt = threat.expiresAt;
+
+    // Only tighten the window, never extend it
+    if (newExpiresAt < oldExpiresAt) {
+      threat.expiresAt = newExpiresAt;
+      threat._urgencyAdjusted = true;
+
+      // Reset urgency alerts so they re-trigger at appropriate thresholds
+      threat.urgencyAlertSent = false;
+      threat.criticalAlertSent = false;
+
+      var remaining = getThreatTimeRemaining(threat);
+      var timeStr = remaining.hours < 48 ? remaining.hours + 'h' :
+        remaining.days < 30 ? remaining.days + 'd' : Math.round(remaining.days / 30) + 'mo';
+      addLog('VIGIL ANALYSIS: ' + threat.orgName + ' — intel indicates operational window of ' +
+        timeStr + '. Threat timeline adjusted.', 'log-warn');
+
+      // Push a feed notification
+      fire('notification:push', {
+        title: 'TIMELINE ADJUSTMENT',
+        body: field.label + ' on ' + threat.orgName + ' reveals shortened operational window. ' +
+          'Estimated ' + timeStr + ' remaining.',
+        severity: remaining.hours <= 48 ? 'HIGH' : 'ELEVATED',
+        icon: '⏱',
+      });
+      break; // Only adjust once per threat
+    }
+  }
+}
 
 function getIntelThreats() {
   return V.threats.filter(function(t) {

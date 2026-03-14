@@ -151,23 +151,47 @@
     var option = op.options[op.selectedOptionIdx];
     if (!option) return;
 
-    // Deploy assets
-    deployAssets(option.assetIds, op.geo.lat, op.geo.lon, op.id);
-    op.assignedAssetIds = option.assetIds.slice();
+    // Filter to only assets that are actually still available (STATIONED)
+    var availableIds = [];
+    for (var av = 0; av < option.assetIds.length; av++) {
+      var checkAsset = getAsset(option.assetIds[av]);
+      if (checkAsset && checkAsset.status === 'STATIONED') {
+        availableIds.push(option.assetIds[av]);
+      }
+    }
+
+    if (availableIds.length === 0) {
+      // All assets were reassigned — force re-analysis
+      op.status = 'ANALYSIS';
+      op.options = [];
+      op.selectedOptionIdx = undefined;
+      addLog('OP ' + op.codename + ': All assigned assets unavailable. Vigil re-analyzing options.', 'log-warn');
+      return;
+    }
+
+    // Deploy only available assets
+    deployAssets(availableIds, op.geo.lat, op.geo.lon, op.id);
+    op.assignedAssetIds = availableIds;
     op.transitStartTotalMinutes = V.time.totalMinutes;
-    op.transitDurationMinutes = option.transitTimeMinutes;
+    // Recalculate transit based on actually deployed assets
+    op.transitDurationMinutes = calcGroupTransitMinutes(availableIds, op.geo.lat, op.geo.lon);
 
     op.status = 'ASSETS_IN_TRANSIT';
 
     // Fire per-asset deployed events (used by domestic Posse Comitatus system)
-    for (var da = 0; da < option.assetIds.length; da++) {
-      var deployedAsset = getAsset(option.assetIds[da]);
+    for (var da = 0; da < availableIds.length; da++) {
+      var deployedAsset = getAsset(availableIds[da]);
       if (deployedAsset) {
         fire('operation:asset:deployed', { operation: op, asset: deployedAsset });
       }
     }
 
-    addLog('OP ' + op.codename + ': Assets deploying. Transit: ' + formatTransitTime(option.transitTimeMinutes) + '.', 'log-op');
+    if (availableIds.length < option.assetIds.length) {
+      var lost = option.assetIds.length - availableIds.length;
+      addLog('OP ' + op.codename + ': ' + lost + ' asset(s) no longer available. Proceeding with ' + availableIds.length + ' asset(s). Transit: ' + formatTransitTime(op.transitDurationMinutes) + '.', 'log-warn');
+    } else {
+      addLog('OP ' + op.codename + ': Assets deploying. Transit: ' + formatTransitTime(op.transitDurationMinutes) + '.', 'log-op');
+    }
   }
 
   function transitionToExecuting(op) {

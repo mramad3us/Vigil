@@ -375,6 +375,13 @@
   background: var(--bg-hover);
 }
 
+.vigil-asset-row.asset-unavailable {
+  opacity: 0.45;
+}
+.vigil-asset-row.asset-unavailable .vigil-asset-name {
+  text-decoration: line-through;
+}
+
 .vigil-asset-cat {
   font-family: var(--font-mono);
   font-size: 8px;

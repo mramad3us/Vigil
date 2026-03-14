@@ -360,7 +360,9 @@
     for (var i = 0; i < op.assignedAssetIds.length; i++) {
       var asset = getAsset(op.assignedAssetIds[i]);
       if (!asset) continue;
-      html += renderAssetRow(asset, false);
+      var expandKey = op.id + '-assigned-' + asset.id;
+      var isExpanded = _expandedAssets[expandKey];
+      html += renderAssetRow(asset, true, expandKey, isExpanded);
     }
 
     html += '</div></div>';
@@ -415,14 +417,20 @@
         '</div>' +
       '</div>';
 
-      // Assets list with expandable detail
+      // Assets list with expandable detail — mark unavailable ones
       html += '<div class="vigil-option-assets">';
       var assets = getAssetsByIds(opt.assetIds);
+      var unavailableCount = 0;
       for (var a = 0; a < assets.length; a++) {
         var asset = assets[a];
         var expandKey = op.id + '-' + i + '-' + asset.id;
         var isExpanded = _expandedAssets[expandKey];
-        html += renderAssetRow(asset, true, expandKey, isExpanded);
+        var isUnavailable = asset.status !== 'STATIONED';
+        if (isUnavailable) unavailableCount++;
+        html += renderAssetRow(asset, true, expandKey, isExpanded, isUnavailable);
+      }
+      if (unavailableCount > 0) {
+        html += '<div style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--amber);padding:var(--sp-2);margin-top:var(--sp-1)">⚠ ' + unavailableCount + ' asset(s) currently deployed elsewhere</div>';
       }
       html += '</div>';
 
@@ -470,7 +478,12 @@
         }
       }
 
-      html += '<button class="op-action-btn execute vigil-select-btn" onclick="approveOption(\'' + op.id + '\',' + i + ')">SELECT THIS OPTION</button>';
+      var allUnavailable = unavailableCount === assets.length;
+      if (allUnavailable) {
+        html += '<button class="op-action-btn execute vigil-select-btn" disabled style="opacity:0.4;cursor:not-allowed">ALL ASSETS UNAVAILABLE</button>';
+      } else {
+        html += '<button class="op-action-btn execute vigil-select-btn" onclick="approveOption(\'' + op.id + '\',' + i + ')">SELECT THIS OPTION' + (unavailableCount > 0 ? ' (' + (assets.length - unavailableCount) + '/' + assets.length + ' AVAILABLE)' : '') + '</button>';
+      }
 
       html += '</div>';
     }
@@ -481,15 +494,17 @@
 
   // --- Asset Row with Expandable Detail ---
 
-  function renderAssetRow(asset, expandable, expandKey, isExpanded) {
+  function renderAssetRow(asset, expandable, expandKey, isExpanded, unavailable) {
     var catInfo = ASSET_CATEGORIES[asset.category] || {};
     var base = getBase(asset.currentBaseId || asset.homeBaseId);
     var catClass = asset.category.toLowerCase();
 
-    var html = '<div class="vigil-asset-row' + (expandable ? ' expandable' : '') + '"' +
+    var unavailCls = unavailable ? ' asset-unavailable' : '';
+    var html = '<div class="vigil-asset-row' + (expandable ? ' expandable' : '') + unavailCls + '"' +
       (expandable ? ' onclick="toggleAssetExpand(\'' + expandKey + '\')"' : '') + '>' +
       '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
       '<span class="vigil-asset-name">' + asset.name + '</span>' +
+      (unavailable ? '<span style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;background:var(--red-dim);color:var(--red)">DEPLOYED</span>' : '') +
       (asset.deniability ? '<span style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + asset.deniability + '</span>' : '') +
       '<span class="vigil-asset-base">' + (base ? base.city + ', ' + base.country : '') + '</span>' +
       (expandable ? '<span class="asset-expand-icon">' + (isExpanded ? '▾' : '▸') + '</span>' : '') +

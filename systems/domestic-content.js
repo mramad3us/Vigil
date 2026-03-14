@@ -842,6 +842,9 @@ var DOMESTIC_INTEL_VALUE_POOLS = {
     'Source reporting indicates {orgName} operational planning meeting in {city}. Attack timeline assessed at 2-4 weeks. Specific target not yet confirmed.',
     'Intercepted communications reference a date and location in {city}. Vigil assesses HIGH probability of imminent attack. Recommend preemptive action.',
     'Digital forensics from seized device reveal {orgName} reconnaissance photography of critical infrastructure in {city}. Planning stage: advanced.',
+    'Encrypted messaging intercept: {orgName} leadership has authorized operational go-code. Execution assessed within 48 hours.',
+    'Source close to {orgName} reports final operational meeting scheduled. Window closing — attack expected within 72 hours of meeting.',
+    'Vigil predictive model: attack probability 87% within 96 hours based on behavioral pattern acceleration and materials procurement timeline.',
   ],
 
   FINANCING_TRAIL: [

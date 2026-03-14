@@ -61,8 +61,8 @@ var OPERATION_TYPES = {
   },
   DIPLOMATIC_RESPONSE: {
     id: 'DIPLOMATIC_RESPONSE', label: 'Diplomatic Response', shortLabel: 'DIPLO',
-    requiredCapabilities: ['INTEL'],
-    preferredCapabilities: ['INTEL', 'HUMINT'],
+    requiredCapabilities: ['DIPLOMATIC'],
+    preferredCapabilities: ['DIPLOMATIC', 'INTEL', 'HUMINT'],
     execHoursRange: [4, 16],
     baseSuccessRate: 75,
   },
