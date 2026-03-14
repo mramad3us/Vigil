@@ -458,7 +458,11 @@
         if (optHasOvert && !opPerms.overtOps) {
           html += '<div class="vigil-option-consequences" style="color:var(--red);border-color:var(--red);background:var(--red-dim)">' +
             'DIPLOMATIC WARNING: Deploying overt assets to ' + opCountry + ' (' + opStance.label + ') without clearance will constitute a sovereignty violation. ' +
-            'Expected stance impact: ' + (opPerms.overtOps ? 'minimal' : 'SEVERE (-3 to -5 levels)') + '.' +
+            'Expected stance impact: SEVERE (-3 to -5 levels).' +
+          '</div>';
+        } else if (optHasOvert && opPerms.clearanceGranted) {
+          html += '<div class="vigil-option-consequences" style="color:var(--green);border-color:var(--green);background:var(--green-dim)">' +
+            'AUTHORIZED: Overt operations cleared by ' + opCountry + ' state authority.' +
           '</div>';
         } else if (optHasOvert) {
           html += '<div class="vigil-option-consequences" style="color:var(--green);border-color:var(--green);background:var(--green-dim)">' +

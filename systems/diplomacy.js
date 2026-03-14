@@ -215,7 +215,13 @@ function getCountryStance(country) {
 function getCountryPermissions(country) {
   var cd = V.diplomacy[country];
   if (!cd) return getStancePermissions(3);
-  return getStancePermissions(cd.stance);
+  var perms = getStancePermissions(cd.stance);
+  // Granted clearance overrides overtOps
+  if (!perms.overtOps && cd.pendingClearance && cd.pendingClearance.status === 'GRANTED') {
+    perms.overtOps = true;
+    perms.clearanceGranted = true;
+  }
+  return perms;
 }
 
 function canDeployOvert(country) {
