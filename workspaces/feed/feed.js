@@ -14,6 +14,7 @@
   var _showDeployPanel = false;
   var _deploySortMode = 'EFFECTIVENESS';
   var _deployCovertFilter = false;
+  var _expandedCollectors = {};
 
   function formatTimeRemaining(hours) {
     if (hours < 48) return hours + 'h';
@@ -168,7 +169,7 @@
         (threat.urgent ? '<div class="feed-threat-urgent-badge" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">URGENT</div>' : '') +
       '</div>' +
       '<div class="feed-threat-type">' + threat.typeLabel + ' · ' + threat.location.city + ', ' + threat.location.country + '</div>' +
-      (threat.foreignTarget ? '<div class="feed-threat-foreign-target">NON-US TARGET: ' + threat.foreignTarget.country + '</div>' : '') +
+      (threat.foreignTarget ? '<div class="feed-threat-foreign-target">NON-US TARGET: ' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + '</div>' : '') +
       '<div class="feed-threat-bars">' +
         '<div class="feed-threat-bar-row">' +
           '<span class="feed-threat-bar-label">INTEL</span>' +
@@ -313,34 +314,71 @@
         if (!asset) continue;
 
         var catInfo = ASSET_CATEGORIES[asset.category] || {};
-        var statusText = asset.status === 'COLLECTING' ? 'ON STATION' :
-                         asset.status === 'IN_TRANSIT' ? 'IN TRANSIT' : asset.status;
-        var statusCls = asset.status === 'COLLECTING' ? 'collecting' : 'transit';
+        var base = getBase(asset.homeBaseId);
+        var isCollecting = asset.status === 'COLLECTING';
+        var statusCls = isCollecting ? 'collecting' : 'transit';
 
-        // Show per-source effectiveness
-        var profile = asset.collectionProfile || {};
-        var effectiveSources = [];
-        for (var src in profile) {
-          if (profile[src] >= 3) effectiveSources.push(src + ':' + profile[src]);
+        // Transit time remaining
+        var statusText = '';
+        if (isCollecting) {
+          statusText = 'ON STATION';
+        } else if (asset.status === 'IN_TRANSIT' && asset.transitDurationMinutes > 0) {
+          var elapsed = V.time.totalMinutes - asset.transitStartTotalMinutes;
+          var remaining = Math.max(0, asset.transitDurationMinutes - elapsed);
+          statusText = 'ETA ' + (typeof formatTransitTime === 'function' ? formatTransitTime(remaining) : remaining + 'min');
+        } else {
+          statusText = asset.status;
         }
 
-        html += '<div class="threat-collector-row">' +
-          '<div class="threat-collector-info">' +
-            '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
-            '<span class="vigil-asset-name">' + asset.name + '</span>' +
-          '</div>' +
-          '<div class="threat-collector-status">' +
-            '<span class="threat-collector-status-chip ' + statusCls + '">' + statusText + '</span>' +
-            '<button class="threat-collector-recall" onclick="console.log(\'[RECALL BTN] clicked for\', \'' + asset.id + '\');recallCollectionAsset(\'' + asset.id + '\');renderFeedRefresh()">RECALL</button>' +
-          '</div>' +
-        '</div>';
+        // Collection effectiveness for this threat
+        var eff = typeof getAssetCollectionEffectiveness === 'function' ?
+          getAssetCollectionEffectiveness(asset, threat) : { rating: 0, effectiveFields: 0, totalUnrevealed: 0 };
+        var effColor = eff.rating >= 60 ? 'var(--green)' : eff.rating >= 30 ? 'var(--amber)' : 'var(--red)';
 
-        // Effectiveness bar
-        if (effectiveSources.length > 0) {
-          html += '<div class="threat-collector-effectiveness">' +
-            'Effective: ' + effectiveSources.join(', ') +
+        // Source capability tags
+        var profile = asset.collectionProfile || {};
+        var capTags = '';
+        for (var src in profile) {
+          var srcColor = profile[src] >= 4 ? 'var(--green)' : profile[src] >= 2 ? 'var(--amber)' : 'var(--text-muted)';
+          capTags += '<span class="deploy-cap-tag" style="color:' + srcColor + '">' + src + ':' + profile[src] + '</span>';
+        }
+
+        var expandedCls = _expandedCollectors[asset.id] ? ' expanded' : '';
+
+        html += '<div class="threat-collector-card' + expandedCls + '">' +
+          '<div class="threat-collector-row" onclick="toggleCollectorExpand(\'' + asset.id + '\')">' +
+            '<div class="threat-collector-info">' +
+              '<span class="collector-expand-icon">' + (_expandedCollectors[asset.id] ? '▾' : '▸') + '</span>' +
+              '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
+              '<span class="vigil-asset-name">' + asset.name + '</span>' +
+            '</div>' +
+            '<div class="threat-collector-status">' +
+              '<span class="threat-collector-status-chip ' + statusCls + '">' + statusText + '</span>' +
+              '<span class="threat-collector-eff" style="color:' + effColor + '">' + eff.rating + '%</span>' +
+            '</div>' +
+          '</div>';
+
+        // Expandable detail panel
+        if (_expandedCollectors[asset.id]) {
+          html += '<div class="threat-collector-detail">' +
+            '<div class="collector-detail-grid">' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">DESIGNATION</span><span class="collector-detail-value">' + (asset.designation || asset.type) + '</span></div>' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">HOME BASE</span><span class="collector-detail-value">' + (base ? base.name + ', ' + base.country : '—') + '</span></div>' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">PERSONNEL</span><span class="collector-detail-value">' + (asset.personnel || '—') + '</span></div>' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">PLATFORM</span><span class="collector-detail-value">' + (asset.platform || '—') + '</span></div>' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">DENIABILITY</span><span class="collector-detail-value" style="color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + (asset.deniability || 'OVERT') + '</span></div>' +
+              '<div class="collector-detail-item"><span class="collector-detail-label">EFFECTIVENESS</span><span class="collector-detail-value" style="color:' + effColor + '">' + eff.rating + '% — ' + eff.effectiveFields + '/' + eff.totalUnrevealed + ' fields covered</span></div>' +
+            '</div>' +
+            (asset.description ? '<div class="collector-detail-desc">' + asset.description + '</div>' : '') +
+            (capTags ? '<div class="collector-detail-caps">' + capTags + '</div>' : '') +
+            (asset.equipment && asset.equipment.length > 0 ? '<div class="collector-detail-equip"><span class="collector-detail-label">EQUIPMENT</span> ' + asset.equipment.join(' · ') + '</div>' : '') +
+            '<div class="collector-detail-actions">' +
+              '<button class="threat-collector-recall" onclick="event.stopPropagation();recallCollectionAsset(\'' + asset.id + '\');renderFeedRefresh()">RECALL TO BASE</button>' +
+            '</div>' +
           '</div>';
         }
+
+        html += '</div>';
       }
 
       html += '</div></div>';
@@ -351,7 +389,7 @@
       html += '<div class="threat-section">' +
         '<div class="threat-section-title">FOREIGN TARGET</div>' +
         '<div style="font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text);margin-bottom:var(--sp-3)">' +
-          'Target intent analysis reveals this threat targets <span style="color:var(--text-hi);font-weight:600">' + threat.foreignTarget.country + '</span>. ' +
+          'Target intent analysis reveals this threat targets <span style="color:var(--text-hi);font-weight:600">' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + '</span>. ' +
           'Disclosing intelligence to the target country may improve diplomatic relations.' +
         '</div>' +
         '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">' +
@@ -364,7 +402,7 @@
       html += '<div class="threat-section">' +
         '<div class="threat-section-title">FOREIGN TARGET</div>' +
         '<div style="font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text-dim)">' +
-          'Target: ' + threat.foreignTarget.country + ' — Disclosed via ' + (threat.foreignTarget.disclosureType || 'unknown') + '.' +
+          'Target: ' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + ' — Disclosed via ' + (threat.foreignTarget.disclosureType || 'unknown') + '.' +
         '</div>' +
       '</div>';
     }
@@ -695,6 +733,11 @@
 
   window.toggleCovertFilter = function() {
     _deployCovertFilter = !_deployCovertFilter;
+    if (_selectedThreatId) renderThreatDetail(_selectedThreatId);
+  };
+
+  window.toggleCollectorExpand = function(assetId) {
+    _expandedCollectors[assetId] = !_expandedCollectors[assetId];
     if (_selectedThreatId) renderThreatDetail(_selectedThreatId);
   };
 

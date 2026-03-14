@@ -533,6 +533,104 @@
   padding: 0 var(--sp-3) var(--sp-1);
 }
 
+/* --- Collapsible Collector Cards --- */
+.threat-collector-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-3);
+  overflow: hidden;
+}
+
+.threat-collector-card .threat-collector-row {
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-radius: 0;
+  transition: background var(--transition-fast);
+}
+
+.threat-collector-card .threat-collector-row:hover {
+  background: var(--bg-hover);
+}
+
+.collector-expand-icon {
+  font-size: 9px;
+  color: var(--text-dim);
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.threat-collector-eff {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.threat-collector-detail {
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+
+.collector-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-1) var(--sp-4);
+  margin-bottom: var(--sp-2);
+}
+
+.collector-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.collector-detail-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.collector-detail-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text);
+}
+
+.collector-detail-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: var(--sp-2);
+  padding: var(--sp-2);
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--border-light);
+}
+
+.collector-detail-caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+
+.collector-detail-equip {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-2);
+}
+
+.collector-detail-actions {
+  display: flex;
+  gap: var(--sp-2);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border);
+}
+
 /* --- Deploy Panel --- */
 .threat-deploy-summary {
   font-size: var(--fs-sm);

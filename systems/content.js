@@ -57,6 +57,21 @@ function generateRandomLocation() {
   };
 }
 
+function generateTargetLocation(originCountry) {
+  // Pick a target country/city different from where the threat operates
+  var allCities = [];
+  for (var tid in THEATERS) {
+    var t = THEATERS[tid];
+    for (var i = 0; i < t.cities.length; i++) {
+      if (t.cities[i].country !== originCountry) {
+        allCities.push(t.cities[i]);
+      }
+    }
+  }
+  if (allCities.length === 0) return null;
+  return pick(allCities);
+}
+
 function generateLocationInTheater(theaterId) {
   var theater = getTheater(theaterId);
   if (!theater) return generateRandomLocation();
@@ -439,16 +454,18 @@ INTEL_VALUE_POOLS.INTERNAL_COMMS = [
 ];
 
 INTEL_VALUE_POOLS.TARGET_INTENT = [
-  'Assessment: high-profile attack on critical infrastructure in {city}. Specific target selection phase underway.',
-  'Intent assessed as mass-casualty event targeting civilian population center. Timeline: within operational window.',
-  'Strategic objective unclear — possible demonstration attack to establish credibility with external sponsors.',
-  'Vigil analysis indicates kidnapping operation targeting foreign nationals in {country}. Financial motivation primary.',
-  'Intent points toward assassination of senior government official in {country}. Surveillance of potential targets detected.',
-  'Attack planning targets transportation hub in {city}. VBIED components being assembled. Intended to maximize media impact.',
-  'Assessment: planned attack against government installations in Germany. Coordination with local cells confirmed via SIGINT.',
-  'Intelligence indicates target is critical infrastructure in Japan. Maritime approach being planned from regional staging area.',
-  'Intent assessed as coordinated strike against allied military bases in South Korea. Timeline aligns with upcoming military exercises.',
-  'Vigil analysis points to imminent cyber operation targeting financial systems in United Kingdom. Attack vectors mapped.',
+  'Assessment: high-profile attack on critical infrastructure in {targetCity}, {targetCountry}. Specific target selection phase underway.',
+  'Intent assessed as mass-casualty event targeting civilian population center in {targetCity}, {targetCountry}. Timeline: within operational window.',
+  'Vigil analysis indicates kidnapping operation targeting foreign nationals in {targetCity}, {targetCountry}. Financial motivation primary.',
+  'Intent points toward assassination of senior government official in {targetCountry}. Surveillance of potential targets detected in {targetCity}.',
+  'Attack planning targets transportation hub in {targetCity}, {targetCountry}. VBIED components being assembled. Intended to maximize media impact.',
+  'Assessment: planned attack against government installations in {targetCountry}. Coordination with local cells confirmed via SIGINT. Primary target in {targetCity}.',
+  'Intelligence indicates target is critical infrastructure in {targetCountry}. Maritime approach being planned from regional staging area toward {targetCity}.',
+  'Intent assessed as coordinated strike against military assets in {targetCountry}. Timeline aligns with upcoming exercises. Staging from {city}.',
+  'Vigil analysis points to imminent cyber operation targeting financial systems in {targetCountry}. Attack vectors mapped. Primary targets in {targetCity}.',
+  'Strategic objective: destabilize {targetCountry} through coordinated attacks on government and civilian targets in {targetCity}.',
+  'Intent confirmed: sabotage operation against energy infrastructure in {targetCity}, {targetCountry}. Operatives deploying from {city}.',
+  'Assessment: hostage operation planned targeting diplomatic compound in {targetCity}, {targetCountry}. Multiple teams being coordinated.',
 ];
 
 INTEL_VALUE_POOLS.ACTOR_ID = [
@@ -530,7 +547,7 @@ INTEL_VALUE_POOLS.FACILITY_ID = [
 // Called per field when building threat intel. Picks from appropriate pool
 // and parametrizes with location/org data.
 
-function generateIntelValue(fieldKey, location, orgName) {
+function generateIntelValue(fieldKey, location, orgName, targetInfo) {
   var pool = INTEL_VALUE_POOLS[fieldKey];
   if (!pool || pool.length === 0) return 'Collection in progress — data insufficient.';
 
@@ -541,6 +558,10 @@ function generateIntelValue(fieldKey, location, orgName) {
     if (location.theater) {
       val = val.replace(/\{theater\}/g, location.theater.name || '?');
     }
+  }
+  if (targetInfo) {
+    val = val.replace(/\{targetCity\}/g, targetInfo.city || '?');
+    val = val.replace(/\{targetCountry\}/g, targetInfo.country || '?');
   }
   val = val.replace(/\{orgName\}/g, orgName || 'unknown organization');
   return val;

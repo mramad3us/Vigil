@@ -258,7 +258,7 @@
       var cl = cd.pendingClearance;
       if (cl.status === 'PENDING') {
         var remaining = cl.estimatedCompletion - V.time.totalMinutes;
-        var approvalChance = getClearanceApprovalChance(cd.stance);
+        var approvalChance = getClearanceApprovalChance(cd.stance, country);
         html += '<div style="font-size:var(--fs-sm);color:var(--text)">' +
           'Status: <span style="color:var(--amber)">PENDING</span> &middot; ' +
           'ETA: ' + formatTransitTime(Math.max(0, remaining)) + ' &middot; ' +
@@ -394,7 +394,10 @@
     var disabled = false;
     var reason = '';
 
-    if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') {
+    if (cd.stance >= 6) {
+      disabled = true;
+      reason = 'Overt operations already authorized at this stance';
+    } else if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') {
       disabled = true;
       reason = 'Clearance already pending';
     }
@@ -408,7 +411,7 @@
         '<span class="diplo-action-cost">FREE</span>' +
       '</div>' +
       '<div class="diplo-action-desc">Request authorization for overt operations. Approval: ' +
-        Math.round(getClearanceApprovalChance(cd.stance) * 100) + '%.</div>' +
+        Math.round(getClearanceApprovalChance(cd.stance, country) * 100) + '%.</div>' +
       (reason ? '<div class="diplo-action-disabled-reason">' + reason + '</div>' : '');
 
     if (expanded) {
@@ -502,7 +505,7 @@
     html += '<div class="diplo-asset-option">' +
       '<div class="diplo-asset-info">' +
         '<span class="diplo-asset-name">REMOTE (Standard timeline)</span>' +
-        '<span class="diplo-asset-meta">Approval: ' + Math.round(getClearanceApprovalChance(V.diplomacy[country].stance) * 100) + '%</span>' +
+        '<span class="diplo-asset-meta">Approval: ' + Math.round(getClearanceApprovalChance(V.diplomacy[country].stance, country) * 100) + '%</span>' +
       '</div>' +
       '<span class="diplo-send-btn" onclick="event.stopPropagation(); startClearanceRequest(\'' + country.replace(/'/g, "\\'") + '\', null)">REQUEST</span>' +
     '</div>';

@@ -945,11 +945,9 @@ function recallCollectionAsset(assetId) {
     }
   }
 
-  console.log('[RECALL] removed from threat collectorAssetIds');
-
   // Return to base
   var homeBase = getBase(asset.homeBaseId);
-  if (!homeBase) { console.log('[RECALL] homeBase not found for', asset.homeBaseId); return; }
+  if (!homeBase) return;
 
   var transitMin = calcTransitMinutes(asset, homeBase.lat, homeBase.lon);
 

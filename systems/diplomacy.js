@@ -81,14 +81,23 @@ var INITIAL_STANCES = {
   hook('tick:hour', function() {
     for (var country in V.diplomacy) {
       var cd = V.diplomacy[country];
+      // Expire granted clearances after 1 year (525600 minutes)
+      if (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED' && cd.pendingClearance.grantedAt) {
+        if (V.time.totalMinutes - cd.pendingClearance.grantedAt >= 525600) {
+          cd.pendingClearance = null;
+          addLog('DIPLOMACY: ' + country + ' clearance expired after 1 year of inactivity.', 'log-info');
+          continue;
+        }
+      }
       if (!cd.pendingClearance || cd.pendingClearance.status !== 'PENDING') continue;
 
       var now = V.time.totalMinutes;
       if (now >= cd.pendingClearance.estimatedCompletion) {
         // Roll for approval
-        var approvalChance = getClearanceApprovalChance(cd.stance);
+        var approvalChance = getClearanceApprovalChance(cd.stance, country);
         if (Math.random() < approvalChance) {
           cd.pendingClearance.status = 'GRANTED';
+          cd.pendingClearance.grantedAt = V.time.totalMinutes;
           addLog('DIPLOMACY: ' + country + ' has GRANTED clearance for operation.', 'log-info');
           pushFeedItem({
             id: uid('FI'),
@@ -174,7 +183,7 @@ var INITIAL_STANCES = {
       }
     }
 
-    // Clear pending clearance after op resolves
+    // Clear clearance tied to this specific op
     if (cd.pendingClearance && cd.pendingClearance.opId === op.id) {
       cd.pendingClearance = null;
     }
@@ -308,9 +317,22 @@ function requestClearance(country, opId) {
   return cd.pendingClearance;
 }
 
-function getClearanceApprovalChance(stance) {
+function getClearanceApprovalChance(stance, country) {
   var chances = { 7: 0.95, 6: 0.70, 5: 0.50, 4: 0.30, 3: 0.20, 2: 0.15, 1: 0.10, 0: 0.10 };
-  return chances[stance] || 0.10;
+  var base = chances[stance] || 0.10;
+
+  // Active disclosed threats targeting this country boost approval by 10% each
+  if (country && V.threats) {
+    for (var i = 0; i < V.threats.length; i++) {
+      var t = V.threats[i];
+      if (t.foreignTarget && t.foreignTarget.disclosed && t.foreignTarget.country === country &&
+          (t.phase === 'INTEL' || t.phase === 'OPS')) {
+        base = Math.min(0.95, base + 0.10);
+      }
+    }
+  }
+
+  return base;
 }
 
 function getClearanceStatus(country) {

@@ -36,7 +36,7 @@ var THREAT_TO_OP_TYPE = {
 //  BUILD INTEL FIELDS FOR A NEW THREAT
 // ===================================================================
 
-function buildThreatIntelFields(threatType, location, orgName) {
+function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
   var fieldDefs = THREAT_INTEL_FIELDS[threatType];
   if (!fieldDefs) return [];
 
@@ -57,7 +57,7 @@ function buildThreatIntelFields(threatType, location, orgName) {
       ticksToReveal: ticksToReveal,
       ticksAccumulated: preRevealed ? ticksToReveal : 0,
       revealed: preRevealed,
-      value: generateIntelValue(def.key, location, orgName),
+      value: generateIntelValue(def.key, location, orgName, def.key === 'TARGET_INTENT' ? targetInfo : null),
     });
   }
   return fields;
@@ -84,6 +84,19 @@ function spawnThreat(theaterId) {
 
   var orgName = generateOrgName();
 
+  // Generate target location for threats that attack a specific place
+  // Most threats target somewhere other than where they operate from
+  var targetInfo = null;
+  var hasTargetField = THREAT_INTEL_FIELDS[type.id] &&
+    THREAT_INTEL_FIELDS[type.id].some(function(f) { return f.key === 'TARGET_INTENT'; });
+  if (hasTargetField) {
+    var targetLoc = typeof generateTargetLocation === 'function' ?
+      generateTargetLocation(loc.country) : null;
+    if (targetLoc) {
+      targetInfo = { country: targetLoc.country, city: targetLoc.city };
+    }
+  }
+
   var threat = {
     id: uid('THR'),
     type: type.id,
@@ -98,8 +111,11 @@ function spawnThreat(theaterId) {
     expiresAt: V.time.totalMinutes + expiresIn,
     urgent: isUrgent,
 
+    // Target info (revealed when TARGET_INTENT field is collected)
+    _targetInfo: targetInfo,
+
     // Intel collection state
-    intelFields: buildThreatIntelFields(type.id, loc, orgName),
+    intelFields: buildThreatIntelFields(type.id, loc, orgName, targetInfo),
     collectorAssetIds: [],
 
     // Ops phase reference (set when moved to Ops)
@@ -272,13 +288,15 @@ function spawnThreat(theaterId) {
         for (var ft = 0; ft < threat.intelFields.length; ft++) {
           var iField = threat.intelFields[ft];
           if (iField.key === 'TARGET_INTENT' && iField.revealed && !threat.foreignTarget) {
-            if (typeof parseTargetIntent === 'function') {
-              var parsed = parseTargetIntent(iField.value);
-              if (!parsed.isUS) {
-                threat.foreignTarget = { country: parsed.targetCountry, disclosed: false, disclosureType: null };
-                fire('threat:foreign_target', { threat: threat });
-                addLog('INTEL: ' + threat.orgName + ' target identified as ' + parsed.targetCountry + ' (non-US).', 'log-intel');
-              }
+            if (threat._targetInfo) {
+              threat.foreignTarget = {
+                country: threat._targetInfo.country,
+                city: threat._targetInfo.city,
+                disclosed: false,
+                disclosureType: null,
+              };
+              fire('threat:foreign_target', { threat: threat });
+              addLog('INTEL: ' + threat.orgName + ' target identified as ' + threat._targetInfo.city + ', ' + threat._targetInfo.country + ' (non-US).', 'log-intel');
             }
           }
         }
@@ -492,7 +510,6 @@ function assessThreatReadiness(threat) {
     };
 
     pushFeedItem(feedItem);
-    queueUrgentAlert(feedItem);
 
     addLog('VIGIL: ' + threat.orgName + ' assessed as actionable (' + progress.pct + '% intel). Awaiting operator decision.', 'log-vigil');
     fire('threat:vigil:recommends_ops', { threat: threat });
