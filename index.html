@@ -66,10 +66,43 @@
 
           <div class="auth-fp-wrap" id="auth-fp">
             <div class="auth-fp-icon" id="auth-fp-icon">
-              <svg class="fp-hex" viewBox="0 0 40 40" width="28" height="28">
-                <polygon points="20,3 36,12 36,28 20,37 4,28 4,12" />
+              <svg class="fp-glyph" viewBox="0 0 120 120" width="96" height="96">
+                <defs>
+                  <filter id="fp-glow">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                <!-- Outer dashed ring — slow clockwise -->
+                <circle class="fp-ring fp-ring-outer" cx="60" cy="60" r="56" />
+                <!-- Middle tick ring — slow counter-clockwise -->
+                <g class="fp-ring-ticks">
+                  <circle class="fp-ring fp-ring-mid" cx="60" cy="60" r="44" />
+                  <line x1="60" y1="4" x2="60" y2="12" class="fp-tick" />
+                  <line x1="116" y1="60" x2="108" y2="60" class="fp-tick" />
+                  <line x1="60" y1="116" x2="60" y2="108" class="fp-tick" />
+                  <line x1="4" y1="60" x2="12" y2="60" class="fp-tick" />
+                  <line x1="99.6" y1="20.4" x2="95.3" y2="24.7" class="fp-tick-sm" />
+                  <line x1="99.6" y1="99.6" x2="95.3" y2="95.3" class="fp-tick-sm" />
+                  <line x1="20.4" y1="99.6" x2="24.7" y2="95.3" class="fp-tick-sm" />
+                  <line x1="20.4" y1="20.4" x2="24.7" y2="24.7" class="fp-tick-sm" />
+                </g>
+                <!-- Inner arc segments — fast clockwise -->
+                <g class="fp-arcs">
+                  <path class="fp-arc" d="M60 28 A32 32 0 0 1 92 60" />
+                  <path class="fp-arc" d="M92 60 A32 32 0 0 1 60 92" />
+                  <path class="fp-arc fp-arc-dim" d="M60 92 A32 32 0 0 1 28 60" />
+                  <path class="fp-arc fp-arc-dim" d="M28 60 A32 32 0 0 1 60 28" />
+                </g>
+                <!-- Orthanc eye — pulsing -->
+                <g class="fp-eye" filter="url(#fp-glow)">
+                  <path class="fp-iris" d="M60 38 L76 60 L60 82 L44 60 Z" />
+                  <circle class="fp-pupil" cx="60" cy="60" r="6" />
+                </g>
+                <!-- Radial sweep line -->
+                <line class="fp-sweep" x1="60" y1="60" x2="60" y2="8" />
               </svg>
-              <div class="fp-scan"></div>
+              <div class="fp-status-ring"></div>
             </div>
             <div class="auth-fp-label">BIOMETRIC VERIFICATION</div>
           </div>
@@ -86,10 +119,7 @@
           <div class="auth-bar" id="auth-bar"></div>
         </div>
 
-        <!-- Classification banner -->
-        <div class="login-class-banner" id="login-class-banner">
-          TOP SECRET // SCI // VIGIL // NOFORN
-        </div>
+        <!-- Classification banner (hidden — no longer shown at login) -->
       </div>
 
     </div>
@@ -227,6 +257,7 @@
   <script src="ui/shell.js"></script>
   <script src="ui/modal.js"></script>
   <script src="ui/notifications.js"></script>
+  <script src="ui/tooltips-data.js"></script>
   <script src="ui/tooltip.js"></script>
   <script src="ui/login.js"></script>
 

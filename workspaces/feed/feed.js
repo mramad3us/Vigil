@@ -43,15 +43,14 @@
         '<div class="ws-two-pane">' +
           '<div class="ws-list-pane" style="width:320px;max-width:400px">' +
             '<div class="ws-list-header">' +
-              '<span class="ws-list-title">INTELLIGENCE FEED</span>' +
+              '<span class="ws-list-title">THREAT BOARD</span>' +
               '<span class="ws-list-count" id="feed-count"></span>' +
             '</div>' +
-            '<div class="ws-toolbar" id="feed-toolbar"></div>' +
             '<div class="ws-list-body" id="feed-list"></div>' +
           '</div>' +
           '<div class="ws-detail-pane">' +
             '<div class="ws-detail-body" id="feed-detail">' +
-              '<div class="ws-detail-empty">Select an intelligence item to view details</div>' +
+              '<div class="ws-detail-empty">Select a threat to view intelligence details</div>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -62,11 +61,8 @@
 
     render: function() {
       renderFeedList();
-      renderFeedToolbar();
       if (_selectedThreatId) {
         renderThreatDetail(_selectedThreatId);
-      } else if (_selectedFeedId) {
-        renderFeedDetail(_selectedFeedId);
       }
     },
   });
@@ -90,65 +86,23 @@
 
     var html = '';
 
-    // --- Active INTEL-phase threats section ---
+    // --- Active INTEL-phase threats only ---
     var intelThreats = typeof getIntelThreats === 'function' ? getIntelThreats() : [];
+
+    if (countEl) {
+      countEl.textContent = intelThreats.length + ' active threat' + (intelThreats.length !== 1 ? 's' : '');
+    }
 
     if (intelThreats.length > 0) {
       html += '<div class="feed-section-header">ACTIVE THREATS · ' + intelThreats.length + '</div>';
       for (var t = 0; t < intelThreats.length; t++) {
         html += renderThreatCard(intelThreats[t]);
       }
-      html += '<div class="feed-section-divider"></div>';
-    }
-
-    // --- Notification feed items ---
-    var items = getFilteredFeed();
-    if (countEl) {
-      var unread = 0;
-      for (var u = 0; u < V.feed.length; u++) { if (!V.feed[u].read) unread++; }
-      countEl.textContent = (intelThreats.length > 0 ? intelThreats.length + ' threats · ' : '') + unread + ' unread';
-    }
-
-    if (_feedFilter !== 'THREATS') {
-      html += '<div class="feed-section-header">FEED</div>';
-      for (var i = 0; i < items.length && i < 100; i++) {
-        var item = items[i];
-        var severityCls = (item.severity || 'routine').toLowerCase();
-        var selectedCls = item.id === _selectedFeedId && !_selectedThreatId ? ' selected' : '';
-        var unreadCls = item.read ? '' : ' unread';
-        var newCls = _renderedIds[item.id] ? '' : ' new-item';
-
-        html += '<div class="feed-item' + selectedCls + unreadCls + newCls + '" onclick="selectFeedItem(\'' + item.id + '\')">' +
-          '<div class="feed-severity ' + severityCls + '"></div>' +
-          '<div class="feed-item-content">' +
-            '<div class="feed-item-header">' + item.header + '</div>' +
-            '<div class="feed-item-meta">' +
-              '<span class="feed-item-type">' + (item.type || 'INTEL') + '</span>' +
-              '<span>' + formatTimestamp(item.timestamp) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      }
-
-      if (items.length === 0 && intelThreats.length === 0) {
-        html += '<div class="ws-detail-empty" style="height:200px">No intelligence items</div>';
-      }
+    } else {
+      html += '<div class="ws-detail-empty" style="height:200px">No active threats detected</div>';
     }
 
     listEl.innerHTML = html;
-
-    // Track rendered IDs
-    for (var j = 0; j < items.length && j < 100; j++) {
-      _renderedIds[items[j].id] = true;
-    }
-    var newItems = listEl.querySelectorAll('.new-item');
-    for (var k = 0; k < newItems.length; k++) {
-      (function(el) {
-        el.addEventListener('animationend', function() {
-          el.classList.remove('new-item');
-        });
-      })(newItems[k]);
-    }
   }
 
   // --- Threat Card in Feed List ---
@@ -162,14 +116,18 @@
     var hasCollectors = threat.collectorAssetIds && threat.collectorAssetIds.length > 0;
     var collectingLabel = hasCollectors ? ' · ' + threat.collectorAssetIds.length + ' asset' + (threat.collectorAssetIds.length > 1 ? 's' : '') : '';
 
+    var hasTags = threat.domestic || threat.urgent;
     return '<div class="feed-threat-card' + selectedCls + urgentCls + '" onclick="selectThreatItem(\'' + threat.id + '\')">' +
       '<div class="feed-threat-top">' +
         '<div class="feed-threat-name">' + threat.orgName + '</div>' +
-        '<div class="feed-threat-level">' + threat.threatLevel + '/5</div>' +
-        (threat.domestic ? '<div class="feed-threat-urgent-badge" style="background:#d4a04a;color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">DOMESTIC</div>' : '') +
-        (threat.urgent ? '<div class="feed-threat-urgent-badge" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;letter-spacing:0.5px">URGENT</div>' : '') +
+        '<div class="feed-threat-level" data-tip="' + escTipAttr(TIPS.threatLevel[threat.threatLevel]) + '">' + threat.threatLevel + '/5</div>' +
       '</div>' +
-      '<div class="feed-threat-type">' + threat.typeLabel + ' · ' + threat.location.city + ', ' + threat.location.country + '</div>' +
+      '<div class="feed-threat-type"><span data-tip="' + escTipAttr(tipThreatType(threat.type)) + '">' + threat.typeLabel + '</span> · ' + threat.location.city + ', ' + threat.location.country +
+        (hasTags ? '<span class="feed-threat-tags">' +
+          (threat.domestic ? '<span class="feed-threat-tag domestic" data-tip="' + escTipAttr(TIPS.tags.DOMESTIC) + '">DOMESTIC</span>' : '') +
+          (threat.urgent ? '<span class="feed-threat-tag urgent" data-tip="' + escTipAttr(TIPS.tags.URGENT) + '">URGENT</span>' : '') +
+        '</span>' : '') +
+      '</div>' +
       (threat.foreignTarget && threat.foreignTarget.country !== 'United States' ? '<div class="feed-threat-foreign-target">NON-US TARGET: ' + (threat.foreignTarget.city ? threat.foreignTarget.city + ', ' : '') + threat.foreignTarget.country + '</div>' : '') +
       (threat.foreignTarget && threat.foreignTarget.country === 'United States' ? '<div class="feed-threat-foreign-target" style="color:var(--red)">HOMELAND TARGET: ' + (threat.foreignTarget.city || 'United States') + '</div>' : '') +
       '<div class="feed-threat-bars">' +
@@ -188,21 +146,7 @@
     '</div>';
   }
 
-  // --- Feed Toolbar ---
-
-  function renderFeedToolbar() {
-    var toolbar = $('feed-toolbar');
-    if (!toolbar) return;
-
-    var filters = ['UNREAD', 'THREATS', 'CRITICAL', 'HIGH', 'ALL'];
-    var html = '<div class="feed-filters">';
-    for (var i = 0; i < filters.length; i++) {
-      var activeCls = _feedFilter === filters[i] ? ' active' : '';
-      html += '<button class="feed-filter' + activeCls + '" onclick="setFeedFilter(\'' + filters[i] + '\')">' + filters[i] + '</button>';
-    }
-    html += '</div>';
-    toolbar.innerHTML = html;
-  }
+  // (Feed toolbar removed — intel tab shows threats only)
 
   // =================================================================
   //  THREAT DETAIL — Intel fields, collection, deployment
@@ -231,9 +175,9 @@
     html += '<div class="threat-detail-header">' +
       '<div class="threat-detail-name">' + threat.orgName + '</div>' +
       '<div class="threat-detail-badges">' +
-        '<span class="threat-type-badge">' + threat.typeLabel + '</span>' +
-        '<span class="threat-level-badge level-' + threat.threatLevel + '">THREAT ' + threat.threatLevel + '/5</span>' +
-        (threat.urgent ? '<span class="threat-urgent-badge" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:0.5px">URGENT</span>' : '') +
+        '<span class="threat-type-badge" data-tip="' + escTipAttr(tipThreatType(threat.type)) + '">' + threat.typeLabel + '</span>' +
+        '<span class="threat-level-badge level-' + threat.threatLevel + '" data-tip="' + escTipAttr(TIPS.threatLevel[threat.threatLevel]) + '">THREAT ' + threat.threatLevel + '/5</span>' +
+        (threat.urgent ? '<span class="threat-urgent-badge" data-tip="' + escTipAttr(TIPS.tags.URGENT) + '" style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;letter-spacing:0.5px">URGENT</span>' : '') +
       '</div>' +
     '</div>';
 
@@ -278,7 +222,7 @@
         if (field.revealed) {
           html += '<div class="intel-field-row">' +
             '<span class="intel-field-key">' +
-              '<span class="intel-source-tag" style="color:' + diffColor + '">' + field.source + '</span> ' +
+              '<span class="intel-source-tag" data-tip="' + escTipAttr(tipSource(field.source)) + '" style="color:' + diffColor + '">' + field.source + '</span> ' +
               field.label +
             '</span>' +
             '<span class="intel-field-val revealed">' + field.value + '</span>' +
@@ -289,13 +233,13 @@
 
           html += '<div class="intel-field-row">' +
             '<span class="intel-field-key">' +
-              '<span class="intel-source-tag" style="color:' + diffColor + '">' + field.source + '</span> ' +
+              '<span class="intel-source-tag" data-tip="' + escTipAttr(tipSource(field.source)) + '" style="color:' + diffColor + '">' + field.source + '</span> ' +
               field.label +
             '</span>' +
             '<span class="intel-field-val hidden">' +
               '<span class="intel-progress-wrap">' +
                 '<span class="intel-progress-bar"><span class="intel-progress-fill" style="width:' + pct + '%;background:' + diffColor + '"></span></span>' +
-                '<span class="intel-progress-label">' + pct + '% · ' + field.difficulty.replace('_', ' ') + '</span>' +
+                '<span class="intel-progress-label" data-tip="' + escTipAttr(tipDifficulty(field.difficulty)) + '">' + pct + '% · ' + field.difficulty.replace('_', ' ') + '</span>' +
               '</span>' +
             '</span>' +
           '</div>';
@@ -351,12 +295,12 @@
           '<div class="threat-collector-row" onclick="toggleCollectorExpand(\'' + asset.id + '\')">' +
             '<div class="threat-collector-info">' +
               '<span class="collector-expand-icon">' + (_expandedCollectors[asset.id] ? '▾' : '▸') + '</span>' +
-              '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
+              '<span class="vigil-asset-cat" data-tip="' + escTipAttr(TIPS.assetCat[asset.category]) + '" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
               '<span class="vigil-asset-name">' + asset.name + '</span>' +
             '</div>' +
             '<div class="threat-collector-status">' +
               '<span class="threat-collector-status-chip ' + statusCls + '">' + statusText + '</span>' +
-              '<span class="threat-collector-eff" style="color:' + effColor + '">' + eff.rating + '%</span>' +
+              '<span class="threat-collector-eff" data-tip="' + escTipAttr(TIPS.collection.effectiveness) + '" style="color:' + effColor + '">' + eff.rating + '%</span>' +
             '</div>' +
           '</div>';
 
@@ -458,6 +402,7 @@
       // Show summary + button
       var _allCollection = typeof getCollectionAssets === 'function' ? getCollectionAssets() : [];
       if (!threat.domestic) { _allCollection = _allCollection.filter(function(a) { return !a.domesticAuthority; }); }
+      else { _allCollection = _allCollection.filter(function(a) { return a.category !== 'NAVY' && a.category !== 'AIR'; }); }
       var availCount = _allCollection.length;
       html += '<div class="threat-deploy-summary">' +
         availCount + ' collection-capable asset' + (availCount !== 1 ? 's' : '') + ' available for deployment.' +
@@ -487,6 +432,9 @@
     // Domestic agencies only available for domestic threats
     if (!threat.domestic) {
       available = available.filter(function(a) { return !a.domesticAuthority; });
+    } else {
+      // Domestic threats: exclude NAVY/AIR (nonsensical on US soil)
+      available = available.filter(function(a) { return a.category !== 'NAVY' && a.category !== 'AIR'; });
     }
 
     if (available.length === 0) {
@@ -584,10 +532,10 @@
       html += '<div class="threat-deploy-card' + (ineffective ? ' ineffective' : '') + unreachableCls + '">' +
         '<div class="threat-deploy-card-top">' +
           '<div class="threat-deploy-card-info">' +
-            '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
+            '<span class="vigil-asset-cat" data-tip="' + escTipAttr(TIPS.assetCat[asset.category]) + '" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
             '<span class="threat-deploy-card-name">' + asset.name + '</span>' +
           '</div>' +
-          '<div class="threat-deploy-card-eff" style="color:' + effColor + '">' + eff.rating + '%</div>' +
+          '<div class="threat-deploy-card-eff" data-tip="' + escTipAttr(TIPS.collection.effectiveness) + '" style="color:' + effColor + '">' + eff.rating + '%</div>' +
         '</div>' +
         '<div class="threat-deploy-card-meta">' +
           (base ? '<span>' + base.city + ', ' + base.country + '</span>' : '') +
@@ -622,103 +570,15 @@
     return html;
   }
 
-  // =================================================================
-  //  FEED DETAIL — Regular notification items
-  // =================================================================
+  // (renderFeedDetail removed — intel tab shows threats only)
 
-  function renderFeedDetail(feedId) {
-    var detailEl = $('feed-detail');
-    if (!detailEl) return;
-
-    var item = null;
-    for (var i = 0; i < V.feed.length; i++) {
-      if (V.feed[i].id === feedId) { item = V.feed[i]; break; }
-    }
-
-    if (!item) {
-      detailEl.innerHTML = '<div class="ws-detail-empty">Select an intelligence item to view details</div>';
-      return;
-    }
-
-    // If this feed item has a threatId and the threat is still in INTEL phase,
-    // show the threat detail instead
-    if (item.threatId) {
-      var linkedThreat = getThreat(item.threatId);
-      if (linkedThreat && linkedThreat.phase === 'INTEL') {
-        _selectedThreatId = linkedThreat.id;
-        _selectedFeedId = null;
-        renderFeedList();
-        renderThreatDetail(linkedThreat.id);
-        return;
-      }
-    }
-
-    var severityCls = (item.severity || 'routine').toLowerCase();
-
-    var html =
-      '<div class="feed-detail-classification">TOP SECRET // SCI // VIGIL // NOFORN</div>' +
-      '<div class="feed-detail-title">' + item.header + '</div>' +
-      '<div class="feed-detail-meta">' +
-        '<span class="feed-detail-meta-key">SEVERITY</span>' +
-        '<span class="feed-detail-meta-val"><span class="urgent-severity severity-' + severityCls + '" style="font-size:9px">' + item.severity + '</span></span>' +
-        '<span class="feed-detail-meta-key">TYPE</span>' +
-        '<span class="feed-detail-meta-val">' + (item.type || 'INTELLIGENCE') + '</span>' +
-        '<span class="feed-detail-meta-key">TIME</span>' +
-        '<span class="feed-detail-meta-val">' + formatTimestamp(item.timestamp) + '</span>' +
-        (item.theaterId ? '<span class="feed-detail-meta-key">THEATER</span><span class="feed-detail-meta-val">' + (THEATERS[item.theaterId] ? THEATERS[item.theaterId].name : item.theaterId) + '</span>' : '') +
-      '</div>' +
-      '<div class="feed-detail-body"><p>' + item.body + '</p></div>';
-
-    // Action buttons
-    html += '<div class="feed-detail-actions">';
-    if (item.opId) {
-      html += '<button class="feed-action-btn primary" onclick="activateWorkspace(\'operations\')">VIEW OPERATION</button>';
-    } else if (item.threatId) {
-      var t = getThreat(item.threatId);
-      if (t && t.phase === 'OPS' && t.linkedOpId) {
-        html += '<button class="feed-action-btn primary" onclick="selectOperation(\'' + t.linkedOpId + '\');activateWorkspace(\'operations\')">VIEW OPERATION</button>';
-      }
-    }
-    if (item.geo && item.geo.lat && item.geo.lon) {
-      html += '<button class="feed-action-btn" onclick="globeFlyTo(' + item.geo.lat + ',' + item.geo.lon + ')">VIEW ON GLOBE</button>';
-    }
-    html += '</div>';
-
-    detailEl.innerHTML = html;
-  }
-
-  // =================================================================
-  //  HELPERS
-  // =================================================================
-
-  function getFilteredFeed() {
-    if (_feedFilter === 'ALL') return V.feed;
-    if (_feedFilter === 'UNREAD') return V.feed.filter(function(i) { return !i.read; });
-    if (_feedFilter === 'THREATS') return []; // Threats shown in dedicated section
-    return V.feed.filter(function(i) { return i.severity === _feedFilter; });
-  }
+  // (Feed filtering removed — intel tab shows threats only)
 
   // =================================================================
   //  GLOBAL FUNCTIONS (onclick handlers)
   // =================================================================
 
-  window.selectFeedItem = function(feedId) {
-    _selectedFeedId = feedId;
-    _selectedThreatId = null;
-    _showDeployPanel = false;
-
-    // Mark as read
-    for (var i = 0; i < V.feed.length; i++) {
-      if (V.feed[i].id === feedId) {
-        V.feed[i].read = true;
-        break;
-      }
-    }
-
-    renderFeedList();
-    renderFeedDetail(feedId);
-    updateWorkspaceBadge('feed', getUnreadFeedCount());
-  };
+  // selectFeedItem removed — intel tab shows threats only
 
   window.selectThreatItem = function(threatId) {
     _selectedThreatId = threatId;
@@ -729,11 +589,7 @@
     renderThreatDetail(threatId);
   };
 
-  window.setFeedFilter = function(filter) {
-    _feedFilter = filter;
-    renderFeedList();
-    renderFeedToolbar();
-  };
+  // setFeedFilter removed — intel tab shows threats only
 
   window.toggleDeployPanel = function() {
     _showDeployPanel = !_showDeployPanel;

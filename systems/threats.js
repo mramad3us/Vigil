@@ -146,44 +146,45 @@ function spawnThreat(theaterId) {
   // Feed item
   var threatDescriptions = {
     TERROR_CELL: [
-      'Vigil has identified a terror cell operating in ' + loc.city + ', ' + loc.country + '. SIGINT intercepts and pattern analysis confirm organized activity consistent with attack planning.',
-      'A new terror cell has been flagged by Vigil in the ' + loc.theater.name + ' theater. Cell activity detected in ' + loc.city + '. Initial assessment indicates operational capability.',
-      'Vigil intelligence network has surfaced a terror cell in ' + loc.city + '. Communications intercepts suggest active recruitment and logistics coordination.',
+      'Vigil has identified a terror cell operating in ' + loc.city + ', ' + loc.country + '. SIGINT intercepts confirm organized activity targeting US interests in the ' + loc.theater.name + ' theater. Pattern analysis indicates attack planning directed at American personnel or facilities.',
+      'A new terror cell has been flagged by Vigil in ' + loc.city + '. Cell communications reference US diplomatic and military targets in the region. Initial assessment indicates operational capability sufficient to strike American assets.',
+      'Vigil intelligence network has surfaced a terror cell in ' + loc.city + ', ' + loc.country + '. Intercepted communications mention US installations, personnel movements, and security protocols. Threat to American interests assessed as CREDIBLE.',
     ],
     STATE_ACTOR: [
-      'State-level threat activity detected in ' + loc.city + ', ' + loc.country + '. Force posture and intelligence indicators suggest escalatory intent in the ' + loc.theater.name + ' theater.',
-      'Vigil has flagged state actor operations centered on ' + loc.city + '. Military movements and diplomatic communications indicate possible aggressive action.',
+      'State-level threat activity detected in ' + loc.city + ', ' + loc.country + '. Force posture and intelligence indicators suggest actions directed against US strategic interests in the ' + loc.theater.name + ' theater. American military and diplomatic personnel in-theater may be at risk.',
+      'Vigil has flagged state actor operations centered on ' + loc.city + '. Military movements and diplomatic communications indicate aggressive posture toward US allies and forward-deployed American forces. Escalation risk to US interests: ELEVATED.',
     ],
     CYBER_GROUP: [
-      'Cyber threat group identified targeting infrastructure from ' + loc.city + ', ' + loc.country + '. Attribution in progress. Initial indicators suggest sophisticated operational capability.',
-      'Vigil has detected organized cyber intrusion operations originating from ' + loc.city + '. Network exploitation patterns consistent with state-sponsored or state-affiliated group.',
+      'Cyber threat group operating from ' + loc.city + ', ' + loc.country + ' has been identified targeting US critical infrastructure. Attribution in progress. Intrusion vectors aimed at American defense networks, financial systems, and government communications.',
+      'Vigil has detected organized cyber intrusion operations originating from ' + loc.city + ' targeting US government and defense contractor networks. Exploitation patterns consistent with state-sponsored group conducting espionage against American interests.',
     ],
     CRIMINAL_ORG: [
-      'Criminal organization flagged in ' + loc.city + ', ' + loc.country + '. Intelligence indicates trafficking operations with potential national security implications.',
-      'Vigil has identified organized criminal activity in ' + loc.city + '. Scale and sophistication suggest strategic-level criminal enterprise.',
+      'Criminal organization flagged in ' + loc.city + ', ' + loc.country + '. Intelligence indicates trafficking operations threatening US national security — narcotics flowing to American cities, weapons, or human trafficking involving US-bound routes.',
+      'Vigil has identified organized criminal activity in ' + loc.city + ' with direct links to US-bound operations. Scale and sophistication threaten American border security and domestic law enforcement. US citizens may be among victims.',
     ],
     INSURGENCY: [
-      'Insurgent movement detected in ' + loc.city + ' region, ' + loc.country + '. Activity patterns indicate growing operational tempo in the ' + loc.theater.name + ' theater.',
-      'Vigil has flagged insurgent activity near ' + loc.city + '. Force estimates and movement patterns suggest organized resistance with external support.',
+      'Insurgent movement detected in ' + loc.city + ' region, ' + loc.country + '. Activity patterns indicate growing threat to US personnel, allied forces, and American-supported governance structures in the ' + loc.theater.name + ' theater.',
+      'Vigil has flagged insurgent activity near ' + loc.city + ' threatening US forward operating positions and allied partners. Force estimates suggest organized resistance with capability to strike American installations.',
     ],
     PROLIFERATOR: [
-      'WMD proliferation activity detected in ' + loc.country + '. Facility near ' + loc.city + ' shows signatures consistent with weapons program. Threat level assessed CRITICAL.',
-      'Vigil has identified potential weapons proliferation activity in ' + loc.city + ', ' + loc.country + '. Procurement patterns and facility analysis indicate active program.',
+      'WMD proliferation activity detected in ' + loc.country + '. Facility near ' + loc.city + ' shows signatures consistent with weapons program capable of threatening US forces in-theater and potentially the American homeland. Threat level: CRITICAL.',
+      'Vigil has identified weapons proliferation activity in ' + loc.city + ', ' + loc.country + '. Procurement patterns indicate program targeting delivery systems capable of reaching US bases and allied nations. Direct threat to American strategic interests.',
     ],
     HOSTAGE_CRISIS: [
-      'HOSTAGE SITUATION: Vigil has confirmed hostage-taking in ' + loc.city + ', ' + loc.country + '. Multiple personnel believed held by hostile elements. Situation is deteriorating. Rescue planning authorized.',
-      'Vigil intelligence confirms a hostage crisis developing in the ' + loc.theater.name + ' theater. Hostages seized in ' + loc.city + '. Captors are making demands. Time-sensitive response required.',
-      'Hostage crisis reported in ' + loc.city + ', ' + loc.country + '. Vigil is receiving intermittent signals intelligence from the location. At least one US national among the hostages. Rescue or negotiation window narrowing.',
+      'HOSTAGE SITUATION: Vigil has confirmed hostage-taking in ' + loc.city + ', ' + loc.country + '. US citizens are among those held by hostile elements. American lives are at immediate risk. Rescue planning authorized.',
+      'Vigil intelligence confirms a hostage crisis in the ' + loc.theater.name + ' theater. US nationals seized in ' + loc.city + ' — captors are making demands through intermediaries. American lives in danger. Time-sensitive response required.',
+      'Hostage crisis in ' + loc.city + ', ' + loc.country + '. Vigil has confirmed US government personnel among the hostages. Intermittent signals intelligence from the location suggests deteriorating conditions. Rescue or negotiation window narrowing.',
+      'PRIORITY: Hostage situation developing in ' + loc.city + '. At least two American citizens confirmed held. Captors have issued demands referencing US foreign policy. State Department liaison activated. Military rescue options being assessed.',
     ],
     HVT_TARGET: [
-      'Vigil has positively identified a high-value target operating in ' + loc.city + ', ' + loc.country + '. Target has been on the disposition matrix for 18+ months. Current location confidence: HIGH. Recommend immediate action planning.',
-      'HIGH-VALUE TARGET: Vigil pattern-of-life analysis has located a priority target in the ' + loc.theater.name + ' theater. Target is currently in ' + loc.city + '. Window of opportunity may be limited.',
-      'Vigil intelligence network has surfaced a confirmed HVT in ' + loc.city + ', ' + loc.country + '. Target is a senior figure with operational authority. Elimination or capture would significantly degrade adversary capability in the theater.',
+      'Vigil has positively identified a high-value target operating in ' + loc.city + ', ' + loc.country + '. Target is responsible for operations that have killed or endangered American personnel. On the disposition matrix for 18+ months. Current location confidence: HIGH.',
+      'HIGH-VALUE TARGET: Vigil pattern-of-life analysis has located a priority target in ' + loc.city + '. Target has directed attacks against US forces and allied partners in the ' + loc.theater.name + ' theater. Window of opportunity may be limited.',
+      'Vigil intelligence network has surfaced a confirmed HVT in ' + loc.city + ', ' + loc.country + '. Target is a senior figure directly responsible for anti-American operations. Elimination or capture would significantly degrade threat to US interests in-theater.',
     ],
     ASSET_COMPROMISED: [
-      'FLASH — COMPROMISED ASSET: A Vigil intelligence asset has been burned in ' + loc.city + ', ' + loc.country + '. Asset is attempting to evade hostile surveillance. Extraction must be initiated before capture by local security services.',
-      'Vigil has lost contact with an intelligence officer operating under cover in ' + loc.city + '. Last transmission indicated compromise. Hostile counterintelligence is actively searching. Asset extraction is time-critical.',
-      'URGENT: Intelligence asset in ' + loc.city + ', ' + loc.country + ' has triggered emergency exfiltration protocol. Cover identity compromised. Asset possesses knowledge of active operations in the ' + loc.theater.name + ' theater. Extraction or sanitization required.',
+      'FLASH — COMPROMISED ASSET: A US intelligence officer has been burned in ' + loc.city + ', ' + loc.country + '. Asset is an American operative attempting to evade hostile surveillance. Extraction must be initiated before capture by local security services.',
+      'Vigil has lost contact with a US intelligence officer operating under cover in ' + loc.city + '. Last transmission indicated compromise. American operative at risk of capture, interrogation, and exploitation. Asset extraction is time-critical.',
+      'URGENT: US intelligence asset in ' + loc.city + ', ' + loc.country + ' has triggered emergency exfiltration protocol. American operative\'s cover identity compromised. Asset possesses knowledge of active US operations in the ' + loc.theater.name + ' theater. Extraction or sanitization required.',
     ],
   };
 
@@ -396,6 +397,7 @@ function spawnThreat(theaterId) {
   // --- INITIAL THREATS ON GAME START ---
 
   hook('game:start', function() {
+    if (V.initialized) return;
     var count = randInt(2, 3);
     for (var i = 0; i < count; i++) {
       spawnThreat();
@@ -543,14 +545,30 @@ function assessThreatReadiness(threat) {
 // --- Operator Response to Vigil Assessment ---
 
 function approveMoveThreatToOps(threatId) {
+  console.log('[DISMISS-DEBUG] approveMoveThreatToOps called. threatId:', threatId, 'activeWorkspace:', V.ui.activeWorkspace);
   var threat = getThreat(threatId);
-  if (!threat || threat.phase !== 'INTEL') { dismissUrgentAlert(); return; }
+  if (!threat || threat.phase !== 'INTEL') {
+    console.log('[DISMISS-DEBUG] early return — threat:', threat ? threat.phase : 'null');
+    dismissUrgentAlert();
+    return;
+  }
 
+  console.log('[DISMISS-DEBUG] threat.phase BEFORE:', threat.phase, 'orgName:', threat.orgName);
   threat.vigilRecommendsOps = false;
   vigilMoveThreatToOps(threat);
+  console.log('[DISMISS-DEBUG] threat.phase AFTER vigilMoveThreatToOps:', threat.phase);
   dismissUrgentAlert();
 
   addLog('OPERATOR: Approved transition of ' + threat.orgName + ' to Operations.', 'log-info');
+
+  // Force full workspace re-render to clear detail panel
+  if (V.ui.activeWorkspace === 'feed' && typeof renderWorkspace === 'function') {
+    console.log('[DISMISS-DEBUG] calling renderWorkspace("feed")');
+    renderWorkspace('feed');
+    // Also directly clear the detail panel as a belt-and-suspenders fix
+    var detailEl = document.getElementById('feed-detail');
+    console.log('[DISMISS-DEBUG] after renderWorkspace, detail innerHTML length:', detailEl ? detailEl.innerHTML.length : 'NO ELEMENT');
+  }
 }
 
 function declineMoveThreatToOps(threatId) {
@@ -786,7 +804,7 @@ function spawnOperationFromThreat(threat) {
   var opType = pick(opTypes);
 
   var codename = generateCodename();
-  var detectionDelay = randInt(30, 120); // Vigil needs a moment to formalize the op
+  var detectionDelay = randInt(2, 5); // Vigil processes near-instantly
 
   // Calculate remaining urgency from threat expiration
   var remainingMinutes = Math.max(360, threat.expiresAt - V.time.totalMinutes);
@@ -877,7 +895,7 @@ function spawnOperationFromEvent(event, urgent) {
 
   var opType = EVENT_TO_OP_TYPE[event.category] || 'SURVEILLANCE';
   var urgencyHours = urgent ? randInt(12, 36) : randInt(48, 168);
-  var detectionDelay = randInt(30, 180);
+  var detectionDelay = randInt(2, 5);
 
   var op = {
     id: uid('OP'),

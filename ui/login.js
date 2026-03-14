@@ -164,7 +164,7 @@ function beginAuth() {
     { label: 'RETINAL SCAN',        status: 'VERIFIED' },
     { label: 'VOICEPRINT',          status: 'MATCHED' },
     { label: 'NEURAL SIGNATURE',    status: 'CONFIRMED' },
-    { label: 'CLEARANCE LEVEL',     status: 'COSMIC TOP SECRET' },
+    { label: 'SECURITY CLEARANCE',  status: 'VERIFIED' },
     { label: 'OPERATOR STATUS',     status: 'ACTIVE' },
   ];
 
@@ -173,25 +173,18 @@ function beginAuth() {
   for (var i = 0; i < checks.length; i++) {
     (function(check, idx) {
       setTimeout(function() {
-        var div = document.createElement('div');
-        div.className = 'auth-check';
-        div.innerHTML =
-          '<span class="check-label">' + check.label + '</span>' +
-          '<span class="check-status ok">' + check.status + '</span>';
-        checksEl.appendChild(div);
-        requestAnimationFrame(function() {
-          div.classList.add('visible');
-        });
+        // Replace previous check instead of stacking
+        checksEl.innerHTML =
+          '<div class="auth-check visible">' +
+            '<span class="check-label">' + check.label + '</span>' +
+            '<span class="check-status ok">' + check.status + '</span>' +
+          '</div>';
 
         // Progress bar
         var bar = $('auth-bar');
         var wrap = $('auth-bar-wrap');
         wrap.classList.add('visible');
         bar.style.width = ((idx + 1) / checks.length * 100) + '%';
-
-        // Auto-scroll login screen to keep new content visible
-        var loginScreen = $('screen-login');
-        loginScreen.scrollTop = loginScreen.scrollHeight;
 
       }, 600 + idx * 400);
     })(checks[i], i);
@@ -210,12 +203,6 @@ function beginAuth() {
     $('auth-btn').classList.add('success');
     $('auth-btn').textContent = 'ACCESS GRANTED';
   }, successDelay);
-
-  // Classification banner
-  setTimeout(function() {
-    $('login-class-banner').classList.add('visible');
-    $('screen-login').scrollTop = $('screen-login').scrollHeight;
-  }, successDelay + 400);
 
   // Transition to main
   setTimeout(function() {
@@ -274,9 +261,6 @@ function resetLoginScreen() {
 
   // Reset fingerprint
   $('auth-fp-icon').classList.remove('scanning', 'confirmed');
-
-  // Reset classification banner
-  $('login-class-banner').classList.remove('visible');
 
   // Reset new operator link
   var newOpEl = $('auth-new-operator');

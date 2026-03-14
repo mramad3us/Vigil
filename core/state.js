@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.4.3';
+V.version = '0.4.4';
 
 function initState() {
 
@@ -118,6 +118,10 @@ function initState() {
     threatsManifested: 0,
     intelFieldsRevealed: 0,
   };
+
+  // Initialization flag — set after first game:start completes.
+  // Persisted in saves to prevent re-initialization on load.
+  V.initialized = false;
 }
 
 // --- Computed Accessors (never cached — Faux13 pattern) ---

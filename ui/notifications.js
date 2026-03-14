@@ -7,8 +7,9 @@ function pushFeedItem(feedItem) {
   V.feed.unshift(feedItem);
   pruneFeed();
 
-  // Badge the feed tab
-  updateWorkspaceBadge('feed', getUnreadFeedCount());
+  // Badge the feed tab with active threat count
+  var intelThreatCount = typeof getIntelThreats === 'function' ? getIntelThreats().length : 0;
+  updateWorkspaceBadge('feed', intelThreatCount);
 
   // Critical alerts get urgent overlay + auto-pause
   if (feedItem.severity === 'CRITICAL') {
@@ -38,7 +39,8 @@ hook('workspace:activate', function(data) {
 // --- Periodic badge updates ---
 
 hook('tick', function() {
-  updateWorkspaceBadge('feed', getUnreadFeedCount());
+  var intelThreatBadge = typeof getIntelThreats === 'function' ? getIntelThreats().length : 0;
+  updateWorkspaceBadge('feed', intelThreatBadge);
   updateWorkspaceBadge('operations', getActiveOpsCount());
   updateWorkspaceBadge('sitroom', getActiveCrisesCount());
 }, 50);

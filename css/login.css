@@ -268,49 +268,187 @@
 }
 
 .auth-fp-icon {
-  width: 56px;
-  height: 56px;
+  width: 96px;
+  height: 96px;
   margin: 0 auto var(--sp-3);
-  border-radius: 50%;
-  border: 2px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-dim);
   position: relative;
-  animation: fp-pulse 2s ease-in-out infinite;
 }
 
-.auth-fp-icon .fp-hex {
+/* --- SVG Glyph Base --- */
+.fp-glyph {
   display: block;
+  overflow: visible;
 }
 
-.auth-fp-icon .fp-hex polygon {
+/* --- Rings --- */
+.fp-ring {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
-  stroke-linejoin: round;
+  stroke-width: 1.5;
 }
 
-.auth-fp-icon .fp-scan {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent);
-  opacity: 0;
-  pointer-events: none;
+.fp-ring-outer {
+  stroke: var(--accent);
+  opacity: 0.3;
+  stroke-dasharray: 6 4;
+  animation: fp-rotate-cw 30s linear infinite;
+  transform-origin: 60px 60px;
 }
 
-.auth-fp-icon.scanning .fp-scan {
+.fp-ring-mid {
+  stroke: var(--accent);
+  opacity: 0.15;
+  stroke-dasharray: 12 6 3 6;
+}
+
+.fp-ring-ticks {
+  animation: fp-rotate-ccw 45s linear infinite;
+  transform-origin: 60px 60px;
+}
+
+.fp-tick {
+  stroke: var(--accent);
+  stroke-width: 2;
+  opacity: 0.5;
+}
+
+.fp-tick-sm {
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  opacity: 0.25;
+}
+
+/* --- Inner arc segments --- */
+.fp-arcs {
+  animation: fp-rotate-cw 8s linear infinite;
+  transform-origin: 60px 60px;
+}
+
+.fp-arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
   opacity: 0.6;
-  animation: fp-scan-line 1.2s ease-in-out infinite;
 }
 
-.auth-fp-icon.confirmed {
+.fp-arc-dim {
+  opacity: 0.15;
+}
+
+/* --- Eye (Orthanc) --- */
+.fp-eye {
+  transform-origin: 60px 60px;
+}
+
+.fp-iris {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+
+.fp-pupil {
+  fill: var(--accent);
+  opacity: 0.9;
+  animation: fp-pupil-pulse 3s ease-in-out infinite;
+}
+
+/* --- Sweep line --- */
+.fp-sweep {
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0;
+  transform-origin: 60px 60px;
+}
+
+/* --- Status ring (border glow) --- */
+.fp-status-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* --- Idle state: gentle pulse on eye --- */
+.auth-fp-icon .fp-eye {
+  animation: fp-eye-breathe 4s ease-in-out infinite;
+}
+
+/* --- Scanning state --- */
+.auth-fp-icon.scanning .fp-sweep {
+  opacity: 0.5;
+  animation: fp-sweep-rotate 1.8s linear infinite;
+}
+
+.auth-fp-icon.scanning .fp-arcs {
+  animation: fp-rotate-cw 3s linear infinite;
+}
+
+.auth-fp-icon.scanning .fp-ring-outer {
+  opacity: 0.6;
+  animation: fp-rotate-cw 10s linear infinite;
+  stroke: var(--accent);
+}
+
+.auth-fp-icon.scanning .fp-ring-ticks {
+  animation: fp-rotate-ccw 12s linear infinite;
+}
+
+.auth-fp-icon.scanning .fp-pupil {
+  animation: fp-pupil-scan 0.8s ease-in-out infinite;
+}
+
+.auth-fp-icon.scanning .fp-status-ring {
+  border-color: rgba(74, 143, 212, 0.3);
+  box-shadow: 0 0 20px rgba(74, 143, 212, 0.1);
+}
+
+/* --- Confirmed state --- */
+.auth-fp-icon.confirmed .fp-ring-outer {
+  stroke: var(--green);
+  opacity: 0.7;
+  animation: fp-rotate-cw 30s linear infinite;
+}
+
+.auth-fp-icon.confirmed .fp-arc {
+  stroke: var(--green);
+  opacity: 0.8;
+}
+
+.auth-fp-icon.confirmed .fp-arc-dim {
+  stroke: var(--green);
+  opacity: 0.3;
+}
+
+.auth-fp-icon.confirmed .fp-iris {
+  stroke: var(--green);
+  opacity: 1;
+}
+
+.auth-fp-icon.confirmed .fp-pupil {
+  fill: var(--green);
+  animation: fp-confirm-pop 0.6s ease forwards;
+}
+
+.auth-fp-icon.confirmed .fp-tick,
+.auth-fp-icon.confirmed .fp-tick-sm {
+  stroke: var(--green);
+}
+
+.auth-fp-icon.confirmed .fp-sweep {
+  opacity: 0;
+}
+
+.auth-fp-icon.confirmed .fp-status-ring {
   border-color: var(--green);
-  color: var(--green);
-  animation: fp-confirm 0.5s ease;
+  box-shadow: 0 0 24px rgba(64, 224, 128, 0.15);
+  animation: fp-ring-confirm 0.6s ease;
 }
 
 .auth-fp-label {

@@ -221,6 +221,7 @@ function buildDomesticIntelFields(threatType, location, orgName) {
 
   // --- Initial domestic threats on game start ---
   hook('game:start', function() {
+    if (V.initialized) return;
     var count = randInt(1, 2);
     for (var i = 0; i < count; i++) {
       spawnDomesticThreat();

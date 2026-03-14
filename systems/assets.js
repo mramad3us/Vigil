@@ -761,6 +761,8 @@ var ASSET_CATEGORIES = {
 (function() {
 
   hook('game:start', function() {
+    if (V.initialized) return;
+
     V.assets = [];
 
     var baseIds = Object.keys(FORCE_STRUCTURE);

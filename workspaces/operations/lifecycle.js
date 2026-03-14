@@ -61,7 +61,7 @@
 
   function transitionToAnalysis(op) {
     op.status = 'ANALYSIS';
-    var analysisMinutes = randInt(120, 360); // 2-6 game-hours
+    var analysisMinutes = randInt(8, 12); // Vigil processes fast — ~10 game-minutes
     op.nextTransitionAt = V.time.totalMinutes + analysisMinutes;
     op.phaseDuration = analysisMinutes;
 

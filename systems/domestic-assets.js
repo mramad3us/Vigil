@@ -272,6 +272,8 @@ var DOMESTIC_FORCE_STRUCTURE = {
 
 (function() {
   hook('game:start', function() {
+    if (V.initialized) return;
+
     var baseIds = Object.keys(DOMESTIC_FORCE_STRUCTURE);
     for (var b = 0; b < baseIds.length; b++) {
       var baseId = baseIds[b];

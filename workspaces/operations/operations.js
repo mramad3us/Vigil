@@ -171,7 +171,7 @@
         '<div class="op-card-label">' + op.label + ' · ' + (op.location ? op.location.city : '?') + '</div>' +
       '</div>' +
       '<div class="op-card-right">' +
-        '<div class="op-status-chip ' + statusCls + '">' + statusLabel + '</div>' +
+        '<div class="op-status-chip ' + statusCls + '" data-tip="' + escTip(TIPS.opStatus[op.status] || '') + '">' + statusLabel + '</div>' +
         timerHtml +
         pipsHtml +
       '</div>' +
@@ -198,7 +198,7 @@
     var html =
       '<div class="op-detail-header">' +
         '<div class="op-detail-codename">' + op.codename + '</div>' +
-        '<div class="op-status-chip ' + statusCls + '" style="font-size:var(--fs-sm);padding:4px 10px">' + statusLabel + '</div>' +
+        '<div class="op-status-chip ' + statusCls + '" data-tip="' + escTip(TIPS.opStatus[op.status] || '') + '" style="font-size:var(--fs-sm);padding:4px 10px">' + statusLabel + '</div>' +
       '</div>';
 
     // Briefing
@@ -212,7 +212,10 @@
       '<div class="op-detail-section-title">OPERATION DETAILS</div>' +
       '<div class="intel-fields">';
 
-    html += intelRow('OPERATION TYPE', opTypeLabel);
+    html += '<div class="intel-field-row">' +
+      '<span class="intel-field-key">OPERATION TYPE</span>' +
+      '<span class="intel-field-val" data-tip="' + escTip(tipOpType(op.operationType)) + '">' + opTypeLabel + '</span>' +
+    '</div>';
     html += intelRow('CODENAME', op.codename);
     html += intelRow('CLASSIFICATION', 'TOP SECRET // SCI // VIGIL');
     html += intelRow('LOCATION', op.location ? op.location.city + ', ' + op.location.country : 'Unknown');
@@ -319,7 +322,7 @@
       if (field.revealed) {
         html += '<div class="intel-field-row">' +
           '<span class="intel-field-key">' +
-            '<span class="intel-source-tag" style="color:' + diffColor + '">' + field.source + '</span> ' +
+            '<span class="intel-source-tag" data-tip="' + escTip(tipSource(field.source)) + '" style="color:' + diffColor + '">' + field.source + '</span> ' +
             field.label +
           '</span>' +
           '<span class="intel-field-val revealed">' + field.value + '</span>' +
@@ -331,13 +334,13 @@
 
         html += '<div class="intel-field-row">' +
           '<span class="intel-field-key">' +
-            '<span class="intel-source-tag" style="color:' + diffColor + '">' + field.source + '</span> ' +
+            '<span class="intel-source-tag" data-tip="' + escTip(tipSource(field.source)) + '" style="color:' + diffColor + '">' + field.source + '</span> ' +
             field.label +
           '</span>' +
           '<span class="intel-field-val hidden">' +
             '<span class="intel-progress-wrap">' +
               '<span class="intel-progress-bar"><span class="intel-progress-fill" style="width:' + pct + '%;background:' + diffColor + '"></span></span>' +
-              '<span class="intel-progress-label">' + pct + '% · ' + field.difficulty.replace('_', ' ') + '</span>' +
+              '<span class="intel-progress-label" data-tip="' + escTip(tipDifficulty(field.difficulty)) + '">' + pct + '% · ' + field.difficulty.replace('_', ' ') + '</span>' +
             '</span>' +
           '</span>' +
         '</div>';
@@ -399,15 +402,15 @@
 
       // Stats row
       html += '<div class="vigil-option-stats">' +
-        '<div class="vigil-stat">' +
+        '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.confidence) + '">' +
           '<span class="vigil-stat-label">CONFIDENCE</span>' +
           '<span class="vigil-stat-value" style="color:' + confColor(opt.confidencePercent) + '">' + opt.confidencePercent + '%</span>' +
         '</div>' +
-        '<div class="vigil-stat">' +
+        '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.risk) + '">' +
           '<span class="vigil-stat-label">RISK</span>' +
           '<span class="vigil-stat-value ' + riskCls + '">' + opt.riskLevel + '</span>' +
         '</div>' +
-        '<div class="vigil-stat">' +
+        '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.eta) + '">' +
           '<span class="vigil-stat-label">ETA</span>' +
           '<span class="vigil-stat-value">' + formatTransitTime(opt.transitTimeMinutes) + '</span>' +
         '</div>' +
@@ -502,10 +505,10 @@
     var unavailCls = unavailable ? ' asset-unavailable' : '';
     var html = '<div class="vigil-asset-row' + (expandable ? ' expandable' : '') + unavailCls + '"' +
       (expandable ? ' onclick="toggleAssetExpand(\'' + expandKey + '\')"' : '') + '>' +
-      '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
+      '<span class="vigil-asset-cat" data-tip="' + escTip(TIPS.assetCat[asset.category] || '') + '" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
       '<span class="vigil-asset-name">' + asset.name + '</span>' +
       (unavailable ? '<span style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;background:var(--red-dim);color:var(--red)">DEPLOYED</span>' : '') +
-      (asset.deniability ? '<span style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + asset.deniability + '</span>' : '') +
+      (asset.deniability ? '<span data-tip="' + escTip(TIPS.deniability[asset.deniability] || '') + '" style="font-family:var(--font-mono);font-size:8px;padding:1px 4px;border-radius:2px;color:' + (DENIABILITY_DISPLAY[asset.deniability] || DENIABILITY_DISPLAY.OVERT).color + '">' + asset.deniability + '</span>' : '') +
       '<span class="vigil-asset-base">' + (base ? base.city + ', ' + base.country : '') + '</span>' +
       (expandable ? '<span class="asset-expand-icon">' + (isExpanded ? '▾' : '▸') + '</span>' : '') +
     '</div>';
@@ -597,16 +600,18 @@
 
     var html = '<div class="op-detail-section">' +
       '<div class="op-detail-section-title">ASSET TRANSIT</div>' +
-      '<div class="transit-assets">';
+      '<div class="vigil-option-assets">';
 
     for (var i = 0; i < op.assignedAssetIds.length; i++) {
       var asset = getAsset(op.assignedAssetIds[i]);
       if (!asset) continue;
 
-      var catInfo = ASSET_CATEGORIES[asset.category] || {};
+      var expandKey = op.id + '-transit-' + asset.id;
+      var isExpanded = _expandedAssets[expandKey];
+
+      // Transit progress info
       var pct = 100;
       var statusText = 'ON STATION';
-
       if (asset.status === 'IN_TRANSIT' && asset.transitDurationMinutes > 0) {
         var elapsed = V.time.totalMinutes - asset.transitStartTotalMinutes;
         pct = Math.min(100, Math.round((elapsed / asset.transitDurationMinutes) * 100));
@@ -616,17 +621,10 @@
         statusText = 'DEPLOYED';
       }
 
-      html += '<div class="transit-asset-row"' +
-        ' data-tip="' + escTip(asset.designation + ' · ' + (asset.personnel || '?') + ' personnel · ' + (asset.platform || '?')) + '"' +
-        ' data-tip-align="right">' +
-        '<div class="transit-asset-info">' +
-          '<span class="vigil-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || '') + '</span>' +
-          '<span class="vigil-asset-name">' + asset.name + '</span>' +
-        '</div>' +
-        '<div class="transit-bar-wrap">' +
-          '<div class="transit-bar"><div class="transit-bar-fill" style="width:' + pct + '%"></div></div>' +
-          '<span class="transit-status">' + statusText + '</span>' +
-        '</div>' +
+      html += renderAssetRow(asset, true, expandKey, isExpanded);
+      html += '<div class="transit-bar-wrap">' +
+        '<div class="transit-bar"><div class="transit-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<span class="transit-status">' + statusText + '</span>' +
       '</div>';
     }
 

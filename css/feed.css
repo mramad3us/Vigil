@@ -281,6 +281,35 @@
   color: var(--text-muted);
   letter-spacing: 0.3px;
   margin-bottom: var(--sp-2);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.feed-threat-tags {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 2px;
+}
+
+.feed-threat-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.feed-threat-tag.domestic {
+  background: #d4a04a;
+  color: #000;
+}
+.feed-threat-tag.urgent {
+  background: var(--red);
+  color: #fff;
 }
 
 .feed-threat-bars {

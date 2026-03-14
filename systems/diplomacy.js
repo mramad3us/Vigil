@@ -64,6 +64,8 @@ var INITIAL_STANCES = {
 (function() {
 
   hook('game:start', function() {
+    if (V.initialized) return;
+
     V.diplomacy = {};
     for (var country in INITIAL_STANCES) {
       V.diplomacy[country] = {

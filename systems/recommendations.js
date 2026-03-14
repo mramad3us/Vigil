@@ -20,6 +20,15 @@ function generateVigilOptions(op) {
   var eligible = getAvailableAssets().filter(function(a) {
     // Domestic agencies only available for domestic ops
     if (a.domesticAuthority && !op.domestic) return false;
+
+    // Domestic ops: exclude categories that make no sense on US soil
+    if (op.domestic) {
+      // NAVY and AIR cannot meaningfully operate domestically
+      if (a.category === 'NAVY' || a.category === 'AIR') return false;
+      // Non-domestic-authority assets must be COVERT to even be considered
+      if (!a.domesticAuthority && a.deniability !== 'COVERT') return false;
+    }
+
     for (var i = 0; i < required.length; i++) {
       if (a.capabilities.indexOf(required[i]) >= 0) return true;
     }

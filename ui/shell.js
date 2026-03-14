@@ -199,5 +199,6 @@ function startGame() {
   startEngine();
 
   fire('game:start', V);
+  V.initialized = true;
   addLog('VIGIL system initialized. Operator ' + V.player.callsign + ' active.', 'log-info');
 }
