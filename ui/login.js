@@ -6,6 +6,24 @@
 
 var _bootPhase = 0;
 
+function getSavedCallsign() {
+  try {
+    var raw = localStorage.getItem('vigil_saves');
+    if (!raw) return null;
+    var saves = JSON.parse(raw);
+    // Find most recent save with a callsign
+    var best = null;
+    for (var k in saves) {
+      if (saves[k].callsign && (!best || (saves[k].timestamp || 0) > (best.timestamp || 0))) {
+        best = saves[k];
+      }
+    }
+    return best ? best.callsign : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function initLogin() {
   var callsignInput = $('auth-callsign');
   var authBtn = $('auth-btn');
@@ -95,7 +113,27 @@ function bootSequence() {
   // Phase 7: Auth form
   setTimeout(function() {
     $('login-auth').classList.add('visible');
-    $('auth-callsign').focus();
+
+    // Check for existing save — auto-fill callsign with typing effect
+    var savedCallsign = getSavedCallsign();
+    if (savedCallsign) {
+      var input = $('auth-callsign');
+      input.disabled = true;
+      var idx = 0;
+      var typeInterval = setInterval(function() {
+        if (idx < savedCallsign.length) {
+          input.value += savedCallsign[idx];
+          idx++;
+        } else {
+          clearInterval(typeInterval);
+          input.disabled = false;
+          $('auth-btn').disabled = false;
+          $('auth-btn').focus();
+        }
+      }, 60);
+    } else {
+      $('auth-callsign').focus();
+    }
   }, wordmarkDelay + 1200);
 }
 
@@ -142,6 +180,10 @@ function beginAuth() {
         wrap.classList.add('visible');
         bar.style.width = ((idx + 1) / checks.length * 100) + '%';
 
+        // Auto-scroll login screen to keep new content visible
+        var loginScreen = $('screen-login');
+        loginScreen.scrollTop = loginScreen.scrollHeight;
+
       }, 600 + idx * 400);
     })(checks[i], i);
   }
@@ -163,6 +205,7 @@ function beginAuth() {
   // Classification banner
   setTimeout(function() {
     $('login-class-banner').classList.add('visible');
+    $('screen-login').scrollTop = $('screen-login').scrollHeight;
   }, successDelay + 400);
 
   // Transition to main

@@ -227,6 +227,16 @@
     }
   });
 
+  // --- Fly to location ---
+  window.globeFlyTo = function(lat, lon) {
+    activateWorkspace('globe');
+    if (!_viewer) return;
+    _viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(lon, lat, 3000000),
+      duration: 1.5,
+    });
+  };
+
   // --- Restore camera on load ---
   hook('game:load', function() {
     if (_viewer && V.globe.cameraPosition) {

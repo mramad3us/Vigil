@@ -4,11 +4,12 @@
    ============================================================ */
 
 #screen-login {
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   background: var(--bg-0);
   position: relative;
   z-index: 200;
+  overflow-y: auto;
 }
 #screen-login.active {
   display: flex;
@@ -42,6 +43,9 @@
   width: 90%;
   position: relative;
   z-index: 1;
+  margin-top: auto;
+  margin-bottom: 0;
+  padding-top: var(--sp-6);
 }
 
 /* --- Orthanc Logo --- */
@@ -224,22 +228,12 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: border-color var(--transition-fast);
+  caret-color: var(--accent);
 }
 
 .auth-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent-dim);
-}
-
-.auth-input-cursor {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2px;
-  height: 18px;
-  background: var(--accent);
-  animation: boot-cursor-blink 1s step-end infinite;
 }
 
 .auth-fp-wrap {
@@ -399,14 +393,12 @@
 
 /* --- Login Footer --- */
 .login-footer {
-  position: absolute;
-  bottom: var(--sp-4);
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
+  width: 100%;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 9px;
   color: var(--text-muted);
   letter-spacing: 0.5px;
-  padding: 0 var(--sp-4);
+  padding: var(--sp-6) var(--sp-4) var(--sp-4);
 }

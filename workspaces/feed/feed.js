@@ -7,6 +7,7 @@
 
   var _selectedFeedId = null;
   var _feedFilter = 'ALL';
+  var _renderedIds = {};
 
   registerWorkspace({
     id: 'feed',
@@ -60,7 +61,9 @@
       var selectedCls = item.id === _selectedFeedId ? ' selected' : '';
       var unreadCls = item.read ? '' : ' unread';
 
-      html += '<div class="feed-item' + selectedCls + unreadCls + '" onclick="selectFeedItem(\'' + item.id + '\')">' +
+      var newCls = _renderedIds[item.id] ? '' : ' new-item';
+
+      html += '<div class="feed-item' + selectedCls + unreadCls + newCls + '" onclick="selectFeedItem(\'' + item.id + '\')">' +
         '<div class="feed-severity ' + severityCls + '"></div>' +
         '<div class="feed-item-content">' +
           '<div class="feed-item-header">' + item.header + '</div>' +
@@ -77,6 +80,19 @@
     }
 
     listEl.innerHTML = html;
+
+    // Track rendered IDs and remove new-item class after animation
+    for (var j = 0; j < items.length && j < 100; j++) {
+      _renderedIds[items[j].id] = true;
+    }
+    var newItems = listEl.querySelectorAll('.new-item');
+    for (var k = 0; k < newItems.length; k++) {
+      (function(el) {
+        el.addEventListener('animationend', function() {
+          el.classList.remove('new-item');
+        });
+      })(newItems[k]);
+    }
   }
 
   // --- Feed Toolbar ---
@@ -132,10 +148,9 @@
     if (item.opId) {
       html += '<button class="feed-action-btn primary" onclick="activateWorkspace(\'operations\')">VIEW OPERATION</button>';
     }
-    if (item.eventId) {
-      html += '<button class="feed-action-btn" onclick="">VIEW EVENT</button>';
+    if (item.geo && item.geo.lat && item.geo.lon) {
+      html += '<button class="feed-action-btn" onclick="globeFlyTo(' + item.geo.lat + ',' + item.geo.lon + ')">VIEW ON GLOBE</button>';
     }
-    html += '<button class="feed-action-btn" onclick="markFeedRead(\'' + item.id + '\')">MARK READ</button>';
     html += '</div>';
 
     detailEl.innerHTML = html;
@@ -171,17 +186,6 @@
     _feedFilter = filter;
     renderFeedList();
     renderFeedToolbar();
-  };
-
-  window.markFeedRead = function(feedId) {
-    for (var i = 0; i < V.feed.length; i++) {
-      if (V.feed[i].id === feedId) {
-        V.feed[i].read = true;
-        break;
-      }
-    }
-    renderFeedList();
-    updateWorkspaceBadge('feed', getUnreadFeedCount());
   };
 
 })();

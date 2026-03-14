@@ -14,6 +14,9 @@
   cursor: pointer;
   border: 1px solid transparent;
   transition: all var(--transition-fast);
+}
+
+.feed-item.new-item {
   animation: feed-item-in 250ms var(--ease-out);
 }
 
