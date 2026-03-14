@@ -311,18 +311,7 @@ function dismissMigration(theaterId) {
 
 // --- Global window functions for UI ---
 
-window.setTheaterDefcon = function(theaterId, level) {
-  setDefcon(theaterId, level);
-};
-
-window.approveMigration = function(theaterId) {
-  approveMigration(theaterId);
-};
-
-window.removeMigrationAsset = function(theaterId, assetId) {
-  removeMigrationAsset(theaterId, assetId);
-};
-
-window.dismissMigration = function(theaterId) {
-  dismissMigration(theaterId);
-};
+window.setTheaterDefcon = setDefcon;
+window.approveMigration = approveMigration;
+window.removeMigrationAsset = removeMigrationAsset;
+window.dismissMigration = dismissMigration;
