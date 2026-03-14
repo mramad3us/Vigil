@@ -278,6 +278,25 @@
         threat.status = success ? 'NEUTRALIZED' : 'FAILED';
         if (success) {
           V.playStats.threatsNeutralized = (V.playStats.threatsNeutralized || 0) + 1;
+
+          // Diplomatic goodwill: neutralizing a disclosed threat earns bonus with the warned country
+          if (threat.foreignTarget && threat.foreignTarget.disclosed && threat.foreignTarget.country) {
+            var ftCountry = threat.foreignTarget.country;
+            if (V.diplomacy[ftCountry]) {
+              shiftStance(ftCountry, 2);
+              addLog('DIPLOMACY: ' + ftCountry + ' grateful for neutralizing ' + threat.orgName + '. Stance +2.', 'log-info');
+              pushFeedItem({
+                id: uid('FI'),
+                type: 'DIPLOMATIC',
+                severity: 'ROUTINE',
+                header: 'DIPLOMATIC GOODWILL: ' + ftCountry.toUpperCase(),
+                body: ftCountry + ' has acknowledged the neutralization of ' + threat.orgName +
+                  ', a threat previously disclosed through intelligence sharing. Relations have improved.',
+                timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+                read: false,
+              });
+            }
+          }
         }
       }
     }
