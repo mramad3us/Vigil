@@ -150,6 +150,11 @@
   background: var(--bg-hover);
 }
 
+.tb-logout:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
 .tb-status {
   font-family: var(--font-mono);
   font-size: var(--fs-xs);

@@ -71,6 +71,7 @@
           </div>
 
           <button class="auth-btn" id="auth-btn" disabled>INITIALIZE SESSION</button>
+          <div class="auth-new-operator" id="auth-new-operator"></div>
         </div>
 
         <!-- Verification checks -->
@@ -137,9 +138,9 @@
         <div class="sb-clock" id="sb-clock">0800 · 1 JAN 2052</div>
         <div class="tb-speed" id="speed-controls">
           <button class="speed-btn paused" data-speed="0" title="Pause">⏸</button>
-          <button class="speed-btn active" data-speed="1" title="Real-time">▶</button>
-          <button class="speed-btn" data-speed="2" title="1s = 1h">▶▶</button>
-          <button class="speed-btn" data-speed="3" title="1s = 12h">▶▶▶</button>
+          <button class="speed-btn active" data-speed="1" title="Normal">▶</button>
+          <button class="speed-btn" data-speed="2" title="Fast">▶▶</button>
+          <button class="speed-btn" data-speed="3" title="V. Fast">▶▶▶</button>
         </div>
       </div>
     </header>
@@ -178,6 +179,7 @@
       </div>
       <div class="tb-right">
         <button class="tb-sys" id="btn-save" onclick="showSaveModal()">SAVE</button>
+        <button class="tb-sys tb-logout" id="btn-logout" onclick="logoutGame()">LOG OUT</button>
         <div class="tb-status" id="tb-status">OPERATIONAL</div>
       </div>
     </footer>

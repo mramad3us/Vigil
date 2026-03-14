@@ -156,7 +156,7 @@
     var type = parts[0];
     var id = parts.slice(1).join('-');
 
-    var title = '', typeLabel = '', detail = '';
+    var title = '', typeLabel = '', detail = '', action = '';
 
     if (type === 'threat') {
       var threat = getThreat(id);
@@ -166,6 +166,7 @@
         detail = 'Location: ' + threat.location.city + ', ' + threat.location.country +
           '<br>Theater: ' + threat.location.theater.name +
           '<br>Intel: ' + threat.intel + '%';
+        action = '<button class="feed-action-btn" onclick="activateWorkspace(\'feed\')">VIEW IN FEED</button>';
       }
     } else if (type === 'op') {
       var op = getOp(id);
@@ -175,6 +176,7 @@
         detail = 'Location: ' + op.location.city + ', ' + op.location.country +
           '<br>Threat Level: ' + op.threatLevel +
           '<br>Status: ' + op.status;
+        action = '<button class="feed-action-btn primary" onclick="viewOperationFromGlobe(\'' + op.id + '\')">VIEW OPERATION</button>';
       }
     }
 
@@ -182,7 +184,8 @@
       info.innerHTML =
         '<div class="globe-info-title">' + title + '</div>' +
         '<div class="globe-info-type">' + typeLabel + '</div>' +
-        '<div class="globe-info-detail">' + detail + '</div>';
+        '<div class="globe-info-detail">' + detail + '</div>' +
+        '<div class="globe-info-actions">' + action + '</div>';
       info.classList.add('visible');
     }
   }
@@ -226,6 +229,14 @@
       if (_viewer) syncGlobeLayers(_viewer);
     }
   });
+
+  // --- View operation from globe ---
+  window.viewOperationFromGlobe = function(opId) {
+    activateWorkspace('operations');
+    setTimeout(function() {
+      selectOperation(opId);
+    }, 50);
+  };
 
   // --- Fly to location ---
   window.globeFlyTo = function(lat, lon) {

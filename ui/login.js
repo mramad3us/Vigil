@@ -5,6 +5,7 @@
    ============================================================ */
 
 var _bootPhase = 0;
+var _isReturningOperator = false;
 
 function getSavedCallsign() {
   try {
@@ -64,7 +65,7 @@ function bootSequence() {
 
   // Phase 3: System check lines
   var bootLines = [
-    { key: 'ORTHANC CORE',           val: 'v7.4.2' },
+    { key: 'ORTHANC CORE',           val: 'v' + V.version },
     { key: 'CRYPTOGRAPHIC MODULE',   val: 'AES-512-GCM' },
     { key: 'QUANTUM MESH',           val: 'SYNCHRONIZED' },
     { key: 'BIOMETRIC ARRAY',        val: 'ONLINE' },
@@ -117,6 +118,7 @@ function bootSequence() {
     // Check for existing save — auto-fill callsign with typing effect
     var savedCallsign = getSavedCallsign();
     if (savedCallsign) {
+      _isReturningOperator = true;
       var input = $('auth-callsign');
       input.disabled = true;
       var idx = 0;
@@ -131,7 +133,14 @@ function bootSequence() {
           $('auth-btn').focus();
         }
       }, 60);
+
+      // Show "new operator" option
+      var newOpEl = $('auth-new-operator');
+      if (newOpEl) {
+        newOpEl.innerHTML = '<button class="auth-new-btn" onclick="startNewOperator()">REQUEST NEW OPERATOR CREDENTIALS</button>';
+      }
     } else {
+      _isReturningOperator = false;
       $('auth-callsign').focus();
     }
   }, wordmarkDelay + 1200);
@@ -212,9 +221,125 @@ function beginAuth() {
   setTimeout(function() {
     initState();
     V.player.callsign = callsign;
+
+    // Load most recent save for returning operator
+    if (_isReturningOperator) {
+      var saves = {};
+      try { saves = JSON.parse(localStorage.getItem('vigil_saves') || '{}'); } catch(e) {}
+      var bestKey = null, bestTime = 0;
+      for (var k in saves) {
+        if (saves[k].callsign === callsign && (saves[k].timestamp || 0) > bestTime) {
+          bestKey = k;
+          bestTime = saves[k].timestamp;
+        }
+      }
+      if (bestKey) loadGameSlot(bestKey);
+    }
+
     startGame();
   }, successDelay + 1400);
 }
+
+// --- New Operator ---
+
+window.startNewOperator = function() {
+  _isReturningOperator = false;
+  var input = $('auth-callsign');
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+  $('auth-btn').disabled = true;
+  $('auth-btn').textContent = 'INITIALIZE SESSION';
+  var newOpEl = $('auth-new-operator');
+  if (newOpEl) newOpEl.innerHTML = '';
+};
+
+// --- Logout ---
+
+function resetLoginScreen() {
+  // Reset auth form
+  var input = $('auth-callsign');
+  input.value = '';
+  input.disabled = false;
+  $('auth-btn').disabled = true;
+  $('auth-btn').textContent = 'INITIALIZE SESSION';
+  $('auth-btn').classList.remove('success');
+
+  // Clear auth checks
+  $('auth-checks').innerHTML = '';
+
+  // Reset progress bar
+  $('auth-bar').style.width = '0%';
+  $('auth-bar-wrap').classList.remove('visible');
+
+  // Reset fingerprint
+  $('auth-fp-icon').classList.remove('scanning', 'confirmed');
+
+  // Reset classification banner
+  $('login-class-banner').classList.remove('visible');
+
+  // Reset new operator link
+  var newOpEl = $('auth-new-operator');
+  if (newOpEl) newOpEl.innerHTML = '';
+}
+
+window.logoutGame = function() {
+  // Autosave before logout
+  if (typeof quickSave === 'function') {
+    try {
+      var saves = JSON.parse(localStorage.getItem('vigil_saves') || '{}');
+      saves['__autosave__'] = {
+        id: '__autosave__',
+        label: 'Autosave — Day ' + V.time.day,
+        callsign: V.player.callsign,
+        day: V.time.day,
+        confidence: Math.round(V.resources.confidence),
+        timestamp: Date.now(),
+        data: JSON.parse(JSON.stringify(V)),
+      };
+      localStorage.setItem('vigil_saves', JSON.stringify(saves));
+    } catch(e) {}
+  }
+
+  // Stop engine
+  stopEngine();
+
+  // Switch screens
+  $('screen-main').classList.remove('active');
+  $('screen-login').classList.add('active');
+
+  // Reset login screen and pre-fill returning operator
+  resetLoginScreen();
+
+  // Skip boot, go straight to auth
+  var savedCallsign = getSavedCallsign();
+  if (savedCallsign) {
+    _isReturningOperator = true;
+    var input = $('auth-callsign');
+    input.disabled = true;
+    var idx = 0;
+    var typeInterval = setInterval(function() {
+      if (idx < savedCallsign.length) {
+        input.value += savedCallsign[idx];
+        idx++;
+      } else {
+        clearInterval(typeInterval);
+        input.disabled = false;
+        $('auth-btn').disabled = false;
+        $('auth-btn').focus();
+      }
+    }, 60);
+
+    var newOpEl = $('auth-new-operator');
+    if (newOpEl) {
+      newOpEl.innerHTML = '<button class="auth-new-btn" onclick="startNewOperator()">REQUEST NEW OPERATOR CREDENTIALS</button>';
+    }
+  } else {
+    $('auth-callsign').focus();
+  }
+
+  $('screen-login').scrollTop = 0;
+};
 
 // --- Initialize on load ---
 document.addEventListener('DOMContentLoaded', initLogin);

@@ -240,6 +240,27 @@
   box-shadow: 0 0 0 1px var(--accent-dim);
 }
 
+.auth-new-operator {
+  text-align: center;
+  margin-top: var(--sp-3);
+}
+
+.auth-new-btn {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--sp-1) var(--sp-2);
+  transition: color var(--transition-fast);
+}
+
+.auth-new-btn:hover {
+  color: var(--accent);
+}
+
 .auth-fp-wrap {
   text-align: center;
   margin: var(--sp-6) 0;
