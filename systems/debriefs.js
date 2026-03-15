@@ -192,10 +192,281 @@ var LE_ENTRY = [
   'Vehicle stop on the interstate. Agents boxed the target\'s vehicle. Felony stop procedures. Driver extracted at gunpoint.',
 ];
 
+// --- Threat-Context Narrative Pools ---
+// When an op type (e.g. SOF_RAID) is used against a different threat type
+// (e.g. HOSTAGE_CRISIS), these pools provide context-appropriate narrative elements.
+
+var THREAT_CONTEXT = {
+  HOSTAGE_CRISIS: {
+    targetDesc: 'hostage site',
+    objective: 'hostage rescue',
+    preMission: [
+      'hostages confirmed held by {org} in a fortified position. Rules of engagement: hostage safety is the absolute priority. Non-lethal options prepared for close-quarters near hostage positions.',
+      'hostage situation developing. {org} holding multiple civilians. ISR confirms hostage location. Assault plan built around simultaneous entry to prevent hostage execution.',
+    ],
+    jackpotSuccess: [
+      '"PRECIOUS CARGO SECURE. All hostages alive." Hostages found in {loc} — frightened, some with minor injuries, but alive. Operators shielded them during the final clearing. Flex-cuffed captors separated from hostages immediately.',
+      '"PRECIOUS CARGO SECURE." {count} hostages recovered from {loc}. Captors had rigged a dead man\'s switch — sniper neutralized the triggerman through a window at the moment of breach. All hostages breathing.',
+    ],
+    jackpotFailure: [
+      'Hostage holding area breached too late. Captors detonated a prepared charge when they heard the assault team in the corridor. {count} hostages killed in the blast. Remaining hostages pulled from the rubble — alive but traumatized.',
+      'By the time the assault team reached the hostage room, the captors had already executed {count} hostages. Remaining hostages rescued but the primary objective — zero hostage casualties — was not achieved.',
+    ],
+    sseSuccess: 'Hostages evacuated to medical triage point. All checked for injuries — minor abrasions and severe psychological trauma but no life-threatening conditions. Captor bodies and equipment documented for intelligence exploitation.',
+    sseFailure: 'Surviving hostages evacuated under emergency medical protocol. Mass casualty response initiated. Scene preservation for after-action review.',
+    assessmentSuccess: 'Hostage rescue operation {codename} in {city} achieved primary objective — all hostages recovered alive. {org}\'s capability to hold hostages in {country} has been eliminated. The operation demonstrated the value of precise intelligence and synchronized assault.',
+    assessmentFailure: 'Hostage rescue operation {codename} in {city} resulted in hostage casualties. {org}\'s captors executed their contingency before the assault team could secure the holding area. Intelligence on the defensive preparations was insufficient. Vigil is reviewing the gap.',
+  },
+  CRIMINAL_ORG: {
+    targetDesc: 'compound',
+    objective: 'interdiction raid',
+    preMission: [
+      '{org} criminal network operating from a compound in {city}. Target: leadership and logistics hub. Intelligence indicates narcotics processing, weapons storage, and financial records at the site.',
+      'criminal network {org} using this facility as a regional headquarters. Expected contents: cash reserves, communications equipment, ledgers, and potentially armed guards from the cartel\'s security wing.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Primary target — {org}\'s regional commander — identified and detained. Found in a back office behind a reinforced door, shredding documents when the team breached. Hard drives seized before wipe could complete.',
+      '"JACKPOT." Cache located: {evidence}. Financial ledgers documenting transactions across {count} countries. {org}\'s logistics network is blown wide open.',
+    ],
+    jackpotFailure: [
+      'Primary target fled through a pre-prepared escape tunnel. The compound was partially cleared but {org}\'s leadership was not present. Evidence of recent occupation — the shredder was still warm.',
+      'Target compound was a decoy. Limited personnel and materials found. Real operations likely redirected to an alternate site. {org} was tipped off.',
+    ],
+    sseSuccess: 'SSE team catalogued: ' + pick(DEBRIEF_EVIDENCE) + '. Cash totaling approximately $' + randInt(1, 15) + 'M seized. Financial forensics team will trace the money trail.',
+    sseFailure: 'Limited materials recovered. Thermite charges had been set — most documents and electronics destroyed. Forensic team attempting data recovery from damaged media.',
+    assessmentSuccess: 'Raid on {org}\'s facility in {city} disrupted their criminal operations. Key leadership detained, financial records seized, and logistics chain exposed. Law enforcement partners notified for coordinated follow-up.',
+    assessmentFailure: 'Raid on {org}\'s facility in {city} failed to secure primary targets. Criminal leadership evaded capture, likely via prior warning. The network will relocate operations. Recommend immediate surveillance of known alternate sites.',
+  },
+  PROLIFERATOR: {
+    targetDesc: 'facility',
+    objective: 'counter-proliferation raid',
+    preMission: [
+      '{org} suspected of WMD-related activities at this facility in {city}. CBRN-qualified operators assigned. NBC protective equipment staged. Priority: secure all materials, documents, and scientific equipment before destruction.',
+      'counter-proliferation intelligence indicates {org} is operating a research or manufacturing facility. Threat type: {threatLabel}. CBRN team attached to assault element. Containment protocols briefed.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT — materials secured." CBRN team entered the laboratory section in full protective gear. Found: centrifuge components, chemical precursors, and technical documents in multiple languages. All materials containerized in hazmat packaging.',
+      '"JACKPOT." Research facility secured. Scientific equipment, sample containers, and procurement records recovered intact. Lead scientist detained — positive ID confirmed. CBRN sweep shows no active contamination threat.',
+    ],
+    jackpotFailure: [
+      'Laboratory section was destroyed by internal charges before the team could reach it. Fire suppression failed — critical materials consumed. CBRN team detected residual chemical signatures confirming WMD-related activity, but physical evidence is gone.',
+      'Facility was in the process of being dismantled when the team arrived. Heavy equipment moved out within the last 48 hours based on floor marks. Only secondary materials recovered. {org}\'s proliferation program has relocated.',
+    ],
+    sseSuccess: 'CBRN-qualified SSE team catalogued all materials under strict chain-of-custody protocols. Samples sealed in triple containment. Technical documents photographed in situ. Full inventory transmitted to Vigil CBRN analysis division.',
+    sseFailure: 'Limited materials recovered. CBRN sweep of destroyed sections confirmed hazardous residue. Site will require environmental remediation. Intelligence value severely degraded by destruction.',
+    assessmentSuccess: 'Counter-proliferation raid on {org}\'s facility in {city} secured WMD-related materials and key personnel. The seizure significantly degrades {org}\'s program timeline. Materials are en route to national laboratory for full analysis.',
+    assessmentFailure: 'Counter-proliferation raid failed to secure {org}\'s primary materials. Evidence of program activity was confirmed but the bulk of materials and equipment has been relocated. {org}\'s proliferation timeline is delayed but not stopped.',
+  },
+  ASSET_COMPROMISED: {
+    targetDesc: 'detention site',
+    objective: 'asset recovery',
+    preMission: [
+      'FLASH priority: Vigil source compromised and detained by {org} in {city}. Counter-intelligence indicates the asset is being held for interrogation. Window for recovery is closing — the longer {org} has the asset, the more damage to Vigil\'s network.',
+      'compromised Vigil asset confirmed alive and held at this location by {org}. The asset possesses knowledge of active operations across the theater. Extraction before full interrogation is critical.',
+    ],
+    jackpotSuccess: [
+      '"PRECIOUS CARGO SECURE." Vigil asset located in a basement holding cell. Alive, showing signs of interrogation but conscious and responsive. Asset confirmed identity via pre-arranged challenge/response. Immediate medical assessment: stable.',
+      '"PRECIOUS CARGO SECURE." Asset found in {loc}, handcuffed to a chair. Interrogation equipment in the room — they had started but hadn\'t broken the asset yet. Operators cut the restraints and moved the asset to extract vehicle.',
+    ],
+    jackpotFailure: [
+      'Asset not found at the target location. Evidence of recent detention — chair bolted to the floor, restraints, blood. {org} moved the asset before the team arrived. Trail is cold.',
+      'Asset located but too late. Found unresponsive in the holding area. Team medic attempted resuscitation. Asset did not survive. {org}\'s interrogators had extracted information before elimination — damage assessment required.',
+    ],
+    sseSuccess: 'Interrogation records and equipment seized. Analysis will determine what information was extracted from the asset before rescue. Counter-intelligence damage assessment initiated. Asset transported to secure medical facility for debriefing.',
+    sseFailure: 'Interrogation room documented. Recording equipment recovered — may reveal what {org} learned. All Vigil operations known to the asset must be considered potentially compromised. Emergency network lockdown recommended.',
+    assessmentSuccess: 'Asset recovery operation {codename} in {city} succeeded. Vigil source recovered alive before {org} could complete interrogation. Counter-intelligence damage assessment in progress but initial indications suggest the asset held. Network integrity maintained.',
+    assessmentFailure: 'Asset recovery failed. Vigil source remains in {org}\'s custody or has been eliminated. All operations known to the asset are considered compromised. Vigil is executing emergency protocols across the {theater} theater to protect remaining sources.',
+  },
+  MILITARY_TARGET: {
+    targetDesc: 'military installation',
+    objective: 'direct action raid',
+    preMission: [
+      'military target identified in {city}, {country}. Fortified position with defensive perimeter. Expected resistance: organized military-grade. Team equipped for heavy contact.',
+      '{org} military installation targeted for destruction/capture. ISR shows defensive positions, vehicle parks, and communications infrastructure. Heavy resistance expected.',
+    ],
+    jackpotSuccess: [
+      '"Objective secured." Military installation under team control. Command post captured intact — maps, communications equipment, and classified documents recovered. Defensive positions neutralized.',
+      '"JACKPOT." Facility\'s command element captured. Military-grade equipment, ammunition stores, and operational plans secured. Remaining garrison surrendered after leadership was neutralized.',
+    ],
+    jackpotFailure: [
+      'Garrison reinforced from adjacent positions before the team could secure the objective. The installation\'s defensive preparations exceeded intelligence estimates. Team forced to withdraw under heavy fire.',
+      'Target installation\'s defenses were more extensive than ISR indicated. Concealed fighting positions and pre-registered mortar fire pinned the assault element. Objective not secured.',
+    ],
+    sseSuccess: 'Military intelligence materials recovered: operational plans, communications logs, and equipment inventories. Order-of-battle analysis updated based on recovered documents.',
+    sseFailure: 'Minimal materials recovered during emergency withdrawal. Post-action ISR shows the installation remains operational with reinforced garrison.',
+    assessmentSuccess: 'Direct action against {org}\'s military installation in {city} achieved objectives. Facility degraded, key personnel captured, and military intelligence recovered. Enemy force capability in the area significantly reduced.',
+    assessmentFailure: 'Raid on {org}\'s military installation in {city} did not achieve objectives. Enemy defenses exceeded intelligence estimates. The installation remains operational. Recommend alternative approach — air strike or siege.',
+  },
+  STRATEGIC_TARGET: {
+    targetDesc: 'strategic facility',
+    objective: 'strategic strike',
+    preMission: [
+      'strategic target in {city}: {org}\'s critical infrastructure node. Destruction of this facility will degrade enemy strategic capability. Maximum force authorized.',
+      '{org} strategic facility targeted. Intelligence confirms this is a high-value infrastructure target whose destruction will have operational-level impact.',
+    ],
+    jackpotSuccess: [
+      '"Objective destroyed." Strategic facility rendered inoperable. Critical infrastructure demolished. Secondary explosions confirm ammunition or fuel storage was present.',
+      '"JACKPOT." Strategic target neutralized. Facility\'s primary function — assessed as command-and-control — has been permanently degraded. Demolition charges placed on remaining structures.',
+    ],
+    jackpotFailure: [
+      'Strategic target partially damaged but not destroyed. Hardened construction absorbed more ordnance than planned. Facility likely repairable within weeks.',
+      'Target facility was defended by systems not identified in pre-mission intelligence. Team took casualties during approach. Only peripheral structures damaged.',
+    ],
+    sseSuccess: 'Demolition complete. BDA confirms primary structures destroyed. Strategic capability permanently degraded.',
+    sseFailure: 'Partial damage only. Facility will require follow-up strike to complete destruction.',
+    assessmentSuccess: 'Strategic strike on {org}\'s facility in {city} achieved destruction of critical infrastructure. Enemy strategic capability in the {theater} theater significantly degraded.',
+    assessmentFailure: 'Strike on {org}\'s strategic facility in {city} achieved only partial damage. The facility may be restored. Follow-up action required to complete the mission.',
+  },
+  INSURGENCY: {
+    targetDesc: 'stronghold',
+    objective: 'counter-insurgency raid',
+    preMission: [
+      '{org} insurgent stronghold in {city}. Intelligence indicates a fortified position serving as a local command node. Weapons caches, IED-making materials, and leadership presence confirmed.',
+      'insurgent network {org} operating from this location. Target doubles as a community organizing point — civilian proximity is a concern. Precision assault required to minimize collateral impact.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Insurgent leadership identified and detained during the assault. Weapons cache secured: RPGs, small arms, IED components, and detonators. Propaganda materials and recruitment lists recovered.',
+      '"JACKPOT." Stronghold cleared. {org}\'s local cell leader captured alive after a brief firefight. Maps showing IED placement plans for the next month recovered from the command room.',
+    ],
+    jackpotFailure: [
+      'Stronghold was defended with prepared positions and IEDs. Team penetrated the outer perimeter but insurgent fighters fell back through pre-planned escape routes. Leadership escaped into the civilian population.',
+      'Insurgent fighters triggered multiple IEDs during the assault, channeling the team into a kill zone. Emergency withdrawal called after casualties exceeded acceptable threshold. Stronghold not secured.',
+    ],
+    sseSuccess: 'Weapons cache documented and destroyed in place. IED-making materials rendered safe. Propaganda materials and communications equipment seized for intelligence exploitation.',
+    sseFailure: 'Limited exploitation before withdrawal. IED threat prevented thorough search. Demolition charges placed on identified weapons cache.',
+    assessmentSuccess: 'Counter-insurgency raid on {org}\'s stronghold in {city} disrupted their local command structure. Leadership detained and weapons cache destroyed. Insurgent operations in the area expected to degrade.',
+    assessmentFailure: 'Raid on {org}\'s stronghold in {city} did not achieve objectives. Insurgent defenses and IED preparations exceeded estimates. {org} maintains operational capability in the area. Alternative approach recommended.',
+  },
+  HVT_TARGET: {
+    targetDesc: 'compound',
+    objective: 'HVT operation',
+    // HVT_TARGET maps naturally to SOF_RAID's default narrative, so minimal overrides needed
+    preMission: null, // use default
+    jackpotSuccess: null, // use default
+    jackpotFailure: null, // use default
+    sseSuccess: null,
+    sseFailure: null,
+    assessmentSuccess: null,
+    assessmentFailure: null,
+  },
+  TERROR_CELL: {
+    targetDesc: 'compound',
+    objective: 'direct action',
+    // TERROR_CELL maps naturally to SOF_RAID's default narrative
+    preMission: null,
+    jackpotSuccess: null,
+    jackpotFailure: null,
+    sseSuccess: null,
+    sseFailure: null,
+    assessmentSuccess: null,
+    assessmentFailure: null,
+  },
+  STATE_ACTOR: {
+    targetDesc: 'facility',
+    objective: 'direct action',
+    preMission: [
+      'state-sponsored {org} facility in {city}. Intelligence indicates foreign intelligence officers and military advisors present. Diplomatic implications are severe — this is a high-stakes operation.',
+      '{org} — a state-backed entity — operating from this facility. Evidence of espionage infrastructure, signals equipment, and foreign military liaison. Assault must be precise to control the narrative.',
+    ],
+    jackpotSuccess: null,
+    jackpotFailure: null,
+    sseSuccess: null,
+    sseFailure: null,
+    assessmentSuccess: null,
+    assessmentFailure: null,
+  },
+};
+
+// Fill template variables in threat context strings
+function fillThreatContext(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{(\w+)\}/g, function(m, key) { return vars[key] || m; });
+}
+
+// --- Intel Field Helpers ---
+
+// Get a specific collected intel field's value, or null if not collected
+function getIntel(v, key) {
+  if (!v._intelMap) return null;
+  var f = v._intelMap[key];
+  return (f && f.revealed) ? f.value : null;
+}
+
+// Get intel field label for display
+function getIntelLabel(v, key) {
+  if (!v._intelMap) return null;
+  var f = v._intelMap[key];
+  return (f && f.revealed) ? f.label : null;
+}
+
+// Build a summary string of 1-3 collected intel findings
+function intelExcerpts(v, keys, fallback) {
+  var found = [];
+  for (var i = 0; i < keys.length && found.length < 3; i++) {
+    var val = getIntel(v, keys[i]);
+    if (val) found.push(val);
+  }
+  return found.length > 0 ? found.join(' ') : (fallback || '');
+}
+
+// Pick N items from an array, return comma-joined string
+function pickItems(arr, n, fallback) {
+  if (!arr || arr.length === 0) return fallback || '';
+  var shuffled = arr.slice();
+  for (var i = shuffled.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+  }
+  return shuffled.slice(0, Math.min(n, shuffled.length)).join(', ');
+}
+
 // --- Main Entry Point ---
 
 function generateDebrief(op, success) {
   var v = op.fillVars || {};
+
+  // Enrich fillVars with underlying threat type for context-aware narratives
+  if (op.relatedThreatId && !v.threatType) {
+    var _threat = getThreat(op.relatedThreatId);
+    if (_threat) {
+      v.threatType = _threat.type;
+      v.threatLabel = _threat.typeLabel || _threat.type;
+      v.threatUrgent = _threat.urgent || false;
+    }
+  }
+
+  // --- Intel fields enrichment ---
+  v._intelMap = {};
+  v._revealedIntel = [];
+  v._unrevealedIntel = [];
+  if (op.intelFields) {
+    for (var fi = 0; fi < op.intelFields.length; fi++) {
+      var field = op.intelFields[fi];
+      v._intelMap[field.key] = field;
+      if (field.revealed) {
+        v._revealedIntel.push(field);
+      } else {
+        v._unrevealedIntel.push(field);
+      }
+    }
+  }
+  v.intelCoverage = op.intelFields && op.intelFields.length > 0
+    ? Math.round((v._revealedIntel.length / op.intelFields.length) * 100)
+    : 0;
+
+  // --- Timing enrichment ---
+  v.transitHours = op.transitDurationMinutes ? Math.round(op.transitDurationMinutes / 6) / 10 : null;
+  v.execHours = op.execDurationMinutes ? Math.round(op.execDurationMinutes / 6) / 10 : null;
+  v.urgencyHours = op.urgencyHours || null;
+  v.daysSinceSpawn = op.daySpawned ? (V.time.day - op.daySpawned) : null;
+  v.domestic = op.domestic || false;
+  v.maritime = op.maritime || false;
+
+  // --- Confidence ---
+  v.confidence = null;
+  if (op.options && op.selectedOptionIdx !== undefined && op.options[op.selectedOptionIdx]) {
+    v.confidence = op.options[op.selectedOptionIdx].confidencePercent;
+  }
 
   // Expired ops with no assets deployed get a special debrief
   if (op.expired) {
@@ -223,6 +494,7 @@ function assemblDebrief(sections, op, success) {
   var html = '';
   html += headerSection(op, success);
   html += deployedSection(op);
+  html += intelligenceBasisSection(op);
   html += vigilAssessmentSection(op);
 
   for (var i = 0; i < sections.length; i++) {
@@ -268,10 +540,70 @@ function deployedSection(op) {
     var base = getBase(asset.homeBaseId);
     var catInfo = ASSET_CATEGORIES[asset.category] || {};
 
+    var readinessLabel = asset.readiness === 'TIER_1' ? 'TIER 1' : asset.readiness === 'TIER_2' ? 'TIER 2' : '';
+    var deniLabel = asset.deniability === 'COVERT' ? 'COVERT' : 'OVERT';
+
     html += '<div class="debrief-asset-card">' +
-      '<div class="debrief-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || asset.category) + '</div>' +
+      '<div class="debrief-asset-cat" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.shortLabel || asset.category) +
+        (readinessLabel ? ' <span style="opacity:0.6">(' + readinessLabel + ')</span>' : '') + '</div>' +
       '<div class="debrief-asset-name">' + asset.name + '</div>' +
-      '<div class="debrief-asset-origin">Origin: ' + (base ? base.name + ', ' + base.country : 'Unknown') + '</div>' +
+      (asset.designation ? '<div class="debrief-asset-origin" style="color:var(--text-dim);font-size:var(--fs-xs)">' + asset.designation + '</div>' : '') +
+      '<div class="debrief-asset-origin">Origin: ' + (base ? base.name + ', ' + base.country : 'Unknown') +
+        ' | ' + deniLabel +
+        (asset.personnel ? ' | ' + asset.personnel + ' personnel' : '') +
+      '</div>' +
+      (asset.vehicles && asset.vehicles.length > 0 ? '<div class="debrief-asset-origin" style="color:var(--text-dim);font-size:var(--fs-xs)">Platforms: ' + asset.vehicles.slice(0, 4).join(', ') + (asset.vehicles.length > 4 ? ' +' + (asset.vehicles.length - 4) + ' more' : '') + '</div>' : '') +
+    '</div>';
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function intelligenceBasisSection(op) {
+  if (!op.intelFields || op.intelFields.length === 0) return '';
+
+  var revealed = [];
+  var unrevealed = [];
+  for (var i = 0; i < op.intelFields.length; i++) {
+    if (op.intelFields[i].revealed) revealed.push(op.intelFields[i]);
+    else unrevealed.push(op.intelFields[i]);
+  }
+
+  var coverage = Math.round((revealed.length / op.intelFields.length) * 100);
+  var coverageColor = coverage >= 80 ? 'var(--green)' : coverage >= 50 ? 'var(--amber)' : 'var(--red)';
+
+  var html = '<div class="debrief-section">' +
+    '<div class="debrief-section-title">INTELLIGENCE BASIS</div>' +
+    '<div class="debrief-vigil-assessment">';
+
+  html += '<div class="debrief-meta-row">' +
+    '<span class="debrief-meta-key">INTEL COVERAGE</span>' +
+    '<span class="debrief-meta-val" style="color:' + coverageColor + ';font-weight:700">' + coverage + '% (' + revealed.length + ' of ' + op.intelFields.length + ' fields collected)</span>' +
+  '</div>';
+
+  // Show collected fields with their values
+  if (revealed.length > 0) {
+    html += '<div style="margin-top:var(--sp-2)">';
+    for (var r = 0; r < revealed.length; r++) {
+      var f = revealed[r];
+      var srcColor = f.source === 'HUMINT' ? 'var(--accent)' : f.source === 'SIGINT' ? 'var(--blue)' : f.source === 'IMAGERY' ? 'var(--green)' : f.source === 'ISR' ? 'var(--amber)' : f.source === 'CYBER' ? 'var(--red)' : 'var(--text-dim)';
+      html += '<div style="margin-bottom:var(--sp-1)">' +
+        '<span style="color:' + srcColor + ';font-size:var(--fs-xs);font-weight:600">[' + f.source + ']</span> ' +
+        '<span style="color:var(--text-hi);font-size:var(--fs-sm)">' + f.label + ':</span> ' +
+        '<span style="color:var(--text);font-size:var(--fs-sm)">' + f.value + '</span>' +
+      '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Show gaps
+  if (unrevealed.length > 0) {
+    var gapLabels = [];
+    for (var u = 0; u < unrevealed.length; u++) gapLabels.push(unrevealed[u].label);
+    html += '<div style="margin-top:var(--sp-2);color:var(--text-dim);font-size:var(--fs-sm)">' +
+      '<span style="color:var(--amber)">INTELLIGENCE GAPS:</span> ' + gapLabels.join(', ') +
+      '. These fields were not collected prior to operational commitment.' +
     '</div>';
   }
 
@@ -366,19 +698,37 @@ function operationalImpactSection(op) {
   var deviated = op.deviatedFromVigil;
   var success = op.status === 'SUCCESS';
   var expired = op.expired;
+  var v = op.fillVars || {};
   var assessment;
+
+  // Intel coverage commentary
+  var intelNote = '';
+  if (v.intelCoverage !== undefined && !expired) {
+    if (v.intelCoverage < 50) {
+      intelNote = ' Intelligence coverage was critically low at ' + v.intelCoverage + '% — operational planning was severely constrained by collection gaps.';
+    } else if (v.intelCoverage < 75) {
+      intelNote = ' Intelligence coverage at ' + v.intelCoverage + '% left material gaps that may have affected operational outcomes.';
+    }
+  }
+
+  // Confidence commentary
+  var confNote = '';
+  if (v.confidence && !expired) {
+    if (v.confidence >= 85) confNote = ' Pre-mission confidence was assessed at ' + v.confidence + '% — well within acceptable parameters.';
+    else if (v.confidence < 50) confNote = ' Pre-mission confidence was only ' + v.confidence + '% — this was a high-risk commitment from the outset.';
+  }
 
   if (expired) {
     assessment = 'The operator failed to deploy assets within the operational window. ' + (op.orgName || 'The target') + ' was not engaged. ' +
       'Vigil presented viable options that were not acted upon. This inaction has been logged. The threat remains active and the window of opportunity has closed.';
   } else if (success && !deviated) {
-    assessment = 'Operator adhered to Vigil-recommended course of action. Mission success validates system analysis. Viability standing reinforced.';
+    assessment = 'Operator adhered to Vigil-recommended course of action. Mission success validates system analysis. Viability standing reinforced.' + confNote + intelNote;
   } else if (success && deviated) {
-    assessment = 'Mission objectives achieved despite operator deviation from Vigil recommendation. Outcome acknowledged, however the deviation introduces uncertainty into Vigil\'s predictive models. Reduced viability credit applied.';
+    assessment = 'Mission objectives achieved despite operator deviation from Vigil recommendation. Outcome acknowledged, however the deviation introduces uncertainty into Vigil\'s predictive models. Reduced viability credit applied.' + confNote + intelNote;
   } else if (!success && !deviated) {
-    assessment = 'Mission failure occurred while following Vigil-recommended course of action. System acknowledges shared responsibility for outcome. Minimal viability adjustment applied pending root-cause analysis.';
+    assessment = 'Mission failure occurred while following Vigil-recommended course of action. System acknowledges shared responsibility for outcome. Minimal viability adjustment applied pending root-cause analysis.' + confNote + intelNote;
   } else {
-    assessment = 'Mission failure compounded by unauthorized deviation from Vigil recommendation. The operator chose a course of action Vigil assessed as suboptimal, and the outcome confirms that assessment. Significant viability reduction applied. This pattern of judgment is being tracked.';
+    assessment = 'Mission failure compounded by unauthorized deviation from Vigil recommendation. The operator chose a course of action Vigil assessed as suboptimal, and the outcome confirms that assessment. Significant viability reduction applied. This pattern of judgment is being tracked.' + confNote + intelNote;
   }
 
   html += '<div style="margin-top:var(--sp-2);color:var(--text-dim);font-size:var(--fs-sm);line-height:1.6">' + assessment + '</div>';
@@ -452,29 +802,62 @@ DEBRIEF_GENERATORS.MILITARY_STRIKE = function(op, v, success) {
   var weather = pick(DEBRIEF_WEATHER);
   var entries = [];
 
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: v.primaryAsset + ' departed ' + v.primaryBase + '. Mission callsign: ' + callsign + '. Strike package assembled.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-5), type: 'normal', text: 'Pre-strike coordination with CAOC complete. Deconfliction verified. No friendly forces in the target area. ROE: Vigil Directive 3 applies.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Transit to ' + v.city + ', ' + v.country + '. Conditions: ' + weather + '. Tanker rendezvous on schedule.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR assets established overwatch of target area in ' + v.city + '. ' + v.threatLevel + '/5 threat environment confirmed. Final target coordinates uploaded.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: callsign + ' at IP. All systems nominal. Weapons armed. Awaiting final clearance from Vigil operations center.' });
+  // Threat-context adaptation
+  var isWMD = v.threatType === 'PROLIFERATOR';
+  var isMilitary = v.threatType === 'MILITARY_TARGET' || v.threatType === 'STRATEGIC_TARGET';
+  var targetLabel = isWMD ? 'WMD-related facility' : isMilitary ? 'military installation' : 'command-and-control infrastructure';
+
+  // Pull real intel
+  var airDefenseIntel = getIntel(v, 'AIR_DEFENSE_POSTURE');
+  var forceIntel = getIntel(v, 'FORCE_DISPOSITION');
+  var hardeningIntel = getIntel(v, 'TARGET_HARDENING') || getIntel(v, 'HARDENING_LEVEL');
+  var collateralIntel = getIntel(v, 'COLLATERAL_RISK') || getIntel(v, 'CIVILIAN_PROXIMITY');
+  var supplyIntel = getIntel(v, 'SUPPLY_LINES');
+  var commandIntel = getIntel(v, 'COMMAND_STRUCTURE');
+
+  // Use actual platform designation if available
+  var platformStr = (v.designations && v.designations.length > 0) ? v.designations[0] : v.primaryAsset;
+  var transitNote = v.transitHours ? ' Transit to AO: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: platformStr + ' departed ' + v.primaryBase + '. Mission callsign: ' + callsign + '. Strike package assembled.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-5), type: 'normal', text: 'Pre-strike coordination with CAOC complete. Deconfliction verified. No friendly forces in the target area. ROE: Vigil Directive 3 applies.' + (isWMD ? ' CBRN contamination risk assessed — munition selection accounts for secondary dispersal.' : '') + (airDefenseIntel ? ' Air defense assessment: ' + airDefenseIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Transit to ' + v.city + ', ' + v.country + '. Conditions: ' + weather + '. Tanker rendezvous on schedule.' + (forceIntel ? ' Target force disposition per Vigil: ' + forceIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR assets established overwatch of target area in ' + v.city + '. ' + v.threatLevel + '/5 threat environment confirmed. Final target coordinates uploaded. Intel coverage: ' + v.intelCoverage + '%.' + (isWMD ? ' MASINT confirms chemical/radiological signatures at the target site.' : '') + (hardeningIntel ? ' Target hardening assessed: ' + hardeningIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: callsign + ' at IP. All systems nominal. Weapons armed. Awaiting final clearance from Vigil operations center.' + (collateralIntel ? ' Collateral risk assessment: ' + collateralIntel + '.' : '') });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"' + callsign + ', you are cleared hot." Weapons release. ' + randInt(2, 6) + ' precision-guided munitions on target. Time on target: ' + randInt(3, 8) + ' seconds. Direct hits confirmed on ' + v.orgName + ' command-and-control infrastructure.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+5min', type: 'normal', text: 'Secondary explosions observed at target site — probable ammunition storage. Thermal imaging confirms structural collapse of primary building.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"' + callsign + ', you are cleared hot." Weapons release. ' + randInt(2, 6) + ' precision-guided munitions on target. Time on target: ' + randInt(3, 8) + ' seconds. Direct hits confirmed on ' + v.orgName + ' ' + targetLabel + '.' });
+    if (isWMD) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+5min', type: 'normal', text: 'Post-strike observation: facility destroyed. No secondary chemical release detected — munitions achieved clean destruction. CBRN monitoring assets confirm no contamination plume.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+5min', type: 'normal', text: 'Secondary explosions observed at target site — probable ammunition storage. Thermal imaging confirms structural collapse of primary building.' });
+    }
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+20min', type: 'normal', text: 'BDA pass complete. ' + randInt(2, 4) + ' of ' + randInt(3, 5) + ' designated aim points destroyed. ' + v.orgName + ' communications traffic ceased from target facility.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Collateral damage assessment: minimal — no civilian structures impacted within assessed blast radius. Pattern-of-life analysis confirmed target was military in nature.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. All assets accounted for. No battle damage sustained.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: callsign + ' initiated strike sequence. Weapons away. ' + randInt(2, 4) + ' munitions released on target coordinates.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+3min', type: 'normal', text: 'Initial BDA: impacts observed in target area. However, ' + pick(DEBRIEF_COMPROMISE) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'failure', text: 'Detailed BDA reveals primary target — ' + v.orgName + ' command post — was not in the struck structures. Intelligence now indicates the facility was vacated ' + randInt(4, 24) + ' hours prior to the strike. Decoy activity detected at the site.' });
+    if (isWMD) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'failure', text: 'Detailed BDA reveals the primary WMD facility was located in a hardened underground structure not fully destroyed by the strike. Surface structures demolished but subsurface capability may be intact. CBRN monitoring shows possible low-level release — downwind monitoring activated.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'failure', text: 'Detailed BDA reveals primary target — ' + v.orgName + ' ' + (isMilitary ? 'military installation' : 'command post') + ' — was not in the struck structures. Intelligence now indicates the facility was vacated ' + randInt(4, 24) + ' hours prior to the strike. Decoy activity detected at the site.' });
+    }
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Collateral damage assessment: ' + pick(['under review — adjacent civilian structure sustained minor damage', 'clean — only military structures affected', 'one non-target structure within blast radius, damage assessment pending']) + '.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Assets recovered to ' + v.primaryBase + '. Intelligence gap identified — Vigil initiating review of source reliability for target confirmation.' });
   }
 
-  var assessment = success ?
-    'Operation ' + v.codename + ' achieved its primary objective in the ' + v.theater + ' theater. ' + v.orgName + '\'s operational capability in ' + v.city + ' has been significantly degraded. SIGINT confirms disruption to their command network. Theater risk assessment adjusted downward.' :
-    'Operation ' + v.codename + ' failed to achieve its primary objective. ' + v.orgName + ' remains operational in ' + v.city + ', ' + v.country + '. Intelligence suggests the target was alerted prior to the strike. Vigil is reviewing the intelligence chain and assessing whether source compromise occurred. Theater risk remains elevated.';
+  var assessment;
+  var coverStr = ' Intel coverage at time of strike: ' + v.intelCoverage + '%.';
+  if (isWMD && success) {
+    assessment = 'Operation ' + v.codename + ' destroyed ' + v.orgName + '\'s WMD-related facility in ' + v.city + '. CBRN assessment confirms clean destruction — no hazardous material release. ' + v.orgName + '\'s proliferation program has been set back significantly. Materials and equipment destroyed cannot be easily replaced.' + coverStr;
+  } else if (isWMD) {
+    assessment = 'Operation ' + v.codename + ' achieved only partial damage to ' + v.orgName + '\'s WMD facility.' + (hardeningIntel ? ' Pre-strike hardening assessment (' + hardeningIntel + ') proved accurate — structure withstood initial strike.' : ' Hardened underground components may remain functional.') + ' CBRN monitoring continues. Follow-up action required.' + coverStr;
+  } else if (success) {
+    assessment = 'Operation ' + v.codename + ' achieved its primary objective in the ' + v.theater + ' theater. ' + v.orgName + '\'s operational capability in ' + v.city + ' has been significantly degraded. SIGINT confirms disruption to their ' + (isMilitary ? 'military command structure' : 'command network') + '.' + (commandIntel ? ' Command structure assessment (' + commandIntel + ') corroborated by post-strike analysis.' : '') + ' Theater risk assessment adjusted downward.' + coverStr;
+  } else {
+    assessment = 'Operation ' + v.codename + ' failed to achieve its primary objective. ' + v.orgName + ' remains operational in ' + v.city + ', ' + v.country + '.' + (v.intelCoverage < 60 ? ' Intelligence coverage was only ' + v.intelCoverage + '% — critical gaps may have contributed to target alerting.' : ' Intelligence suggests the target was alerted prior to the strike.') + ' Vigil is reviewing the intelligence chain and assessing whether source compromise occurred. Theater risk remains elevated.';
+  }
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -486,16 +869,91 @@ DEBRIEF_GENERATORS.MILITARY_STRIKE = function(op, v, success) {
 DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
   var weather = pick(DEBRIEF_WEATHER);
-  var hostileCount = randInt(6, 18);
-  var teamSize = randInt(12, 24);
   var entries = [];
 
+  // --- Threat-context adaptation ---
+  var tc = (v.threatType && THREAT_CONTEXT[v.threatType]) ? THREAT_CONTEXT[v.threatType] : null;
+  var targetDesc = (tc && tc.targetDesc) || 'compound';
+  var objectiveDesc = (tc && tc.objective) || 'direct action';
+
+  // Pull real data from intel fields
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE') || getIntel(v, 'MEMBER_COUNT');
+  var hostileCount = guardForceIntel ? randInt(6, 18) : randInt(4, 12);
+  var teamSize = (v.totalPersonnel && v.totalPersonnel > 0) ? Math.min(v.totalPersonnel, randInt(16, 32)) : randInt(12, 24);
+  var hostageCountIntel = getIntel(v, 'HOSTAGE_COUNT');
+  var entryPointsIntel = getIntel(v, 'ENTRY_POINTS');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'CAPTOR_ID');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var qrfIntel = getIntel(v, 'QRF_PROXIMITY');
+  var escapesIntel = getIntel(v, 'ESCAPE_ROUTES');
+  var targetIntentIntel = getIntel(v, 'TARGET_INTENT');
+  var facilityIntel = getIntel(v, 'FACILITY_ID') || getIntel(v, 'TARGET_HARDENING');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS') || getIntel(v, 'COMMS_PATTERN');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'HVT_NETWORK');
+
+  var tcVars = {
+    org: v.orgName, city: v.city, country: v.country, theater: v.theater,
+    codename: v.codename, threatLabel: v.threatLabel || '',
+    loc: pick(['second floor, east wing', 'ground floor, rear room', 'basement level', 'reinforced interior room']),
+    count: randInt(2, 6), evidence: pick(DEBRIEF_EVIDENCE),
+  };
+
+  // For hostage/asset rescue contexts, adjust team composition
+  var isRescue = v.threatType === 'HOSTAGE_CRISIS' || v.threatType === 'ASSET_COMPROMISED';
+  var isCBRN = v.threatType === 'PROLIFERATOR';
+
   // --- Pre-mission ---
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' staged at forward operating base near ' + v.city + '. ' + teamSize + '-man assault element. Final intelligence brief received from Vigil. Target: ' + v.orgName + ' compound, grid reference classified.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-4), type: 'normal', text: 'Mission rehearsal complete. Scale model of target compound constructed from ISR imagery. Entry points designated Alpha through Delta. Contingency plans for ' + randInt(3, 5) + ' abort scenarios reviewed.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Kit check. Weapons function-tested. Comms check on all nets. Medic verified blood types and trauma supplies for all team members. NODs calibrated.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Team ' + callsign + ' departed for insertion. ' + weather + '. Aviation assets: ' + pick(['2x MH-60M Black Hawks + 1x MH-47G Chinook for extract', '2x MH-6M Little Birds + 1x AH-6 for gun support', '1x CV-22 Osprey + 2x AH-64 Apache escort']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Overwatch established. ISR feed shows ' + hostileCount + ' military-age males in and around the compound. ' + randInt(1, 3) + ' vehicles parked outside. Pattern-of-life consistent with Vigil intelligence package. "Jackpot" individual\'s presence ' + (success ? 'confirmed by positive identification' : 'assessed as probable') + '.' });
+  var preMissionContext = '';
+  if (tc && tc.preMission) {
+    preMissionContext = fillThreatContext(pick(tc.preMission), tcVars);
+  }
+
+  // Build intel-informed pre-mission briefing
+  var intelBrief = '';
+  if (guardForceIntel) intelBrief += ' Force assessment: ' + guardForceIntel + '.';
+  if (leadershipIntel && !isRescue) intelBrief += ' Target ID: ' + leadershipIntel + '.';
+  if (qrfIntel) intelBrief += ' QRF assessment: ' + qrfIntel + '.';
+
+  // Transit time from actual op data
+  var transitNote = v.transitHours ? 'Transit time to AO: ' + v.transitHours + ' hours. ' : '';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' staged at forward operating base near ' + v.city + '. ' + teamSize + '-man assault element. ' + transitNote + 'Final intelligence brief received from Vigil (' + v.intelCoverage + '% collection coverage). Target: ' + v.orgName + ' ' + targetDesc + ', grid reference classified.' + (preMissionContext ? ' ' + preMissionContext : '') + intelBrief });
+
+  // Rehearsal — use real entry points if collected
+  var rehearsalNote = entryPointsIntel
+    ? 'Scale model of target ' + targetDesc + ' constructed from ISR imagery. Entry point analysis: ' + entryPointsIntel + '. Contingency plans for ' + randInt(3, 5) + ' abort scenarios reviewed.'
+    : 'Scale model of target ' + targetDesc + ' constructed from ISR imagery. Entry points designated Alpha through Delta. Contingency plans for ' + randInt(3, 5) + ' abort scenarios reviewed.';
+  if (escapesIntel) rehearsalNote += ' Known escape routes identified: ' + escapesIntel + '.';
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-4), type: 'normal', text: 'Mission rehearsal complete. ' + rehearsalNote });
+
+  // Kit check — use actual equipment from deployed assets
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 3) : '';
+  if (isCBRN) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Kit check. ' + (actualGear ? 'Primary weapons: ' + actualGear + '. ' : 'Weapons function-tested. ') + 'CBRN protective equipment issued and tested — full MOPP-4 capability. Decontamination team staged at extract point. NODs calibrated.' });
+  } else if (isRescue) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Kit check. ' + (actualGear ? 'Primary weapons: ' + actualGear + '. ' : 'Weapons function-tested. ') + 'Non-lethal options loaded — flashbangs, CS gas. Medic carried additional trauma supplies for ' + (v.threatType === 'HOSTAGE_CRISIS' ? 'hostage' : 'asset') + ' casualties. NODs calibrated.' });
+  } else {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Kit check. ' + (actualGear ? 'Primary loadout: ' + actualGear + '. ' : 'Weapons function-tested. ') + 'Comms check on all nets. Medic verified blood types and trauma supplies for all team members. NODs calibrated.' });
+  }
+
+  // Aviation — use actual vehicles if available
+  var aviationStr = (v.vehicles && v.vehicles.length > 0)
+    ? pickItems(v.vehicles.filter(function(vv) { return /MH-|AH-|CV-|UH-|CH-|V-22|Osprey|Black Hawk|Chinook|Apache|Little Bird|Pave/.test(vv); }), 3, pick(['2x MH-60M Black Hawks + 1x MH-47G Chinook for extract', '2x MH-6M Little Birds + 1x AH-6 for gun support', '1x CV-22 Osprey + 2x AH-64 Apache escort']))
+    : pick(['2x MH-60M Black Hawks + 1x MH-47G Chinook for extract', '2x MH-6M Little Birds + 1x AH-6 for gun support', '1x CV-22 Osprey + 2x AH-64 Apache escort']);
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Team ' + callsign + ' departed for insertion. ' + weather + '. Aviation assets: ' + aviationStr + '.' + (v.confidence ? ' Pre-mission confidence: ' + v.confidence + '%.' : '') });
+
+  // Overwatch — adapted for threat context, pull real intel
+  if (isRescue) {
+    var cargoLabel = v.threatType === 'HOSTAGE_CRISIS' ? 'hostages' : 'Vigil asset';
+    var hostageDetail = hostageCountIntel ? hostageCountIntel : 'Thermal confirms ' + cargoLabel + ' present';
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Overwatch established. ISR feed shows ' + hostileCount + ' armed personnel in and around the ' + targetDesc + '. ' + hostageDetail + '. ' + pick(['Movement detected in interior room consistent with captive personnel.', 'Heat signatures in basement level consistent with detained individuals.', 'Audio intercept confirms ' + cargoLabel + ' alive as of this hour.']) });
+  } else if (isCBRN) {
+    var cbrDetail = facilityIntel ? facilityIntel + '. ' : '';
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Overwatch established. ISR feed shows ' + hostileCount + ' personnel at the ' + targetDesc + '. ' + cbrDetail + 'MASINT sensors detect chemical signatures consistent with WMD-related activity. Ventilation systems and laboratory equipment visible on thermal. ' + randInt(1, 3) + ' vehicles parked outside.' });
+  } else {
+    var pidMethod = commsIntel ? 'SIGINT intercept confirmed target communications from the site' : (success ? 'confirmed by positive identification' : 'assessed as probable');
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Overwatch established. ISR feed shows ' + hostileCount + ' military-age males in and around the ' + targetDesc + '. ' + randInt(1, 3) + ' vehicles parked outside.' + (guardForceIntel ? ' Guard force consistent with intel assessment.' : ' Pattern-of-life consistent with Vigil intelligence package.') + ' "Jackpot" individual\'s presence ' + pidMethod + '.' });
+  }
 
   // --- Approach and insertion ---
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: pick(SOF_APPROACH) });
@@ -531,16 +989,32 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(16, 18)), type: 'critical', text: pick(SOF_FINAL_CONTACT) });
     detained += randInt(0, 2);
 
-    // JACKPOT call
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 20)), type: 'critical', text: '"All stations, JACKPOT. I say again, JACKPOT." Target ' + (v.targetAlias || 'HVT') + ' positively identified and ' + pick(['secured', 'neutralized', 'detained']) + '. ' + kia + ' hostile KIA. ' + detained + ' detained.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(20, 24)), type: 'normal', text: 'Compound secured. All rooms cleared. Helmet cams reviewed — every engagement accounted for. Team accounting: all ' + teamSize + ' operators present. ' + randInt(0, 2) + ' minor injuries — shrapnel and abrasions treated on site.' });
+    // JACKPOT call — adapted for threat context
+    if (tc && tc.jackpotSuccess) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 20)), type: 'critical', text: fillThreatContext(pick(tc.jackpotSuccess), tcVars) + ' ' + kia + ' hostile KIA. ' + detained + ' detained.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 20)), type: 'critical', text: '"All stations, JACKPOT. I say again, JACKPOT." Target ' + (v.targetAlias || 'HVT') + ' positively identified and ' + pick(['secured', 'neutralized', 'detained']) + '. ' + kia + ' hostile KIA. ' + detained + ' detained.' });
+    }
 
-    // --- SSE ---
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(24, 30)), type: 'normal', text: pick(SOF_SSE) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(30, 40)), type: 'normal', text: 'SSE complete. Total time on objective: ' + randInt(25, 45) + ' minutes. All items catalogued and packaged for transport. Demolition charges set on remaining weapons cache.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(20, 24)), type: 'normal', text: targetDesc.charAt(0).toUpperCase() + targetDesc.slice(1) + ' secured. All rooms cleared. Helmet cams reviewed — every engagement accounted for. Team accounting: all ' + teamSize + ' operators present. ' + randInt(0, 2) + ' minor injuries — shrapnel and abrasions treated on site.' });
+
+    // --- SSE — adapted for threat context, enriched with real intel ---
+    if (tc && tc.sseSuccess) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(24, 30)), type: 'normal', text: fillThreatContext(tc.sseSuccess, tcVars) });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(24, 30)), type: 'normal', text: pick(SOF_SSE) });
+    }
+    // SSE corroboration — reference actual intel findings
+    var sseCorroboration = '';
+    if (weaponsCacheIntel) sseCorroboration += ' Weapons cache confirmed — consistent with pre-mission intel: ' + weaponsCacheIntel + '.';
+    if (networkIntel) sseCorroboration += ' Network documentation seized — corroborates SIGINT assessment: ' + networkIntel + '.';
+    if (targetIntentIntel && !isRescue) sseCorroboration += ' Recovered planning materials confirm assessed intent: ' + targetIntentIntel + '.';
+    var sseTime = v.execHours ? Math.round(v.execHours * 60 * 0.6) : randInt(25, 45);
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(30, 40)), type: 'normal', text: 'SSE complete. Total time on objective: ' + sseTime + ' minutes. All items catalogued and packaged for transport.' + (isCBRN ? ' CBRN materials sealed in triple containment for laboratory analysis.' : ' Demolition charges set on remaining weapons cache.') + sseCorroboration });
 
     // --- Extract ---
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(40, 55)), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. ' + (v.targetAlias || 'HVT') + ' secured aboard extract aircraft. Zero friendly KIA.' });
+    var extractCargo = isRescue ? (v.threatType === 'HOSTAGE_CRISIS' ? 'Rescued hostages' : 'Recovered asset') : ((v.targetAlias || 'HVT'));
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(40, 55)), type: 'normal', text: pick(DEBRIEF_EXFIL) + '. ' + extractCargo + ' secured aboard extract aircraft. Zero friendly KIA.' });
   } else {
     // --- Climax: compromised assault (expanded with combat detail) ---
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 8)), type: 'critical', text: '"EXECUTE EXECUTE EXECUTE." ' + pick(SOF_BREACH_DETAIL) });
@@ -550,20 +1024,44 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
 
     // Then it goes wrong
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(10, 12)), type: 'critical', text: pick(SOF_FAILURE_DETAIL) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 14)), type: 'failure', text: pick(SOF_ROOM_CLEAR) + ' But ' + pick(DEBRIEF_COMPROMISE) + '. Compound alarm triggered. Hostile QRF mobilizing from ' + randInt(2, 5) + ' blocks away.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(12, 14)), type: 'failure', text: pick(SOF_ROOM_CLEAR) + ' But ' + pick(DEBRIEF_COMPROMISE) + '. ' + targetDesc.charAt(0).toUpperCase() + targetDesc.slice(1) + ' alarm triggered. Hostile QRF mobilizing from ' + randInt(2, 5) + ' blocks away.' });
 
-    // Target not found
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(14, 18)), type: 'failure', text: 'Target ' + (v.targetAlias || 'HVT') + ' not located in expected position. Intelligence indicated room ' + pick(['2A', '3B', '1C', 'ground floor east']) + ' — room was empty. ' + pick(['Evidence of recent occupation — warm tea, still-lit cigarette', 'Bed unmade, personal effects removed', 'Room had been stripped clean within the last hour']) + '.' });
+    // Objective not achieved — adapted for threat context
+    if (tc && tc.jackpotFailure) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(14, 18)), type: 'failure', text: fillThreatContext(pick(tc.jackpotFailure), tcVars) });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(14, 18)), type: 'failure', text: 'Target ' + (v.targetAlias || 'HVT') + ' not located in expected position. Intelligence indicated room ' + pick(['2A', '3B', '1C', 'ground floor east']) + ' — room was empty. ' + pick(['Evidence of recent occupation — warm tea, still-lit cigarette', 'Bed unmade, personal effects removed', 'Room had been stripped clean within the last hour']) + '.' });
+    }
 
     // Continued fighting during withdrawal
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 22)), type: 'failure', text: pick(SOF_SNIPER_ENGAGEMENT) + ' But hostiles are massing at the compound perimeter. Muzzle flashes from adjacent rooftops.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(18, 22)), type: 'failure', text: pick(SOF_SNIPER_ENGAGEMENT) + ' But hostiles are massing at the ' + targetDesc + ' perimeter. Muzzle flashes from adjacent rooftops.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(22, 25)), type: 'normal', text: 'Team leader: "We\'re dry on the objective. Calling abort." ' + randInt(1, 3) + ' WIA — ' + pick(['gunshot wound to the leg, non-life-threatening', 'fragmentation injuries from improvised explosive', 'blast concussion from RPG near-miss']) + '. Medic applying treatment under fire.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(25, 35)), type: 'normal', text: 'Emergency extraction. Gun runs by escort helicopters suppressed hostile reinforcements. Team extracted under fire. All wounded stable.' });
+
+    // SSE for failure — reference what we lost
+    if (tc && tc.sseFailure) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(35, 40)), type: 'normal', text: fillThreatContext(tc.sseFailure, tcVars) });
+    }
+    // Intel gap analysis on failure
+    if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+      var gapNote = 'Post-action analysis: intelligence gaps in ' + v._unrevealedIntel.map(function(f) { return f.label; }).slice(0, 3).join(', ') + ' likely contributed to mission failure.';
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(40, 45)), type: 'normal', text: gapNote });
+    }
   }
 
-  var assessment = success ?
-    'Operation ' + v.codename + ': SOF raid on ' + v.orgName + ' compound in ' + v.city + ' achieved all objectives. Target ' + (v.targetAlias || 'HVT') + ' captured/neutralized. Sensitive materials recovered for exploitation by Vigil analysis division. ' + v.primaryAsset + ' returning to ' + v.primaryBase + '. Zero friendly KIA.' :
-    'Operation ' + v.codename + ': SOF raid on ' + v.orgName + ' in ' + v.city + ' did not achieve primary objective. Target ' + (v.targetAlias || 'HVT') + ' was not present at the compound — intelligence suggests early warning enabled departure. ' + randInt(1, 3) + ' operators WIA, all expected to return to duty. Operational security review initiated. Vigil is re-evaluating source reliability.';
+  // Assessment — adapted for threat context, enriched with real data
+  var assessment;
+  var confStr = v.confidence ? ' Pre-mission confidence was ' + v.confidence + '%.' : '';
+  var coverStr = ' Intel coverage at time of commitment: ' + v.intelCoverage + '%.';
+  if (tc && tc.assessmentSuccess && success) {
+    assessment = fillThreatContext(tc.assessmentSuccess, tcVars) + ' ' + v.primaryAsset + ' returning to ' + v.primaryBase + '. Zero friendly KIA.' + confStr + coverStr;
+  } else if (tc && tc.assessmentFailure && !success) {
+    assessment = fillThreatContext(tc.assessmentFailure, tcVars) + ' ' + randInt(1, 3) + ' operators WIA, all expected to return to duty.' + confStr + coverStr + ' Vigil is re-evaluating source reliability.';
+  } else if (success) {
+    assessment = 'Operation ' + v.codename + ': SOF raid on ' + v.orgName + ' ' + targetDesc + ' in ' + v.city + ' achieved all objectives. Target ' + (v.targetAlias || 'HVT') + ' captured/neutralized. Sensitive materials recovered for exploitation by Vigil analysis division. ' + v.primaryAsset + ' returning to ' + v.primaryBase + '. Zero friendly KIA.' + confStr + coverStr;
+  } else {
+    assessment = 'Operation ' + v.codename + ': SOF raid on ' + v.orgName + ' in ' + v.city + ' did not achieve primary objective. Target ' + (v.targetAlias || 'HVT') + ' was not present at the ' + targetDesc + ' — intelligence suggests early warning enabled departure.' + confStr + coverStr + ' ' + randInt(1, 3) + ' operators WIA, all expected to return to duty. Operational security review initiated. Vigil is re-evaluating source reliability.';
+  }
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -575,26 +1073,34 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
 DEBRIEF_GENERATORS.SURVEILLANCE = function(op, v, success) {
   var entries = [];
 
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: v.primaryAsset + ' tasked for persistent surveillance of ' + v.orgName + ' activities in ' + v.city + ', ' + v.country + '. Collection priority: network mapping and communications intercept.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR platform on station. Full-spectrum coverage initiated — SIGINT, IMINT, and pattern-of-life analysis. Collection plan synchronized with Vigil targeting cell.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Initial pattern-of-life data being compiled. Tracking ' + randInt(4, 12) + ' persons of interest across ' + randInt(2, 5) + ' locations in ' + v.city + '.' });
+  // Pull real intel and asset data
+  var commsIntel = getIntel(v, 'COMMS_PATTERN') || getIntel(v, 'INTERNAL_COMMS');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'HVT_NETWORK');
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS') || getIntel(v, 'ACTIVITY_BASELINE');
+  var locationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION') || getIntel(v, 'AREA_OF_INTEREST');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var execTime = v.execHours ? Math.round(v.execHours) : randInt(48, 96);
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: v.primaryAsset + ' tasked for persistent surveillance of ' + v.orgName + ' activities in ' + v.city + ', ' + v.country + '. Collection priority: network mapping and communications intercept.' + (actualGear ? ' Sensor suite: ' + actualGear + '.' : '') + (v.transitHours ? ' Platform on station after ' + v.transitHours + '-hour transit.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR platform on station. Full-spectrum coverage initiated — SIGINT, IMINT, and pattern-of-life analysis. Collection plan synchronized with Vigil targeting cell.' + (locationIntel ? ' Pre-existing location intel: ' + locationIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Initial pattern-of-life data being compiled. Tracking ' + randInt(4, 12) + ' persons of interest across ' + randInt(2, 5) + ' locations in ' + v.city + '.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') });
 
   if (success) {
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Identified ' + randInt(3, 8) + ' previously unknown associates of ' + v.orgName + '. Network map updated with new communication links and meeting locations.' });
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(8), type: 'normal', text: 'SIGINT breakthrough: intercepted an unencrypted voice call between two senior ' + v.orgName + ' operatives discussing logistics for an upcoming operation.' });
-    entries.push({ time: dayLabel(2) + ' ' + zuluTime(4), type: 'critical', text: 'Critical intelligence obtained: ' + pick(DEBRIEF_EVIDENCE) + '. Data transmitted to Vigil for analysis. Cross-referencing with existing threat models.' });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Identified ' + randInt(3, 8) + ' previously unknown associates of ' + v.orgName + '. Network map updated with new communication links and meeting locations.' + (movementIntel ? ' Movement patterns confirmed: ' + movementIntel : '') });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(8), type: 'normal', text: 'SIGINT breakthrough: ' + (commsIntel ? commsIntel : 'intercepted an unencrypted voice call between two senior ' + v.orgName + ' operatives discussing logistics for an upcoming operation.') });
+    entries.push({ time: dayLabel(2) + ' ' + zuluTime(4), type: 'critical', text: 'Critical intelligence obtained: ' + (networkIntel ? networkIntel + '.' : pick(DEBRIEF_EVIDENCE) + '.') + ' Data transmitted to Vigil for analysis. Cross-referencing with existing threat models.' });
     entries.push({ time: dayLabel(2) + ' ' + zuluTime(12), type: 'normal', text: 'Key facility identified: ' + v.orgName + ' using a ' + pick(['warehouse', 'residential building', 'commercial office', 'religious compound']) + ' as a logistics hub. Geo-tagged for future targeting.' });
-    entries.push({ time: dayLabel(3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance window complete. Asset repositioned. ' + randInt(80, 200) + ' hours of collected data processed. ' + randInt(12, 30) + ' actionable intelligence reports generated.' });
+    entries.push({ time: dayLabel(3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance window complete (' + execTime + ' hours total). Asset repositioned. ' + randInt(80, 200) + ' hours of collected data processed. ' + randInt(12, 30) + ' actionable intelligence reports generated. Intel coverage improved from ' + v.intelCoverage + '% to ' + Math.min(100, v.intelCoverage + randInt(15, 30)) + '%.' });
   } else {
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Limited collection achieved. ' + v.orgName + ' employing counter-surveillance measures in ' + v.city + '. Targets using encrypted communications and irregular movement patterns.' });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Limited collection achieved. ' + v.orgName + ' employing counter-surveillance measures in ' + v.city + '. Targets using encrypted communications and irregular movement patterns.' + (commsIntel ? ' Prior SIGINT on their comms (' + commsIntel + ') no longer current — TTPs have changed.' : '') });
     entries.push({ time: dayLabel(1) + ' ' + zuluTime(12), type: 'normal', text: 'Multiple targets observed conducting surveillance detection routes. Professional tradecraft — possible foreign intelligence training.' });
     entries.push({ time: dayLabel(2) + ' ' + zuluTime(4), type: 'failure', text: 'Target organization went dark after suspected detection of ISR platform. ' + pick(DEBRIEF_COMPROMISE) + '. All tracked individuals changed communications methods simultaneously.' });
-    entries.push({ time: dayLabel(3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance terminated. Minimal actionable intelligence collected. Target awareness of Vigil interest confirmed. Recommend stand-down period before re-tasking.' });
+    entries.push({ time: dayLabel(3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance terminated after ' + execTime + ' hours. Minimal actionable intelligence collected. Target awareness of Vigil interest confirmed. Recommend stand-down period before re-tasking.' });
   }
 
   var assessment = success ?
-    'Surveillance of ' + v.orgName + ' in ' + v.city + ' yielded high-value intelligence. Network analysis has identified new nodes for future targeting. Intel score increased. Recommend sustained collection posture in ' + v.theater + ' theater.' :
-    'Surveillance operation against ' + v.orgName + ' in ' + v.city + ' compromised. Counter-surveillance by the target resulted in loss of collection capability. ' + v.orgName + ' is likely to adjust TTPs. Alternative collection methods recommended.';
+    'Surveillance of ' + v.orgName + ' in ' + v.city + ' yielded high-value intelligence (' + v.intelCoverage + '% pre-mission coverage). Network analysis has identified new nodes for future targeting. Intel score increased. ' + v.primaryAsset + ' available for retasking. Recommend sustained collection posture in ' + v.theater + ' theater.' :
+    'Surveillance operation against ' + v.orgName + ' in ' + v.city + ' compromised after ' + execTime + ' hours on station. Counter-surveillance by the target resulted in loss of collection capability. ' + v.orgName + ' is likely to adjust TTPs. Alternative collection methods recommended. Intel coverage remains at ' + v.intelCoverage + '%.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -608,9 +1114,17 @@ DEBRIEF_GENERATORS.NAVAL_INTERDICTION = function(op, v, success) {
   var vesselName = 'MV ' + pick(['ATLANTIC HORIZON', 'PACIFIC STAR', 'NORTHERN SPIRIT', 'GOLDEN DAWN', 'IRON MERCHANT', 'SILVER CREST', 'OCEAN TIGER', 'DESERT WIND']);
   var flag = pick(['Panama', 'Liberia', 'Marshall Islands', 'Comoros', 'Togo', 'Moldova']);
 
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' departed ' + v.primaryBase + '. Ordered to establish interdiction zone near ' + v.city + ', ' + v.country + '. Maritime patrol area: ' + randInt(200, 800) + ' square nautical miles.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Transit to operational area. ' + pick(DEBRIEF_WEATHER) + '. Sea state ' + randInt(2, 5) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Naval assets on station. Interdiction zone established. All vessels entering the area subject to query and possible inspection. P-8 maritime patrol aircraft providing wide-area surveillance.' });
+  // Pull real intel
+  var cargoIntel = getIntel(v, 'CARGO_MANIFEST');
+  var routeIntel = getIntel(v, 'ROUTE_PREDICTION');
+  var vesselIntel = getIntel(v, 'VESSEL_IDENTIFICATION');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'FINANCIAL_FLOWS');
+  var actualVehicles = (v.vehicles && v.vehicles.length > 0) ? pickItems(v.vehicles, 2) : '';
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' departed ' + v.primaryBase + '. Ordered to establish interdiction zone near ' + v.city + ', ' + v.country + '. Maritime patrol area: ' + randInt(200, 800) + ' square nautical miles.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Transit to operational area. ' + pick(DEBRIEF_WEATHER) + '. Sea state ' + randInt(2, 5) + '.' + (routeIntel ? ' Route intelligence: ' + routeIntel + '.' : '') + (vesselIntel ? ' Vessel identification: ' + vesselIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Naval assets on station.' + (actualVehicles ? ' Deployed platforms: ' + actualVehicles + '.' : '') + ' Interdiction zone established. All vessels entering the area subject to query and possible inspection.' + (cargoIntel ? ' Intel on expected cargo: ' + cargoIntel + '.' : '') });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Suspect vessel identified: ' + vesselName + ', ' + flag + '-flagged, ' + randInt(4000, 15000) + ' DWT. AIS data inconsistent with declared route. Closing to intercept.' });
@@ -625,8 +1139,8 @@ DEBRIEF_GENERATORS.NAVAL_INTERDICTION = function(op, v, success) {
   }
 
   var assessment = success ?
-    'Naval interdiction near ' + v.city + ' successfully disrupted ' + v.orgName + '\'s maritime logistics. Seized cargo and crew provide actionable intelligence on the supply chain. Vessel ' + vesselName + ' and contents transferred to evidence custody. Recommend sustained maritime presence.' :
-    'Interdiction failed to intercept target shipment. ' + v.orgName + ' demonstrated awareness of naval patrol patterns and adapted. Intelligence timeline was insufficient — recommend earlier deployment in future operations.';
+    'Naval interdiction near ' + v.city + ' successfully disrupted ' + v.orgName + '\'s maritime logistics. Seized cargo and crew provide actionable intelligence on the supply chain. Vessel ' + vesselName + ' and contents transferred to evidence custody.' + (networkIntel ? ' Seized materials corroborate network intelligence: ' + networkIntel + '.' : '') + ' Intel coverage: ' + v.intelCoverage + '%. Recommend sustained maritime presence.' :
+    'Interdiction failed to intercept target shipment. ' + v.orgName + ' demonstrated awareness of naval patrol patterns and adapted.' + (v.intelCoverage < 60 ? ' Intel coverage was only ' + v.intelCoverage + '% — route prediction may have been unreliable.' : ' Intelligence timeline was insufficient.') + ' Recommend earlier deployment in future operations.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -639,9 +1153,17 @@ DEBRIEF_GENERATORS.CYBER_OP = function(op, v, success) {
   var entries = [];
   var implantName = pick(['NIGHTFALL', 'COBALT', 'IRONSIDE', 'GLASSBREAK', 'OVERCAST', 'SANDCASTLE']);
 
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: v.primaryAsset + ' initiated cyber operation against ' + v.orgName + '\'s network infrastructure in ' + v.city + ', ' + v.country + '. Target: ' + pick(['C2 servers', 'financial network', 'communications infrastructure', 'operational planning systems']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Reconnaissance phase complete. Attack surface mapped. ' + randInt(3, 8) + ' potential access vectors identified. Initial access vector selected: ' + pick(['spear-phishing with weaponized document', 'exploitation of unpatched VPN appliance', 'supply chain compromise via third-party vendor', 'watering hole attack on known associate website', 'zero-day in target\'s custom web application']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Initial access achieved. Establishing persistence via implant ' + implantName + '. Lateral movement in progress through target network. ' + randInt(3, 12) + ' internal hosts enumerated.' });
+  // Pull real intel
+  var topoIntel = getIntel(v, 'NETWORK_TOPOLOGY');
+  var vulnIntel = getIntel(v, 'VULNERABILITY_SCAN') || getIntel(v, 'ACCESS_VECTORS');
+  var attrIntel = getIntel(v, 'ATTRIBUTION_CONF');
+  var counterIntel = getIntel(v, 'COUNTER_INTRUSION');
+  var targetIntel = getIntel(v, 'TARGET_INTENT');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: v.primaryAsset + ' initiated cyber operation against ' + v.orgName + '\'s network infrastructure in ' + v.city + ', ' + v.country + '. Target: ' + pick(['C2 servers', 'financial network', 'communications infrastructure', 'operational planning systems']) + '.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') + (attrIntel ? ' Attribution assessment: ' + attrIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Reconnaissance phase complete. ' + (topoIntel ? 'Network topology per Vigil collection: ' + topoIntel + '. ' : 'Attack surface mapped. ') + randInt(3, 8) + ' potential access vectors identified. Initial access vector selected: ' + (vulnIntel ? vulnIntel : pick(['spear-phishing with weaponized document', 'exploitation of unpatched VPN appliance', 'supply chain compromise via third-party vendor', 'watering hole attack on known associate website', 'zero-day in target\'s custom web application'])) + '.' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Initial access achieved. Establishing persistence via implant ' + implantName + '. Lateral movement in progress through target network. ' + randInt(3, 12) + ' internal hosts enumerated.' + (counterIntel ? ' Counter-intrusion risk: ' + counterIntel + '.' : '') });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Privilege escalation successful — domain administrator credentials obtained. Full Active Directory access. ' + randInt(40, 200) + ' user accounts enumerated across ' + randInt(3, 8) + ' organizational units.' });
@@ -655,8 +1177,8 @@ DEBRIEF_GENERATORS.CYBER_OP = function(op, v, success) {
   }
 
   var assessment = success ?
-    'Cyber operation against ' + v.orgName + ' in ' + v.country + ' achieved comprehensive network penetration. Persistent access established for ongoing intelligence collection. Data exploitation in progress — initial analysis reveals ' + pick(DEBRIEF_EVIDENCE).toLowerCase() + '. Vigil SIGINT division has been briefed on the new collection capability.' :
-    'Cyber operation detected and contained by ' + v.orgName + '\'s defensive capabilities within their ' + v.city + ' infrastructure. Target network has been hardened. Access vector ' + implantName + ' is burned and cannot be reused. Recommend alternative collection approaches for this target in the ' + v.theater + ' theater.';
+    'Cyber operation against ' + v.orgName + ' in ' + v.country + ' achieved comprehensive network penetration. Persistent access established for ongoing intelligence collection.' + (targetIntel ? ' Exfiltrated data confirms prior assessment of target intent: ' + targetIntel + '.' : ' Data exploitation in progress — initial analysis reveals ' + pick(DEBRIEF_EVIDENCE).toLowerCase() + '.') + ' Vigil SIGINT division has been briefed on the new collection capability. Intel coverage: ' + v.intelCoverage + '%.' :
+    'Cyber operation detected and contained by ' + v.orgName + '\'s defensive capabilities within their ' + v.city + ' infrastructure.' + (counterIntel ? ' Counter-intrusion risk assessment (' + counterIntel + ') proved accurate.' : '') + ' Target network has been hardened. Access vector ' + implantName + ' is burned and cannot be reused.' + (v.intelCoverage < 60 ? ' Intel coverage was only ' + v.intelCoverage + '% — insufficient reconnaissance of target\'s defensive posture.' : '') + ' Recommend alternative collection approaches for this target in the ' + v.theater + ' theater.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -667,15 +1189,43 @@ DEBRIEF_GENERATORS.CYBER_OP = function(op, v, success) {
 
 DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
-  var hostageCount = randInt(3, 12);
-  var teamSize = randInt(16, 32);
+  var teamSize = (v.totalPersonnel && v.totalPersonnel > 0) ? Math.min(v.totalPersonnel, randInt(16, 32)) : randInt(16, 32);
   var entries = [];
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' deployed from ' + v.primaryBase + '. ' + teamSize + '-operator rescue force. ' + hostageCount + ' hostages confirmed held by ' + v.orgName + ' in ' + v.city + ', ' + v.country + '.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(6), type: 'normal', text: 'Crisis negotiation cell established. Vigil providing real-time intelligence on hostage conditions and captor behavior. ISR feed active on target building.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Rescue plan finalized. ' + randInt(3, 5) + ' entry points identified. Sniper teams positioned on ' + randInt(2, 4) + ' rooftops. Emergency medical team staged ' + randInt(200, 500) + 'm from the objective.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR confirmed hostage location: ' + pick(['second floor, east wing', 'ground floor, central room', 'basement level', 'third floor, rear']) + '. ' + randInt(4, 10) + ' armed captors identified via thermal and audio surveillance.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Team ' + callsign + ' at final assault positions. All elements report ready. Negotiation team maintaining contact with captors as cover for assault preparation.' });
+  // Pull real intel
+  var hostageCountIntel = getIntel(v, 'HOSTAGE_COUNT');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var entryPointsIntel = getIntel(v, 'ENTRY_POINTS');
+  var hostageCondIntel = getIntel(v, 'HOSTAGE_CONDITION') || getIntel(v, 'ASSET_CONDITION');
+  var captorDemandsIntel = getIntel(v, 'CAPTOR_DEMANDS');
+  var captorIdIntel = getIntel(v, 'CAPTOR_ID');
+  var qrfIntel = getIntel(v, 'QRF_PROXIMITY');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var hostageLocIntel = getIntel(v, 'HOSTAGE_LOCATION') || getIntel(v, 'ASSET_LAST_KNOWN');
+  var compromiseIntel = getIntel(v, 'COMPROMISE_VECTOR');
+  var damageIntel = getIntel(v, 'DAMAGE_ASSESSMENT');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 3) : '';
+
+  // Adapt for ASSET_COMPROMISED — rescue a Vigil source, not civilian hostages
+  var isAssetRecovery = v.threatType === 'ASSET_COMPROMISED';
+  var hostageCount = isAssetRecovery ? 1 : randInt(3, 12);
+  var cargoLabel = isAssetRecovery ? 'compromised Vigil asset' : hostageCount + ' hostages';
+  var sourceCode = isAssetRecovery ? generateSourceCode() : null;
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  if (isAssetRecovery) {
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: (v.threatUrgent ? 'FLASH priority: ' : '') + v.primaryAsset + ' deployed from ' + v.primaryBase + '. ' + teamSize + '-operator rescue force.' + transitNote + ' Vigil source ' + sourceCode + ' confirmed detained by ' + v.orgName + ' in ' + v.city + ', ' + v.country + '.' + (compromiseIntel ? ' Compromise vector: ' + compromiseIntel + '.' : ' Asset is being interrogated — recovery before full exploitation is critical.') + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') });
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(6), type: 'normal', text: 'Counter-intelligence damage assessment initiated.' + (damageIntel ? ' Current assessment: ' + damageIntel + '.' : '') + ' Vigil providing real-time intelligence on asset location and guard rotation. ISR feed active on detention site.' + (hostageCondIntel ? ' Asset condition: ' + hostageCondIntel + '.' : '') });
+  } else {
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: (v.threatUrgent ? 'FLASH priority: ' : '') + v.primaryAsset + ' deployed from ' + v.primaryBase + '. ' + teamSize + '-operator rescue force.' + transitNote + ' ' + (hostageCountIntel ? hostageCountIntel : hostageCount + ' hostages confirmed held by ' + v.orgName) + ' in ' + v.city + ', ' + v.country + '.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') });
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(6), type: 'normal', text: 'Crisis negotiation cell established. Vigil providing real-time intelligence on hostage conditions and captor behavior. ISR feed active on target building.' + (hostageCondIntel ? ' Hostage condition: ' + hostageCondIntel + '.' : '') + (captorIdIntel ? ' Captor identification: ' + captorIdIntel + '.' : '') });
+  }
+  var entryNote = entryPointsIntel ? entryPointsIntel : randInt(3, 5) + ' entry points identified';
+  var guardCount = guardForceIntel ? guardForceIntel : randInt(4, 10) + ' armed captors identified via thermal and audio surveillance';
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Rescue plan finalized. ' + entryNote + '. Sniper teams positioned on ' + randInt(2, 4) + ' rooftops. Emergency medical team staged ' + randInt(200, 500) + 'm from the objective.' + (actualGear ? ' Assault loadout: ' + actualGear + '.' : '') + (qrfIntel ? ' QRF assessment: ' + qrfIntel + '.' : '') + (captorDemandsIntel ? ' Captor demands assessment: ' + captorDemandsIntel + '.' : '') });
+  var hostageLocStr = hostageLocIntel ? hostageLocIntel : pick(['second floor, east wing', 'ground floor, central room', 'basement level', 'third floor, rear']);
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'ISR confirmed hostage location: ' + hostageLocStr + '. ' + guardCount + '.' + (commsIntel ? ' Captor communications: ' + commsIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Team ' + callsign + ' at final assault positions. All elements report ready. ' + (isAssetRecovery ? 'ISR maintaining continuous track on detention site.' : 'Negotiation team maintaining contact with captors as cover for assault preparation.') + ' Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"GREEN GREEN GREEN." Simultaneous breach on all entry points. Flashbangs deployed. ' + pick(SOF_BREACH_DETAIL) });
@@ -709,35 +1259,73 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function(op, v, success) {
 
 DEBRIEF_GENERATORS.COUNTER_TERROR = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
-  var cellSize = randInt(4, 12);
   var raidLocations = randInt(2, 5);
   var entries = [];
 
-  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' cell preparing an attack in ' + v.city + ', ' + v.country + '. Cell estimated at ' + cellSize + ' members. ' + v.primaryAsset + ' tasked for counter-terrorism operation.' });
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance established on ' + randInt(3, 6) + ' known cell members. Pattern-of-life analysis underway. ' + randInt(2, 4) + ' safe houses identified across ' + v.city + '.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'SIGINT intercept confirms attack timeline — ' + v.orgName + ' cell plans to execute within ' + randInt(24, 72) + ' hours. Attack materiel confirmed at location ' + pick(['Alpha', 'Bravo', 'Charlie']) + '. Coordinated takedown authorized.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Team ' + callsign + ' elements positioned at ' + raidLocations + ' target locations across ' + v.city + '. Local security forces briefed on cordon responsibilities. Medical and EOD teams staged.' });
+  // Pull real intel
+  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
+  var cellSize = memberCountIntel ? randInt(4, 12) : randInt(4, 12);
+  var attackPlanIntel = getIntel(v, 'ATTACK_PLANNING');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'CAPTOR_ID');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var networkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING');
+  var targetIntentIntel = getIntel(v, 'TARGET_INTENT');
+  var hostageCountIntel = getIntel(v, 'HOSTAGE_COUNT');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var transitNote = v.transitHours ? ' Transit time: ' + v.transitHours + ' hours.' : '';
+
+  var isHostage = v.threatType === 'HOSTAGE_CRISIS' || v.threatType === 'HOSTAGE_DOMESTIC';
+  var hostageCount = isHostage ? randInt(4, 15) : 0;
+
+  if (isHostage) {
+    entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' cell holding ' + (hostageCountIntel ? hostageCountIntel : hostageCount + ' hostages') + ' across ' + raidLocations + ' locations in ' + v.city + ', ' + v.country + '. ' + (memberCountIntel ? 'Cell assessment: ' + memberCountIntel + '.' : 'Cell estimated at ' + cellSize + ' members.') + ' ' + v.primaryAsset + ' tasked for coordinated hostage recovery operation.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+    entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance established. Hostage positions confirmed at ' + raidLocations + ' sites via thermal and audio surveillance. Crisis negotiation team maintaining contact with captors to buy time.' + (guardForceIntel ? ' Armed subject assessment: ' + guardForceIntel + '.' : '') });
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: (commsIntel ? 'SIGINT collection: ' + commsIntel + '. ' : 'SIGINT intercept indicates ') + v.orgName + ' cell growing agitated — execution timeline may be imminent. Simultaneous rescue operation authorized. All assault elements briefed: hostage safety is the absolute priority.' });
+  } else {
+    entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' cell preparing an attack in ' + v.city + ', ' + v.country + '. ' + (memberCountIntel ? 'Cell assessment: ' + memberCountIntel + '.' : 'Cell estimated at ' + cellSize + ' members.') + ' ' + v.primaryAsset + ' tasked for counter-terrorism operation.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + ' Intel coverage: ' + v.intelCoverage + '%.' });
+    entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance established on ' + randInt(3, 6) + ' known cell members. Pattern-of-life analysis underway. ' + randInt(2, 4) + ' safe houses identified across ' + v.city + '.' + (leadershipIntel ? ' Leadership identification: ' + leadershipIntel + '.' : '') + (networkIntel ? ' Network assessment: ' + networkIntel + '.' : '') });
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: (attackPlanIntel ? 'Attack planning intel: ' + attackPlanIntel + '. ' : 'SIGINT intercept confirms attack timeline — ') + v.orgName + ' cell plans to execute within ' + randInt(24, 72) + ' hours. ' + (weaponsCacheIntel ? 'Weapons cache confirmed: ' + weaponsCacheIntel + '.' : 'Attack materiel confirmed at location ' + pick(['Alpha', 'Bravo', 'Charlie']) + '.') + ' Coordinated takedown authorized.' });
+  }
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Team ' + callsign + ' elements positioned at ' + raidLocations + ' target locations across ' + v.city + '. ' + (actualGear ? 'Loadout: ' + actualGear + '. ' : '') + 'Local security forces briefed on cordon responsibilities. Medical and EOD teams staged.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"All stations: execute." Simultaneous raids across ' + raidLocations + ' locations. Doors breached at ' + String(raidLocations) + ' sites within a 30-second window.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 1), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' ' + randInt(2, 4) + ' suspects inside — one dove for a weapon under the mattress. Operator pinned his arm, kicked the pistol away. All suspects flex-cuffed face-down.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 3), type: 'critical', text: 'Location Bravo: hostile opened fire through the door as the team stacked. Rounds punching through the wood. Team pulled offline. Flashbang through the window. Re-entry. ' + randInt(1, 3) + ' hostile KIA. One suspect hiding in a closet — dragged out and detained.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'critical', text: 'Location Charlie: ' + randInt(1, 3) + ' suspects surrendered immediately upon seeing the assault team. Hands up before the first operator was fully through the door. Apartment full of bombmaking materials — wires, detonators, bags of ammonium nitrate.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'All locations secured. ' + randInt(6, 12) + ' total suspects detained. ' + v.orgName + ' cell leadership — including the attack planner — in custody. Helmet cam footage captured everything for prosecution.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Attack materiel recovered: ' + pick(DEBRIEF_EVIDENCE) + '. EOD team rendered safe ' + randInt(1, 4) + ' IEDs found ready for deployment. Planned attack disrupted prior to execution.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'All locations secured. ' + randInt(6, 12) + ' total suspects detained. ' + v.orgName + ' cell leadership — including the ' + (isHostage ? 'hostage-taker commander' : 'attack planner') + ' — in custody. Helmet cam footage captured everything for prosecution.' });
+    if (isHostage) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'All ' + hostageCount + ' hostages recovered alive across ' + raidLocations + ' sites. Medical teams assessed all hostages — minor injuries and psychological trauma but no life-threatening conditions. EOD cleared ' + randInt(1, 3) + ' IEDs rigged near hostage positions.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'normal', text: 'Attack materiel recovered: ' + pick(DEBRIEF_EVIDENCE) + '. EOD team rendered safe ' + randInt(1, 4) + ' IEDs found ready for deployment. Planned attack disrupted prior to execution.' });
+    }
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(3), type: 'normal', text: 'All detained subjects transferred to secure facility for interrogation. Initial interrogation producing intelligence on wider ' + v.orgName + ' network. No civilian casualties. No friendly casualties.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"All stations: execute." Raids initiated simultaneously. However, ' + pick(DEBRIEF_COMPROMISE) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' Premises empty — recently vacated. Warm food on the table, electronics wiped. Smell of soldering flux — bombmaking happened here.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: 'Location Bravo: brief contact. ' + randInt(1, 2) + ' low-level operatives detained after a scuffle in the stairwell. One tried to swallow a SIM card. Cell leadership not present at any target location.' });
+    if (isHostage) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' Captors triggered prepared charges upon hearing the assault. ' + randInt(1, Math.max(1, Math.floor(hostageCount / 4))) + ' hostages killed in the blast. Remaining hostages pulled from the site — alive but injured.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: 'Location Bravo: captors fled with ' + randInt(1, 3) + ' hostages before the team could breach. Vehicle spotted leaving the rear exit. Pursuit initiated but lost in urban traffic.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 2), type: 'critical', text: 'Location Alpha: ' + pick(SOF_BREACH_DETAIL) + ' Premises empty — recently vacated. Warm food on the table, electronics wiped. Smell of soldering flux — bombmaking happened here.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 5), type: 'failure', text: 'Location Bravo: brief contact. ' + randInt(1, 2) + ' low-level operatives detained after a scuffle in the stairwell. One tried to swallow a SIM card. Cell leadership not present at any target location.' });
+    }
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'failure', text: 'Location Charlie: door was booby-trapped. Breacher detected the tripwire — EOD called in. By the time the room was cleared, any occupants were long gone. Back window open, fire escape ladder deployed.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'normal', text: 'Sweep of all target locations complete. Only ' + randInt(1, 3) + ' of ' + cellSize + ' cell members apprehended. Core network — including the attack planner — has dispersed. Attack materiel not recovered.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: v.orgName + ' posted a statement on encrypted channels claiming credit for evading the operation. Attack timeline may have been accelerated or redirected to alternate target.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'normal', text: 'Sweep of all target locations complete. Only ' + randInt(1, 3) + ' of ' + cellSize + ' cell members apprehended. Core network — including the ' + (isHostage ? 'hostage-taker leadership' : 'attack planner') + ' — has dispersed.' + (isHostage ? ' Some hostages remain unaccounted for.' : ' Attack materiel not recovered.') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: v.orgName + ' posted a statement on encrypted channels' + (isHostage ? ' threatening to execute remaining hostages unless demands are met.' : ' claiming credit for evading the operation. Attack timeline may have been accelerated or redirected to alternate target.') });
   }
 
-  var assessment = success ?
-    'Counter-terrorism operation in ' + v.city + ' successfully dismantled ' + v.orgName + '\'s operational cell. Imminent attack disrupted. Detained subjects providing intelligence under interrogation. Threat to ' + v.theater + ' theater reduced.' :
-    'Counter-terrorism operation failed to neutralize ' + v.orgName + '\'s core leadership. The cell was alerted and dispersed before takedown. Attack materiel remains unrecovered — the threat is still active. Enhanced surveillance and alternative approaches recommended.';
+  var assessment;
+  if (isHostage && success) {
+    assessment = 'Counter-terrorism operation in ' + v.city + ' successfully rescued all ' + hostageCount + ' hostages and dismantled ' + v.orgName + '\'s cell. Coordinated simultaneous raids across ' + raidLocations + ' sites achieved complete surprise. All hostages recovered alive. Detained subjects providing intelligence under interrogation.';
+  } else if (isHostage) {
+    assessment = 'Counter-terrorism operation in ' + v.city + ' resulted in hostage casualties. ' + v.orgName + '\'s cell was partially alerted before simultaneous breach could be executed. Some hostages remain unaccounted for. Vigil is reviewing the intelligence and operational timing for lessons learned.';
+  } else if (success) {
+    assessment = 'Counter-terrorism operation in ' + v.city + ' successfully dismantled ' + v.orgName + '\'s operational cell. Imminent attack disrupted. Detained subjects providing intelligence under interrogation. Threat to ' + v.theater + ' theater reduced.';
+  } else {
+    assessment = 'Counter-terrorism operation failed to neutralize ' + v.orgName + '\'s core leadership. The cell was alerted and dispersed before takedown. Attack materiel remains unrecovered — the threat is still active. Enhanced surveillance and alternative approaches recommended.';
+  }
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -749,9 +1337,15 @@ DEBRIEF_GENERATORS.COUNTER_TERROR = function(op, v, success) {
 DEBRIEF_GENERATORS.DIPLOMATIC_RESPONSE = function(op, v, success) {
   var entries = [];
 
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' dispatched to ' + v.city + ', ' + v.country + ' to manage diplomatic situation involving ' + v.orgName + '. Vigil situation brief transmitted via secure channel.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Arrived in ' + v.city + '. Initial coordination with US Embassy staff and allied diplomatic representatives. Media monitoring activated — ' + randInt(3, 8) + ' international outlets covering the situation.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Secure communications established with Washington. Vigil providing real-time intelligence support on ' + v.orgName + '\'s political connections and leverage points.' });
+  // Pull real intel
+  var commandIntel = getIntel(v, 'COMMAND_STRUCTURE');
+  var strategicIntel = getIntel(v, 'STRATEGIC_INTENT') || getIntel(v, 'ESCALATION_POSTURE');
+  var commsIntel = getIntel(v, 'COMMS_PATTERN');
+  var forceIntel = getIntel(v, 'FORCE_DISPOSITION');
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' dispatched to ' + v.city + ', ' + v.country + ' to manage diplomatic situation involving ' + v.orgName + '. Vigil situation brief transmitted via secure channel.' + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + (v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Arrived in ' + v.city + '. Initial coordination with US Embassy staff and allied diplomatic representatives. Media monitoring activated — ' + randInt(3, 8) + ' international outlets covering the situation.' + (strategicIntel ? ' Strategic assessment: ' + strategicIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Secure communications established with Washington. Vigil providing real-time intelligence support on ' + v.orgName + '\'s political connections and leverage points.' + (commandIntel ? ' Command structure intel: ' + commandIntel + '.' : '') + ' Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Initial meeting with ' + v.country + ' counterparts. Tone: ' + pick(['cautious but receptive', 'tense but professional', 'unexpectedly cooperative']) + '. Key demands presented through back-channel.' });
@@ -780,25 +1374,32 @@ DEBRIEF_GENERATORS.INTEL_COLLECTION = function(op, v, success) {
   var sourceCode = generateSourceCode();
   var entries = [];
 
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' deployed to ' + v.city + ', ' + v.country + '. Cover identity established. Target: ' + v.orgName + ' network intelligence collection.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Case officer established operational base in ' + v.city + '. Counter-surveillance route validated. No hostile indicators detected. Source ' + sourceCode + ' contacted via dead drop — meeting arranged.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Pre-meeting surveillance of rendezvous site. ' + randInt(2, 4) + ' counter-surveillance passes. Site assessed as clean. Meeting location: ' + pick(['hotel lobby', 'public park', 'commercial café', 'underground parking structure', 'private residence']) + '.' });
+  // Pull real intel
+  var locationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'SUPPORT_NETWORK');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'COMMAND_STRUCTURE');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS') || getIntel(v, 'COMMS_PATTERN');
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' deployed to ' + v.city + ', ' + v.country + '.' + transitNote + ' Cover identity established. Target: ' + v.orgName + ' network intelligence collection.' + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + (locationIntel ? ' Prior location intel: ' + locationIntel + '.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Case officer established operational base in ' + v.city + '. Counter-surveillance route validated. No hostile indicators detected. Source ' + sourceCode + ' contacted via dead drop — meeting arranged.' + (v.hasCovert ? ' All assets operating under non-official cover.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Pre-meeting surveillance of rendezvous site. ' + randInt(2, 4) + ' counter-surveillance passes. Site assessed as clean. Meeting location: ' + pick(['hotel lobby', 'public park', 'commercial café', 'underground parking structure', 'private residence']) + '. Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Meeting with source ' + sourceCode + '. Source provided verbal debrief on ' + v.orgName + '\'s current activities, leadership changes, and upcoming operational plans.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'critical', text: 'Source ' + sourceCode + ' delivered physical materials: ' + pick(DEBRIEF_EVIDENCE) + '. Intelligence corroborated by existing SIGINT intercepts. Assessed as high-confidence.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Follow-up meeting established for ' + randInt(5, 14) + ' days. Source recruited for ongoing reporting with monthly contact schedule. Cover story intact. No counter-intelligence indicators detected.' });
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Case officer departed ' + v.city + ' via commercial cover. Materials transmitted to Vigil via secure channel. Source ' + sourceCode + ' assessed as reliable — graded B-2 on the admiralty scale.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Meeting with source ' + sourceCode + '. Source provided verbal debrief on ' + v.orgName + '\'s current activities, leadership changes, and upcoming operational plans.' + (leadershipIntel ? ' Corroborated existing leadership intel: ' + leadershipIntel + '.' : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'critical', text: 'Source ' + sourceCode + ' delivered physical materials: ' + pick(DEBRIEF_EVIDENCE) + '. ' + (networkIntel ? 'Network intelligence confirmed: ' + networkIntel + '. ' : '') + 'Intelligence corroborated by existing SIGINT intercepts. Assessed as high-confidence.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Follow-up meeting established for ' + randInt(5, 14) + ' days. Source recruited for ongoing reporting with monthly contact schedule. Cover story intact. No counter-intelligence indicators detected.' + (commsIntel ? ' Communications protocol established matching existing intercept profile.' : '') });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Case officer departed ' + v.city + ' via commercial cover. Materials transmitted to Vigil via secure channel. Source ' + sourceCode + ' assessed as reliable — graded B-2 on the admiralty scale. Intel coverage now ' + Math.min(100, v.intelCoverage + randInt(10, 25)) + '%.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Case officer arrived at meeting site. Source ' + sourceCode + ' ' + pick(['45 minutes late and visibly agitated', 'failed to appear — no signal at dead drop', 'sent an intermediary with a warning message']) + '.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'failure', text: pick(DEBRIEF_COMPROMISE) + '. Source ' + sourceCode + ' ' + pick(['is assessed as compromised — likely under hostile control', 'may have been doubled by ' + v.orgName + '\'s counter-intelligence', 'sent a distress signal indicating imminent danger']) + '.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(3), type: 'normal', text: 'Case officer executed emergency exfiltration protocol. Left ' + v.city + ' via ' + pick(['overland route to border crossing', 'commercial flight under backup identity', 'maritime extraction from coastal rendezvous']) + '. No pursuit detected but counter-intelligence exposure assessed as high.' });
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Source ' + sourceCode + ' status: unknown. All associated sub-sources placed on administrative hold. ' + v.orgName + '\'s counter-intelligence capabilities in ' + v.country + ' have been reassessed upward. Network requires reconstruction.' });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Source ' + sourceCode + ' status: unknown. All associated sub-sources placed on administrative hold. ' + v.orgName + '\'s counter-intelligence capabilities in ' + v.country + ' have been reassessed upward. Network requires reconstruction. Intel coverage remains at ' + v.intelCoverage + '%.' });
   }
 
   var assessment = success ?
-    'Intelligence collection against ' + v.orgName + ' in ' + v.city + ' was successful. Source ' + sourceCode + ' is producing high-value reporting. Vigil has integrated new intelligence into threat models for ' + v.theater + ' theater. Sustained collection recommended.' :
-    'Intelligence collection operation in ' + v.city + ' compromised. Source ' + sourceCode + ' is presumed lost. ' + v.orgName + '\'s counter-intelligence capabilities in ' + v.country + ' exceeded estimates. All collection assets in theater placed under review.';
+    'Intelligence collection against ' + v.orgName + ' in ' + v.city + ' was successful. Source ' + sourceCode + ' is producing high-value reporting. Vigil has integrated new intelligence into threat models for ' + v.theater + ' theater.' + (v.intelCoverage < 70 ? ' Collection should continue — current coverage is ' + v.intelCoverage + '%, below threshold for confident operational commitment.' : ' Intel coverage now sufficient for high-confidence operational planning.') + ' Sustained collection recommended.' :
+    'Intelligence collection operation in ' + v.city + ' compromised. Source ' + sourceCode + ' is presumed lost. ' + v.orgName + '\'s counter-intelligence capabilities in ' + v.country + ' exceeded estimates.' + (v.intelCoverage < 50 ? ' Critical — intel coverage is only ' + v.intelCoverage + '%. Alternative collection vectors urgently needed.' : '') + ' All collection assets in theater placed under review.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -809,29 +1410,74 @@ DEBRIEF_GENERATORS.INTEL_COLLECTION = function(op, v, success) {
 
 DEBRIEF_GENERATORS.DRONE_STRIKE = function(op, v, success) {
   var entries = [];
-  var munitionType = pick(['AGM-114R Hellfire', 'GBU-39 Small Diameter Bomb', 'AGM-179 JAGM', 'GBU-12 Paveway II']);
+  // Use actual munitions from asset equipment if available
+  var assetMunitions = (v.equipment || []).filter(function(e) { return /Hellfire|GBU|JAGM|Paveway|JDAM|Harpoon|AGM|bomb|missile/i.test(e); });
+  var munitionType = assetMunitions.length > 0 ? pick(assetMunitions) : pick(['AGM-114R Hellfire', 'GBU-39 Small Diameter Bomb', 'AGM-179 JAGM', 'GBU-12 Paveway II']);
 
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' launched from ' + v.primaryBase + '. Target package: ' + v.orgName + ' leadership in ' + v.city + ', ' + v.country + '. Estimated time on station: ' + randInt(8, 16) + ' hours.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Platform on station over ' + v.city + '. Altitude: ' + randInt(15, 25) + ',000ft. ' + pick(DEBRIEF_WEATHER) + '. Sensor suite active — EO/IR and SIGINT collection initiated.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Target compound under observation. Pattern-of-life monitoring established. Tracking ' + randInt(3, 8) + ' individuals at the site. Waiting for positive identification of ' + (v.targetAlias || 'HVT') + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'PID confirmed: ' + (v.targetAlias || 'HVT') + ' positively identified by ' + pick(['facial recognition match at 94% confidence', 'gait analysis consistent with known profile', 'SIGINT — target\'s personal device confirmed at location', 'multiple corroborating HUMINT sources']) + '. Strike authorization requested.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '-5min', type: 'normal', text: 'Strike authorization confirmed by operator. Collateral damage estimate reviewed — ' + pick(['no civilians within blast radius', 'one non-combatant structure adjacent, risk assessed as acceptable', 'civilians cleared from the area in the last 30 minutes']) + '. Weapons release authorized under Vigil Directive 3. ' + munitionType + ' selected.' });
+  // Threat-context adaptation
+  var isFacility = v.threatType === 'MILITARY_TARGET' || v.threatType === 'STRATEGIC_TARGET' || v.threatType === 'PROLIFERATOR';
+  var isWMD = v.threatType === 'PROLIFERATOR';
+  var targetLabel = isFacility ? (isWMD ? 'WMD-related facility' : 'military installation') : 'leadership';
+
+  // Pull real intel
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var collateralIntel = getIntel(v, 'COLLATERAL_RISK') || getIntel(v, 'CIVILIAN_PROXIMITY');
+  var facilityIntel = getIntel(v, 'FACILITY_ID') || getIntel(v, 'TARGET_HARDENING') || getIntel(v, 'HARDENING_LEVEL');
+  var airDefenseIntel = getIntel(v, 'AIR_DEFENSE_POSTURE');
+  var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var actualSensors = (v.equipment || []).filter(function(e) { return /FLIR|infrared|radar|EO|IR|sensor|camera|optic/i.test(e); });
+  var sensorStr = actualSensors.length > 0 ? pickItems(actualSensors, 2) : 'EO/IR and SIGINT collection';
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-8), type: 'normal', text: v.primaryAsset + ' launched from ' + v.primaryBase + '. Target package: ' + v.orgName + ' ' + targetLabel + ' in ' + v.city + ', ' + v.country + '.' + transitNote + ' Estimated time on station: ' + randInt(8, 16) + ' hours.' + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Platform on station over ' + v.city + '. Altitude: ' + randInt(15, 25) + ',000ft. ' + pick(DEBRIEF_WEATHER) + '. Sensor suite active — ' + sensorStr + '.' + (airDefenseIntel ? ' Air defense environment: ' + airDefenseIntel + '.' : '') });
+
+  if (isFacility) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Target facility under observation. ' + (isWMD ? 'MASINT sensors confirm chemical/radiological activity. ' : '') + (facilityIntel ? 'Facility assessment: ' + facilityIntel + '. ' : '') + 'Tracking ' + randInt(3, 8) + ' personnel and ' + randInt(1, 4) + ' vehicles at the site. Facility layout confirmed against ISR imagery.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Target facility confirmed active — ' + pick(['communications traffic originating from structure', 'thermal signatures consistent with operational equipment', 'vehicle movement pattern indicates shift change — personnel count confirmed']) + '. Strike authorization requested. Intel coverage: ' + v.intelCoverage + '%.' });
+  } else {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Target compound under observation. ' + (movementIntel ? 'Pattern-of-life per Vigil collection: ' + movementIntel + '. ' : 'Pattern-of-life monitoring established. ') + 'Tracking ' + randInt(3, 8) + ' individuals at the site. ' + (guardForceIntel ? 'Security detail: ' + guardForceIntel + '. ' : '') + 'Waiting for positive identification of ' + (v.targetAlias || 'HVT') + '.' });
+    var pidMethod = hvtIdIntel ? hvtIdIntel : (commsIntel ? 'SIGINT — target communications confirmed at location' : pick(['facial recognition match at 94% confidence', 'gait analysis consistent with known profile', 'SIGINT — target\'s personal device confirmed at location', 'multiple corroborating HUMINT sources']));
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'PID confirmed: ' + (v.targetAlias || 'HVT') + ' positively identified by ' + pidMethod + '. Strike authorization requested. Intel coverage: ' + v.intelCoverage + '%.' });
+  }
+  var collateralStr = collateralIntel ? collateralIntel : pick(['no civilians within blast radius', 'one non-combatant structure adjacent, risk assessed as acceptable', 'civilians cleared from the area in the last 30 minutes']);
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '-5min', type: 'normal', text: 'Strike authorization confirmed by operator. Collateral damage estimate reviewed — ' + collateralStr + '. Weapons release authorized under Vigil Directive 3. ' + munitionType + ' selected.' });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Weapons release. ' + randInt(1, 3) + 'x ' + munitionType + ' away. Time of flight: ' + randInt(15, 45) + ' seconds. Impact. Direct hit on target structure. ' + (v.targetAlias || 'HVT') + ' was in the building at time of impact.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'normal', text: 'Post-strike observation. Structure destroyed. Secondary explosion observed — probable weapons or ammunition storage. No movement at the target site.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+15min', type: 'normal', text: 'BDA complete. Target ' + (v.targetAlias || 'HVT') + ' assessed KIA with high confidence. ' + randInt(2, 5) + ' additional hostile casualties confirmed. Collateral damage: ' + pick(['none observed', 'minimal — adjacent wall damaged', 'one non-target vehicle destroyed']) + '.' });
+    if (isFacility) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Weapons release. ' + randInt(2, 4) + 'x ' + munitionType + ' away. Time of flight: ' + randInt(15, 45) + ' seconds. Multiple impacts on target facility. Direct hits on ' + randInt(2, 4) + ' designated aim points.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'normal', text: 'Post-strike observation. Facility ' + (isWMD ? 'destroyed. No secondary chemical release detected — clean destruction achieved.' : 'destroyed. Secondary explosions confirm ammunition or fuel storage. Structural collapse of primary buildings.') + ' No movement at the target site.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+15min', type: 'normal', text: 'BDA complete. Facility assessed as non-operational. ' + randInt(3, 8) + ' hostile casualties confirmed. Collateral damage: ' + pick(['none observed', 'minimal — perimeter wall of adjacent property damaged', 'one non-target vehicle destroyed']) + '.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Weapons release. ' + randInt(1, 3) + 'x ' + munitionType + ' away. Time of flight: ' + randInt(15, 45) + ' seconds. Impact. Direct hit on target structure. ' + (v.targetAlias || 'HVT') + ' was in the building at time of impact.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'normal', text: 'Post-strike observation. Structure destroyed. Secondary explosion observed — probable weapons or ammunition storage. No movement at the target site.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+15min', type: 'normal', text: 'BDA complete. Target ' + (v.targetAlias || 'HVT') + ' assessed KIA with high confidence. ' + randInt(2, 5) + ' additional hostile casualties confirmed. Collateral damage: ' + pick(['none observed', 'minimal — adjacent wall damaged', 'one non-target vehicle destroyed']) + '.' });
+    }
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: v.primaryAsset + ' remained on station for ' + randInt(1, 3) + ' additional hours monitoring for hostile activity. ' + v.orgName + '\'s communications traffic from the area ceased completely. Platform returning to ' + v.primaryBase + '.' });
   } else {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Weapons release. ' + randInt(1, 2) + 'x ' + munitionType + ' away. Impact on target coordinates. However — ' + pick(DEBRIEF_COMPROMISE) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'failure', text: 'Post-strike observation: target structure partially destroyed, but real-time sensor data indicates ' + (v.targetAlias || 'HVT') + ' departed the compound ' + randInt(10, 45) + ' minutes prior to strike. Vehicle observed leaving the area shortly before weapons release.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'normal', text: 'BDA: ' + randInt(1, 3) + ' hostile casualties at target site — none matching ' + (v.targetAlias || 'HVT') + '\'s profile. Collateral damage assessment: ' + pick(['minimal', 'under review', 'one civilian structure within blast radius sustained damage']) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: v.primaryAsset + ' maintaining station to track ' + (v.targetAlias || 'HVT') + '\'s possible escape route. Target vehicle lost in urban environment. Platform returning to ' + v.primaryBase + ' at bingo fuel.' });
+    if (isFacility) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'failure', text: 'Post-strike observation: target facility partially damaged but hardened structures appear intact. ' + (isWMD ? 'Underground sections likely survived. CBRN monitoring activated.' : 'Key military structures withstood the strike — construction was more resilient than assessed.') });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'normal', text: 'BDA: partial damage to surface structures. ' + randInt(1, 3) + ' hostile casualties at site. Facility may remain operational. Collateral damage assessment: ' + pick(['minimal', 'under review', 'one civilian structure within blast radius sustained damage']) + '.' });
+    } else {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+2min', type: 'failure', text: 'Post-strike observation: target structure partially destroyed, but real-time sensor data indicates ' + (v.targetAlias || 'HVT') + ' departed the compound ' + randInt(10, 45) + ' minutes prior to strike. Vehicle observed leaving the area shortly before weapons release.' });
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+30min', type: 'normal', text: 'BDA: ' + randInt(1, 3) + ' hostile casualties at target site — none matching ' + (v.targetAlias || 'HVT') + '\'s profile. Collateral damage assessment: ' + pick(['minimal', 'under review', 'one civilian structure within blast radius sustained damage']) + '.' });
+    }
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: v.primaryAsset + (isFacility ? ' maintained station for follow-up BDA. Facility shows signs of activity — emergency repairs may be underway. ' : ' maintaining station to track ' + (v.targetAlias || 'HVT') + '\'s possible escape route. Target vehicle lost in urban environment. ') + 'Platform returning to ' + v.primaryBase + ' at bingo fuel.' });
   }
 
-  var assessment = success ?
-    'Drone strike on ' + v.orgName + ' in ' + v.city + ', ' + v.country + ' achieved target elimination. ' + (v.targetAlias || 'HVT') + ' confirmed KIA. ' + v.orgName + '\'s leadership structure disrupted. SIGINT confirms network-wide communications disruption. ' + v.primaryAsset + ' available for retasking.' :
-    'Drone strike failed to eliminate ' + (v.targetAlias || 'HVT') + '. Target departed the site prior to weapons release — possible early warning via counter-surveillance or compromised intelligence. The strike may have revealed Vigil\'s surveillance capability in ' + v.country + '. Target expected to relocate and increase security posture.';
+  var assessment;
+  if (isFacility && success) {
+    assessment = 'Drone strike destroyed ' + v.orgName + '\'s ' + (isWMD ? 'WMD-related facility' : 'military installation') + ' in ' + v.city + ', ' + v.country + '. ' + (isWMD ? 'CBRN assessment confirms clean destruction. Proliferation program significantly degraded.' : 'Military capability in the area significantly reduced.') + ' ' + v.primaryAsset + ' available for retasking.';
+  } else if (isFacility) {
+    assessment = 'Drone strike achieved only partial damage to ' + v.orgName + '\'s ' + (isWMD ? 'WMD facility' : 'military installation') + ' in ' + v.city + '. Hardened construction withstood the munitions. Follow-up strike or alternative approach recommended.';
+  } else if (success) {
+    assessment = 'Drone strike on ' + v.orgName + ' in ' + v.city + ', ' + v.country + ' achieved target elimination. ' + (v.targetAlias || 'HVT') + ' confirmed KIA. ' + v.orgName + '\'s leadership structure disrupted. SIGINT confirms network-wide communications disruption. ' + v.primaryAsset + ' available for retasking.';
+  } else {
+    assessment = 'Drone strike failed to eliminate ' + (v.targetAlias || 'HVT') + '. Target departed the site prior to weapons release — possible early warning via counter-surveillance or compromised intelligence. The strike may have revealed Vigil\'s surveillance capability in ' + v.country + '. Target expected to relocate and increase security posture.';
+  }
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -843,14 +1489,26 @@ DEBRIEF_GENERATORS.DRONE_STRIKE = function(op, v, success) {
 DEBRIEF_GENERATORS.HVT_ELIMINATION = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
   var weather = pick(DEBRIEF_WEATHER);
-  var teamSize = randInt(12, 24);
+  var teamSize = (v.totalPersonnel && v.totalPersonnel > 0) ? Math.min(v.totalPersonnel, randInt(12, 24)) : randInt(12, 24);
   var entries = [];
 
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued kill/capture authorization for ' + (v.targetAlias || 'HVT') + ', senior ' + v.orgName + ' operative, located in ' + v.city + ', ' + v.country + '. ' + v.primaryAsset + ' assigned. ' + teamSize + '-man kill team.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Target surveillance package activated. ' + (v.targetAlias || 'HVT') + '\'s residence, known associates, and pattern-of-life mapped. Positive ID established via ' + pick(['long-range photography', 'SIGINT device signature', 'HUMINT source corroboration']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Team ' + callsign + ' staged at forward position. ' + weather + '. ISR confirms target at ' + pick(['primary residence', 'known associate\'s compound', 'commercial property used as office']) + '.' });
+  // Pull real intel
+  var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID');
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var escapesIntel = getIntel(v, 'ESCAPE_ROUTES');
+  var collateralIntel = getIntel(v, 'COLLATERAL_RISK');
+  var networkIntel = getIntel(v, 'HVT_NETWORK') || getIntel(v, 'SUPPORT_NETWORK');
+  var commandIntel = getIntel(v, 'COMMAND_STRUCTURE');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued kill/capture authorization for ' + (v.targetAlias || 'HVT') + ', senior ' + v.orgName + ' operative, located in ' + v.city + ', ' + v.country + '. ' + v.primaryAsset + ' assigned. ' + teamSize + '-man kill team.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + (hvtIdIntel ? ' Target identification: ' + hvtIdIntel + '.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Target surveillance package activated. ' + (movementIntel ? 'Pattern of life: ' + movementIntel + '. ' : (v.targetAlias || 'HVT') + '\'s residence, known associates, and pattern-of-life mapped. ') + 'Positive ID established via ' + (commsIntel ? 'SIGINT intercept: ' + commsIntel : pick(['long-range photography', 'SIGINT device signature', 'HUMINT source corroboration'])) + '.' + (networkIntel ? ' Target network: ' + networkIntel + '.' : '') + (escapesIntel ? ' Known escape routes: ' + escapesIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Team ' + callsign + ' staged at forward position. ' + weather + '. ' + (actualGear ? 'Primary weapons: ' + actualGear + '. ' : '') + 'ISR confirms target at ' + pick(['primary residence', 'known associate\'s compound', 'commercial property used as office']) + '. Intel coverage: ' + v.intelCoverage + '%.' });
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: pick(SOF_APPROACH) });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'All teams in position. Overwatch confirms ' + randInt(3, 8) + ' personnel at target location. ' + (v.targetAlias || 'HVT') + ' positively identified on thermal. "We have eyes on JACKPOT."' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'All teams in position. Overwatch confirms ' + (guardForceIntel ? guardForceIntel + '.' : randInt(3, 8) + ' personnel at target location.') + ' ' + (v.targetAlias || 'HVT') + ' positively identified on thermal. "We have eyes on JACKPOT."' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." ' + pick(SOF_BREACH_DETAIL) });
@@ -885,12 +1543,20 @@ DEBRIEF_GENERATORS.HVT_ELIMINATION = function(op, v, success) {
 
 DEBRIEF_GENERATORS.HVT_CAPTURE = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
-  var teamSize = randInt(16, 28);
+  var teamSize = (v.totalPersonnel && v.totalPersonnel > 0) ? Math.min(v.totalPersonnel, randInt(16, 28)) : randInt(16, 28);
   var entries = [];
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued capture order for ' + (v.targetAlias || 'HVT') + ', ' + v.orgName + ' operative, in ' + v.city + ', ' + v.country + '. Priority: ALIVE for interrogation. ' + v.primaryAsset + ' assigned — ' + teamSize + ' operators.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'ISR confirms target at location. Non-lethal options prepared: flashbangs, CS gas, flex-cuffs. Designated marksmen briefed: weapon-arm shots only unless life-threatening situation.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Team ' + callsign + ' at final assault position. ' + pick(SOF_APPROACH) });
+  // Pull real intel
+  var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
+  var escapesIntel = getIntel(v, 'ESCAPE_ROUTES');
+  var commandIntel = getIntel(v, 'COMMAND_STRUCTURE');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued capture order for ' + (v.targetAlias || 'HVT') + ', ' + v.orgName + ' operative, in ' + v.city + ', ' + v.country + '. Priority: ALIVE for interrogation. ' + v.primaryAsset + ' assigned — ' + teamSize + ' operators.' + (hvtIdIntel ? ' Target ID: ' + hvtIdIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + (commandIntel ? ' Command authority: ' + commandIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'ISR confirms target at location. ' + (actualGear ? 'Loadout: ' + actualGear + '. ' : '') + 'Non-lethal options prepared: flashbangs, CS gas, flex-cuffs. Designated marksmen briefed: weapon-arm shots only unless life-threatening situation.' + (guardForceIntel ? ' Security detail: ' + guardForceIntel + '.' : '') + (escapesIntel ? ' Escape routes identified: ' + escapesIntel + ' — interdiction teams posted.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Team ' + callsign + ' at final assault position. ' + (movementIntel ? 'Pattern-of-life confirms target on site: ' + movementIntel + '. ' : '') + pick(SOF_APPROACH) });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Execute." CS gas deployed into target structure via windows. ' + pick(SOF_BREACH_DETAIL) });
@@ -925,9 +1591,17 @@ DEBRIEF_GENERATORS.TARGETED_KILLING = function(op, v, success) {
   var entries = [];
   var method = pick(['precision air strike', 'vehicle-borne IED on target route', 'sniper team at overwatch position', 'armed drone loiter-and-strike']);
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil authorized targeted killing of ' + (v.targetAlias || 'HVT') + ', ' + v.orgName + ' operative, in ' + v.city + ', ' + v.country + '. Method: ' + method + '. ' + v.primaryAsset + ' tasked.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Assets in position. Target\'s pattern of life monitored. Expected window of opportunity: ' + pick(['morning commute between 0700-0800 local', 'evening meeting at known associate\'s residence', 'weekly visit to a commercial establishment', 'departure from compound for scheduled event']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'PID confirmed. ' + (v.targetAlias || 'HVT') + ' observed at anticipated location. ' + pick(['No civilian bystanders within danger zone', 'Minimal civilian presence — 2 non-combatants at edge of blast radius, acceptable under ROE', 'Area is clear']) + '. Awaiting final authorization.' });
+  // Pull real intel
+  var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'SUBJECT_ID');
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var collateralIntel = getIntel(v, 'COLLATERAL_RISK');
+  var networkIntel = getIntel(v, 'HVT_NETWORK') || getIntel(v, 'NETWORK_MAPPING');
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil authorized targeted killing of ' + (v.targetAlias || 'HVT') + ', ' + v.orgName + ' operative, in ' + v.city + ', ' + v.country + '. Method: ' + method + '. ' + v.primaryAsset + ' tasked.' + (hvtIdIntel ? ' Target ID: ' + hvtIdIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Assets in position. ' + (movementIntel ? 'Pattern of life per Vigil collection: ' + movementIntel + '. ' : 'Target\'s pattern of life monitored. ') + 'Expected window of opportunity: ' + pick(['morning commute between 0700-0800 local', 'evening meeting at known associate\'s residence', 'weekly visit to a commercial establishment', 'departure from compound for scheduled event']) + '.' + (guardForceIntel ? ' Security detail: ' + guardForceIntel + '.' : '') });
+  var collateralStr = collateralIntel ? collateralIntel : pick(['No civilian bystanders within danger zone', 'Minimal civilian presence — 2 non-combatants at edge of blast radius, acceptable under ROE', 'Area is clear']);
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'PID confirmed. ' + (v.targetAlias || 'HVT') + ' observed at anticipated location. ' + collateralStr + '. Awaiting final authorization. Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Authorization received. Action executed. ' + (v.targetAlias || 'HVT') + ' ' + pick(['struck by precision munition — no time to react', 'engaged by sniper team — two rounds, both hits, target down immediately', 'vehicle destroyed by directed charge — no survivors']) + '. Confirmed EKIA.' });
@@ -955,9 +1629,21 @@ DEBRIEF_GENERATORS.ASSET_EXTRACTION = function(op, v, success) {
   var sourceCode = generateSourceCode();
   var entries = [];
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'FLASH priority: Vigil source ' + sourceCode + ' compromised in ' + v.city + ', ' + v.country + '. ' + v.orgName + ' counter-intelligence has identified the asset. Immediate extraction authorized. ' + v.primaryAsset + ' tasked.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(4), type: 'normal', text: 'Emergency contact protocol activated. Source ' + sourceCode + ' reached via dead drop — confirmed alive, under surveillance but not yet detained. Extraction window estimated at ' + randInt(12, 36) + ' hours before ' + v.orgName + ' acts.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Team ' + callsign + ' in ' + v.city + '. Extraction plan: ' + pick(['vehicle pickup at pre-arranged safe point, overland to border', 'maritime extraction from coastal rendezvous', 'helicopter extraction from rooftop of allied facility', 'commercial air departure under false identity']) + '. Backup plans Alpha through Charlie prepared.' });
+  // Pull real intel
+  var lastKnownIntel = getIntel(v, 'ASSET_LAST_KNOWN');
+  var compromiseIntel = getIntel(v, 'COMPROMISE_VECTOR');
+  var ciActivityIntel = getIntel(v, 'HOSTILE_CI_ACTIVITY');
+  var exfilRoutesIntel = getIntel(v, 'EXFIL_ROUTES');
+  var conditionIntel = getIntel(v, 'ASSET_CONDITION');
+  var coverIntel = getIntel(v, 'COVER_STATUS');
+  var safeHouseIntel = getIntel(v, 'SAFE_HOUSE_NETWORK');
+  var damageIntel = getIntel(v, 'DAMAGE_ASSESSMENT');
+  var transitNote = v.transitHours ? ' Transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: (v.threatUrgent ? 'FLASH priority: ' : '') + 'Vigil source ' + sourceCode + ' compromised in ' + v.city + ', ' + v.country + '. ' + (compromiseIntel ? 'Compromise vector: ' + compromiseIntel + '. ' : v.orgName + ' counter-intelligence has identified the asset. ') + 'Immediate extraction authorized. ' + v.primaryAsset + ' tasked.' + transitNote + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(4), type: 'normal', text: 'Emergency contact protocol activated. ' + (conditionIntel ? 'Asset condition: ' + conditionIntel + '. ' : 'Source ' + sourceCode + ' reached via dead drop — confirmed alive, under surveillance but not yet detained. ') + (ciActivityIntel ? 'Hostile CI activity: ' + ciActivityIntel + '. ' : '') + (coverIntel ? 'Cover status: ' + coverIntel + '. ' : '') + 'Extraction window estimated at ' + randInt(12, 36) + ' hours before ' + v.orgName + ' acts.' + (damageIntel ? ' Damage assessment: ' + damageIntel + '.' : '') });
+  var exfilPlan = exfilRoutesIntel ? exfilRoutesIntel : pick(['vehicle pickup at pre-arranged safe point, overland to border', 'maritime extraction from coastal rendezvous', 'helicopter extraction from rooftop of allied facility', 'commercial air departure under false identity']);
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Team ' + callsign + ' in ' + v.city + '. Extraction plan: ' + exfilPlan + '. ' + (safeHouseIntel ? 'Safe house network: ' + safeHouseIntel + '. ' : '') + 'Backup plans Alpha through Charlie prepared. Intel coverage: ' + v.intelCoverage + '%.' });
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Source ' + sourceCode + ' moving to extraction point. Counter-surveillance team reports ' + pick(['no hostile tail detected — route appears clean', '2 possible surveillance vehicles — taking evasive action', 'foot surveillance team detected, source running SDR']) + '.' });
 
   if (success) {
@@ -984,13 +1670,23 @@ DEBRIEF_GENERATORS.ASSET_EXTRACTION = function(op, v, success) {
 
 DEBRIEF_GENERATORS.DOMESTIC_HOSTAGE_RESCUE = function(op, v, success) {
   var callsign = pick(DEBRIEF_CALLSIGNS);
-  var hostageCount = randInt(4, 20);
   var entries = [];
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Hostage situation confirmed in ' + v.city + ', United States. ' + hostageCount + ' civilians held by ' + v.orgName + ' in ' + pick(['a commercial building', 'a government facility', 'a residential compound', 'a transportation hub']) + '. FBI HRT alerted. ' + v.primaryAsset + ' designated as primary assault element.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Crisis negotiation team established contact with ' + v.orgName + '. Demands: ' + pick(['political concessions and safe passage', 'release of imprisoned associates', 'ransom of $' + randInt(5, 50) + 'M', 'media broadcast of manifesto']) + '. Vigil assessing sincerity and hostage welfare.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Tactical teams positioned. ' + randInt(3, 5) + ' sniper teams in overwatch. Inner and outer perimeter established by local law enforcement. Medical teams staged. Media cordon holding.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Negotiations deteriorating. ' + v.orgName + ' becoming increasingly agitated. Vigil intercepted communications suggesting deadline for hostage execution. Assault authorization granted by DOJ.' });
+  // Pull real intel
+  var hostageCountIntel = getIntel(v, 'HOSTAGE_COUNT');
+  var hostageCount = randInt(4, 20);
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var entryPointsIntel = getIntel(v, 'ENTRY_POINTS');
+  var captorDemandsIntel = getIntel(v, 'CAPTOR_DEMANDS');
+  var captorIdIntel = getIntel(v, 'CAPTOR_ID');
+  var hostageCondIntel = getIntel(v, 'HOSTAGE_CONDITION');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Hostage situation confirmed in ' + v.city + ', United States. ' + (hostageCountIntel ? hostageCountIntel : hostageCount + ' civilians held by ' + v.orgName) + ' in ' + pick(['a commercial building', 'a government facility', 'a residential compound', 'a transportation hub']) + '. FBI HRT alerted. ' + v.primaryAsset + ' designated as primary assault element.' + (captorIdIntel ? ' Captor identification: ' + captorIdIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-6), type: 'normal', text: 'Crisis negotiation team established contact with ' + v.orgName + '. ' + (captorDemandsIntel ? 'Demands assessment: ' + captorDemandsIntel + '.' : 'Demands: ' + pick(['political concessions and safe passage', 'release of imprisoned associates', 'ransom of $' + randInt(5, 50) + 'M', 'media broadcast of manifesto']) + '.') + ' Vigil assessing sincerity and hostage welfare.' + (hostageCondIntel ? ' Hostage condition: ' + hostageCondIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Tactical teams positioned. ' + randInt(3, 5) + ' sniper teams in overwatch. ' + (actualGear ? 'Assault loadout: ' + actualGear + '. ' : '') + (entryPointsIntel ? 'Entry assessment: ' + entryPointsIntel + '. ' : '') + 'Inner and outer perimeter established by local law enforcement. Medical teams staged. Media cordon holding.' + (guardForceIntel ? ' Armed subject assessment: ' + guardForceIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'Negotiations deteriorating. ' + v.orgName + ' becoming increasingly agitated. ' + (commsIntel ? 'Subject communications: ' + commsIntel + '. ' : 'Vigil intercepted communications suggesting deadline for hostage execution. ') + 'Assault authorization granted by DOJ. Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 0), type: 'critical', text: '"Green light. Execute." Simultaneous entry — ' + pick(SOF_BREACH_DETAIL) + ' CS gas deployed through ventilation system to disorient captors.' });
@@ -1026,9 +1722,16 @@ DEBRIEF_GENERATORS.LAW_ENFORCEMENT = function(op, v, success) {
   var suspectsCount = randInt(3, 8);
   var warrantCount = randInt(2, 5);
 
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Federal warrants obtained for ' + warrantCount + ' locations associated with ' + v.orgName + ' in ' + v.city + ', United States. ' + v.primaryAsset + ' designated as lead agency. Vigil providing intelligence support.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Pre-raid coordination complete. ' + randInt(20, 60) + ' agents and officers from ' + randInt(2, 4) + ' agencies briefed. Target packages distributed. Tactical plans reviewed. Flash-bang and breach equipment staged.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'All teams in position at ' + warrantCount + ' target locations across ' + v.city + '. Surveillance confirms ' + suspectsCount + ' targets at their expected locations. H-hour set.' });
+  // Pull real intel
+  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
+  var locationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var networkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'FINANCIAL_FLOWS');
+
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Federal warrants obtained for ' + warrantCount + ' locations associated with ' + v.orgName + ' in ' + v.city + ', United States. ' + v.primaryAsset + ' designated as lead agency. Vigil providing intelligence support.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') + (locationIntel ? ' Location intel: ' + locationIntel + '.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Pre-raid coordination complete. ' + randInt(20, 60) + ' agents and officers from ' + randInt(2, 4) + ' agencies briefed. Target packages distributed.' + (leadershipIntel ? ' Leadership identification: ' + leadershipIntel + '.' : '') + (weaponsCacheIntel ? ' Weapons intelligence: ' + weaponsCacheIntel + '.' : '') + ' Tactical plans reviewed. Flash-bang and breach equipment staged.' });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'All teams in position at ' + warrantCount + ' target locations across ' + v.city + '. ' + (memberCountIntel ? 'Suspect assessment: ' + memberCountIntel + '. ' : '') + 'Surveillance confirms ' + suspectsCount + ' targets at their expected locations. H-hour set. Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"Execute." Simultaneous service of ' + warrantCount + ' warrants. ' + pick(LE_ENTRY) });
@@ -1056,24 +1759,42 @@ DEBRIEF_GENERATORS.INVESTIGATION = function(op, v, success) {
   var entries = [];
   var sourceCount = randInt(3, 8);
 
-  entries.push({ time: dayLabel(-7) + ' ' + zuluTime(0), type: 'normal', text: 'Federal investigation initiated against ' + v.orgName + ' network in ' + v.city + ', United States. ' + v.primaryAsset + ' assigned as lead investigative unit. Vigil providing SIGINT and database support.' });
-  entries.push({ time: dayLabel(-5) + ' ' + zuluTime(0), type: 'normal', text: 'FISA warrants obtained for electronic surveillance on ' + randInt(3, 8) + ' targets. Financial subpoenas served to ' + randInt(2, 5) + ' banking institutions. Grand jury convened.' });
-  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance producing results. ' + randInt(50, 200) + ' hours of intercepted communications. ' + sourceCount + ' confidential sources providing information. Pattern analysis revealing network structure.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Case file compiled. ' + randInt(200, 800) + ' pages of evidence. Financial trail mapped across ' + randInt(3, 7) + ' shell companies. Key transactions identified totaling $' + randInt(1, 25) + 'M.' });
+  // Pull real intel
+  var cellLocationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
+  var cellStructureIntel = getIntel(v, 'CELL_STRUCTURE');
+  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
+  var attackPlanningIntel = getIntel(v, 'ATTACK_PLANNING');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID');
+  var supportNetworkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING');
+  var financialIntel = getIntel(v, 'FINANCIAL_FLOWS');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var targetIntentIntel = getIntel(v, 'TARGET_INTENT');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+
+  entries.push({ time: dayLabel(-7) + ' ' + zuluTime(0), type: 'normal', text: 'Federal investigation initiated against ' + v.orgName + ' network in ' + v.city + ', United States. ' + v.primaryAsset + ' assigned as lead investigative unit. Vigil providing SIGINT and database support.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') + (cellLocationIntel ? ' Target location: ' + cellLocationIntel + '.' : '') });
+  entries.push({ time: dayLabel(-5) + ' ' + zuluTime(0), type: 'normal', text: 'FISA warrants obtained for electronic surveillance on ' + randInt(3, 8) + ' targets. Financial subpoenas served to ' + randInt(2, 5) + ' banking institutions. Grand jury convened.' + (leadershipIntel ? ' Leadership identified: ' + leadershipIntel + '.' : '') + (cellStructureIntel ? ' Cell structure: ' + cellStructureIntel + '.' : '') });
+  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance producing results. ' + randInt(50, 200) + ' hours of intercepted communications. ' + sourceCount + ' confidential sources providing information. ' + (supportNetworkIntel ? 'Network analysis: ' + supportNetworkIntel + '. ' : 'Pattern analysis revealing network structure. ') + (commsIntel ? 'Communications intel: ' + commsIntel + '.' : '') + (financialIntel ? ' Financial intelligence: ' + financialIntel + '.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Case file compiled. ' + randInt(200, 800) + ' pages of evidence. ' + (financialIntel ? 'Financial trail: ' + financialIntel + '. ' : 'Financial trail mapped across ' + randInt(3, 7) + ' shell companies. Key transactions identified totaling $' + randInt(1, 25) + 'M. ') + (memberCountIntel ? 'Suspect assessment: ' + memberCountIntel + '. ' : '') + (attackPlanningIntel ? 'Attack planning intel: ' + attackPlanningIntel + '. ' : '') + 'Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Investigation reached actionable threshold. Grand jury returned ' + randInt(12, 40) + '-count indictment against ' + randInt(3, 8) + ' ' + v.orgName + ' operatives. Charges include: ' + pick(['material support for terrorism', 'conspiracy to commit acts of violence', 'money laundering and fraud', 'weapons trafficking and procurement of destructive devices']) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'Arrest warrants issued. ' + randInt(3, 6) + ' subjects taken into custody across ' + randInt(2, 4) + ' states. ' + randInt(0, 2) + ' subjects remain at large — fugitive task force activated.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Investigation reached actionable threshold. Grand jury returned ' + randInt(12, 40) + '-count indictment against ' + randInt(3, 8) + ' ' + v.orgName + ' operatives. Charges include: ' + pick(['material support for terrorism', 'conspiracy to commit acts of violence', 'money laundering and fraud', 'weapons trafficking and procurement of destructive devices']) + '.' + (targetIntentIntel ? ' Target intent established: ' + targetIntentIntel + '.' : '') + (weaponsCacheIntel ? ' Weapons evidence: ' + weaponsCacheIntel + '.' : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'Arrest warrants issued. ' + randInt(3, 6) + ' subjects taken into custody across ' + randInt(2, 4) + ' states. ' + randInt(0, 2) + ' subjects remain at large — fugitive task force activated.' + (actualGear ? ' Arrest teams equipped with ' + actualGear + '.' : '') });
     entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Evidence exploitation continuing. Digital forensics team processing ' + randInt(5, 20) + ' devices. Vigil cross-referencing findings with international intelligence holdings. Additional subjects may be identified.' });
   } else {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Investigation stalled. Key evidence challenged — FISA warrant application contained procedural errors. Defense counsel filed motion to suppress.' });
+    var gapAnalysis = '';
+    if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+      var gaps = v._unrevealedIntel.slice(0, 2).map(function(f) { return f.label; }).join(' and ');
+      gapAnalysis = ' Intelligence gaps in ' + gaps + ' may have contributed to the evidentiary shortfall.';
+    }
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Investigation stalled. Key evidence challenged — FISA warrant application contained procedural errors. Defense counsel filed motion to suppress.' + gapAnalysis });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(8), type: 'failure', text: 'Federal judge ruled ' + pick(['key electronic intercepts inadmissible — warrant affidavit insufficient', 'financial evidence obtained in violation of Fourth Amendment protections', 'confidential source testimony unreliable — source was previously compromised by ' + v.orgName]) + '. Case significantly weakened.' });
     entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'US Attorney\'s office declining to prosecute on current evidence. Case remanded for additional investigation. ' + v.orgName + ' operatives remain at liberty. Their legal counsel has filed counter-complaints.' });
   }
 
   var assessment = success ?
-    'Federal investigation of ' + v.orgName + ' in ' + v.city + ' produced actionable indictments. Multiple subjects in custody. Evidence chain is strong — prosecution expected to proceed. Vigil intelligence was instrumental in building the case.' :
-    'Federal investigation of ' + v.orgName + ' encountered legal obstacles. Key evidence suppressed by judicial ruling. ' + v.orgName + ' operatives remain free and are now aware of the investigation\'s scope. Recommend rebuilding the case with alternative evidence sources.';
+    'Federal investigation of ' + v.orgName + ' in ' + v.city + ' produced actionable indictments. Multiple subjects in custody. Evidence chain is strong — prosecution expected to proceed. Intel coverage at ' + v.intelCoverage + '% — Vigil intelligence was instrumental in building the case.' + (v.confidence ? ' Operation confidence was ' + v.confidence + '%.' : '') :
+    'Federal investigation of ' + v.orgName + ' encountered legal obstacles. Key evidence suppressed by judicial ruling. Intel coverage was only ' + v.intelCoverage + '% — ' + (v.intelCoverage < 50 ? 'insufficient intelligence collection likely contributed to the weak evidentiary foundation.' : 'despite adequate intelligence, the legal framework could not support the case.') + ' ' + v.orgName + ' operatives remain free and are now aware of the investigation\'s scope. Recommend rebuilding the case with alternative evidence sources.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -1086,24 +1807,44 @@ DEBRIEF_GENERATORS.DOMESTIC_SURVEILLANCE = function(op, v, success) {
   var entries = [];
   var targetsCount = randInt(3, 8);
 
-  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' initiated domestic surveillance operation against ' + v.orgName + ' in ' + v.city + ', United States. ' + targetsCount + ' persons of interest identified. FISA court authorization obtained.' });
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Physical surveillance teams deployed. ' + randInt(4, 8) + ' agents in ' + randInt(2, 4) + ' vehicles maintaining rolling coverage. Technical surveillance: pen registers on ' + randInt(2, 5) + ' phone lines, email intercepts active.' });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Pattern-of-life established on primary targets. Daily routines mapped. Known associates catalogued. ' + randInt(2, 4) + ' previously unknown meeting locations identified across ' + v.city + '.' });
+  // Pull real intel
+  var cellLocationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
+  var cellStructureIntel = getIntel(v, 'CELL_STRUCTURE');
+  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
+  var attackPlanningIntel = getIntel(v, 'ATTACK_PLANNING');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID');
+  var supportNetworkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var targetIntentIntel = getIntel(v, 'TARGET_INTENT');
+  var financialIntel = getIntel(v, 'FINANCIAL_FLOWS');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var actualVehicles = (v.vehicles && v.vehicles.length > 0) ? pickItems(v.vehicles, 2) : '';
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var transitNote = v.transitHours ? ' Deployment transit: ' + v.transitHours + ' hours.' : '';
+
+  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: v.primaryAsset + ' initiated domestic surveillance operation against ' + v.orgName + ' in ' + v.city + ', United States. ' + (memberCountIntel ? 'Suspect assessment: ' + memberCountIntel + '. ' : targetsCount + ' persons of interest identified. ') + 'FISA court authorization obtained.' + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') + (cellLocationIntel ? ' Target location: ' + cellLocationIntel + '.' : '') + transitNote });
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Physical surveillance teams deployed. ' + randInt(4, 8) + ' agents in ' + (actualVehicles ? actualVehicles : randInt(2, 4) + ' vehicles') + ' maintaining rolling coverage. Technical surveillance: pen registers on ' + randInt(2, 5) + ' phone lines, email intercepts active.' + (actualGear ? ' Equipment: ' + actualGear + '.' : '') + (leadershipIntel ? ' Primary target — leadership: ' + leadershipIntel + '.' : '') });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Pattern-of-life established on primary targets. Daily routines mapped. Known associates catalogued. ' + (cellStructureIntel ? 'Cell structure: ' + cellStructureIntel + '. ' : '') + randInt(2, 4) + ' previously unknown meeting locations identified across ' + v.city + '.' + (commsIntel ? ' Communications: ' + commsIntel + '.' : '') });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Key intercept: ' + v.orgName + ' cell leader conducted an unencrypted phone call discussing ' + pick(['operational timeline for planned attack', 'weapons procurement from out-of-state supplier', 'financial transfer instructions to overseas account', 'meeting with foreign contact at designated location']) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'critical', text: 'Breakthrough: physical surveillance team observed ' + randInt(2, 4) + ' targets meeting at ' + pick(['a storage unit', 'a rented warehouse', 'a private residence']) + '. Targets were observed ' + pick(['handling weapons and tactical equipment', 'reviewing maps and photographs of a potential target', 'transferring large amounts of cash', 'conducting rehearsals of an operational plan']) + '. Documented via long-range photography and audio.' });
-    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Network fully mapped. ' + randInt(8, 20) + ' associates identified. Communication patterns, financial flows, and logistics chain documented. Intelligence package forwarded to Vigil for threat assessment and to DOJ for prosecution support.' });
-    entries.push({ time: dayLabel(2) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance window complete. ' + randInt(100, 300) + ' hours of coverage compiled. ' + randInt(15, 40) + ' actionable intelligence reports generated. Recommend transition to enforcement phase.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Key intercept: ' + v.orgName + ' cell leader conducted an unencrypted phone call discussing ' + (attackPlanningIntel ? attackPlanningIntel : pick(['operational timeline for planned attack', 'weapons procurement from out-of-state supplier', 'financial transfer instructions to overseas account', 'meeting with foreign contact at designated location'])) + '.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'critical', text: 'Breakthrough: physical surveillance team observed ' + randInt(2, 4) + ' targets meeting at ' + pick(['a storage unit', 'a rented warehouse', 'a private residence']) + '. Targets were observed ' + (weaponsCacheIntel ? 'at weapons cache: ' + weaponsCacheIntel : pick(['handling weapons and tactical equipment', 'reviewing maps and photographs of a potential target', 'transferring large amounts of cash', 'conducting rehearsals of an operational plan'])) + '. Documented via long-range photography and audio.' + (targetIntentIntel ? ' Intent assessment: ' + targetIntentIntel + '.' : '') });
+    entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'Network fully mapped. ' + randInt(8, 20) + ' associates identified. ' + (supportNetworkIntel ? 'Network analysis: ' + supportNetworkIntel + '. ' : 'Communication patterns, financial flows, and logistics chain documented. ') + (financialIntel ? 'Financial intelligence: ' + financialIntel + '. ' : '') + 'Intelligence package forwarded to Vigil for threat assessment and to DOJ for prosecution support.' });
+    entries.push({ time: dayLabel(2) + ' ' + zuluTime(0), type: 'normal', text: 'Surveillance window complete. ' + randInt(100, 300) + ' hours of coverage compiled. ' + randInt(15, 40) + ' actionable intelligence reports generated. Intel coverage: ' + v.intelCoverage + '%. Recommend transition to enforcement phase.' });
   } else {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Targets employing counter-surveillance techniques. ' + randInt(2, 3) + ' surveillance detection routes observed. Subjects switching vehicles and using burner phones with regular frequency.' });
+    var gapAnalysis = '';
+    if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+      var gaps = v._unrevealedIntel.slice(0, 2).map(function(f) { return f.label; }).join(' and ');
+      gapAnalysis = ' Intelligence gaps in ' + gaps + ' left the team unprepared for counter-surveillance measures.';
+    }
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'normal', text: 'Targets employing counter-surveillance techniques. ' + randInt(2, 3) + ' surveillance detection routes observed. Subjects switching vehicles and using burner phones with regular frequency.' + gapAnalysis });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(8), type: 'failure', text: 'Surveillance compromised. Target ' + pick(['spotted a surveillance vehicle and took evasive action — all targets went dark within 2 hours', 'used an RF detector and found a planted audio device — counter-intelligence protocols activated', 'posted photographs of surveillance team members on encrypted channels']) + '.' });
     entries.push({ time: dayLabel(1) + ' ' + zuluTime(0), type: 'normal', text: 'All surveillance assets recalled. ' + v.orgName + ' cell aware of federal interest. Targets have changed all communication methods, relocated from known addresses, and alerted the wider network.' });
   }
 
   var assessment = success ?
-    'Domestic surveillance of ' + v.orgName + ' in ' + v.city + ' produced comprehensive intelligence. Network mapped, communications intercepted, and evidence documented within FISA guidelines. Case ready for prosecution phase.' :
-    'Domestic surveillance operation compromised. ' + v.orgName + '\'s counter-surveillance capabilities exceeded assessment. All targets are now aware of federal interest and have gone dark. Recommend stand-down period and alternative approaches.';
+    'Domestic surveillance of ' + v.orgName + ' in ' + v.city + ' produced comprehensive intelligence at ' + v.intelCoverage + '% coverage. Network mapped, communications intercepted, and evidence documented within FISA guidelines. Case ready for prosecution phase.' + (v.confidence ? ' Operation confidence was ' + v.confidence + '%.' : '') :
+    'Domestic surveillance operation compromised. ' + v.orgName + '\'s counter-surveillance capabilities exceeded assessment. Intel coverage was ' + v.intelCoverage + '% — ' + (v.intelCoverage < 50 ? 'inadequate pre-operational intelligence likely contributed to detection.' : 'despite reasonable intelligence, the target\'s tradecraft proved superior.') + ' All targets are now aware of federal interest and have gone dark. Recommend stand-down period and alternative approaches.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -1116,24 +1857,42 @@ DEBRIEF_GENERATORS.ARREST_OPERATION = function(op, v, success) {
   var entries = [];
   var targetCount = randInt(1, 4);
 
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Federal arrest warrants issued for ' + targetCount + ' ' + v.orgName + ' operatives in ' + v.city + ', United States. ' + v.primaryAsset + ' designated as arresting agency. Charges: ' + pick(['material support for terrorism (18 USC 2339A)', 'conspiracy to use weapons of mass destruction (18 USC 2332a)', 'seditious conspiracy (18 USC 2384)', 'interstate transportation of stolen property and fraud']) + '.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Surveillance confirms target(s) at expected location. Tactical arrest team assembled — ' + randInt(8, 16) + ' agents. Marked and unmarked vehicles staged. Ambulance on standby.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Final brief. Arrest plan: ' + pick(['dynamic entry at residence — SWAT support requested', 'vehicle interception during target\'s morning commute', 'controlled approach at target\'s workplace — minimal disruption', 'surround and call-out at target\'s known location']) + '. Rules of engagement: minimum force necessary.' });
+  // Pull real intel
+  var cellLocationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
+  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
+  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID');
+  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
+  var attackPlanningIntel = getIntel(v, 'ATTACK_PLANNING');
+  var targetIntentIntel = getIntel(v, 'TARGET_INTENT');
+  var supportNetworkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING');
+  var commsIntel = getIntel(v, 'INTERNAL_COMMS');
+  var guardForceIntel = getIntel(v, 'GUARD_FORCE');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var actualVehicles = (v.vehicles && v.vehicles.length > 0) ? pickItems(v.vehicles, 2) : '';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Federal arrest warrants issued for ' + (memberCountIntel ? v.orgName + ' operatives (' + memberCountIntel + ')' : targetCount + ' ' + v.orgName + ' operatives') + ' in ' + v.city + ', United States. ' + v.primaryAsset + ' designated as arresting agency. Charges: ' + pick(['material support for terrorism (18 USC 2339A)', 'conspiracy to use weapons of mass destruction (18 USC 2332a)', 'seditious conspiracy (18 USC 2384)', 'interstate transportation of stolen property and fraud']) + '.' + (leadershipIntel ? ' Primary target: ' + leadershipIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: 'Surveillance confirms target(s) at expected location. ' + (cellLocationIntel ? 'Target location: ' + cellLocationIntel + '. ' : '') + 'Tactical arrest team assembled — ' + (v.totalPersonnel ? v.totalPersonnel + ' personnel' : randInt(8, 16) + ' agents') + '. ' + (actualVehicles ? 'Vehicles: ' + actualVehicles + '. ' : 'Marked and unmarked vehicles staged. ') + 'Ambulance on standby.' + (guardForceIntel ? ' Subject threat assessment: ' + guardForceIntel + '.' : '') + (weaponsCacheIntel ? ' Weapons intel: ' + weaponsCacheIntel + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Final brief. Arrest plan: ' + pick(['dynamic entry at residence — SWAT support requested', 'vehicle interception during target\'s morning commute', 'controlled approach at target\'s workplace — minimal disruption', 'surround and call-out at target\'s known location']) + '. Rules of engagement: minimum force necessary.' + (actualGear ? ' Team loadout: ' + actualGear + '.' : '') + (attackPlanningIntel ? ' Attack planning context: ' + attackPlanningIntel + '.' : '') + ' Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: pick(LE_ENTRY) + ' Target(s) detained without incident. Miranda rights administered. ' + targetCount + ' of ' + targetCount + ' subjects in federal custody.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'normal', text: 'Incident search conducted pursuant to arrest. Recovered: ' + pick(DEBRIEF_EVIDENCE) + '. All items tagged and photographed for chain of custody.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Subjects transported to federal holding facility. Initial processing complete. Legal counsel notified. Magistrate hearing scheduled within 24 hours.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: pick(LE_ENTRY) + ' Target(s) detained without incident. Miranda rights administered. ' + targetCount + ' of ' + targetCount + ' subjects in federal custody.' + (commsIntel ? ' Subjects\' phones seized — communications already monitored: ' + commsIntel + '.' : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'normal', text: 'Incident search conducted pursuant to arrest. Recovered: ' + pick(DEBRIEF_EVIDENCE) + '. All items tagged and photographed for chain of custody.' + (supportNetworkIntel ? ' Network intel confirmed: ' + supportNetworkIntel + '.' : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Subjects transported to federal holding facility. Initial processing complete. Legal counsel notified. Magistrate hearing scheduled within 24 hours.' + (targetIntentIntel ? ' Intent assessment confirmed: ' + targetIntentIntel + '.' : '') });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'No injuries to any party. Media statement prepared jointly with US Attorney\'s office. Operation documented in compliance with DOJ use-of-force reporting requirements.' });
   } else {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Arrest team approached target location. ' + pick(DEBRIEF_COMPROMISE) + '.' });
+    var gapAnalysis = '';
+    if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+      var gaps = v._unrevealedIntel.slice(0, 2).map(function(f) { return f.label; }).join(' and ');
+      gapAnalysis = ' Intelligence gaps in ' + gaps + ' contributed to the operational failure.';
+    }
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Arrest team approached target location. ' + pick(DEBRIEF_COMPROMISE) + '.' + gapAnalysis });
     entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'failure', text: pick(['Target barricaded inside residence. Armed standoff ensued — negotiators called to scene. After ' + randInt(4, 12) + ' hours, target surrendered but had destroyed all physical evidence inside', 'Target fled on foot. Pursuit through ' + pick(DOMESTIC_LOCATIONS) + '. Lost contact after ' + randInt(5, 15) + ' minutes. Target remains at large', 'Target resisted arrest — altercation resulted in injuries to ' + randInt(1, 2) + ' agents and the subject. Use-of-force investigation automatically triggered. Subject hospitalized']) + '.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'Only ' + randInt(0, Math.max(0, targetCount - 1)) + ' of ' + targetCount + ' targets successfully arrested. Remaining subjects are fugitives. BOLO issued to all field offices and international partners.' });
   }
 
   var assessment = success ?
-    'Arrest operation against ' + v.orgName + ' in ' + v.city + ' completed successfully. All ' + targetCount + ' subjects in custody. Evidence preserved. Prosecution timeline on track. Operation conducted within constitutional requirements.' :
-    'Arrest operation partially failed. Key subject(s) evaded custody. Vigil recommends fugitive task force activation and enhanced surveillance on known associates. The failed arrest will alert the wider ' + v.orgName + ' network.';
+    'Arrest operation against ' + v.orgName + ' in ' + v.city + ' completed successfully. All ' + targetCount + ' subjects in custody. Evidence preserved. Intel coverage: ' + v.intelCoverage + '%. Prosecution timeline on track. Operation conducted within constitutional requirements.' + (v.confidence ? ' Vigil confidence was ' + v.confidence + '%.' : '') :
+    'Arrest operation partially failed. Key subject(s) evaded custody. Intel coverage was ' + v.intelCoverage + '% — ' + (v.intelCoverage < 50 ? 'insufficient pre-arrest intelligence likely allowed targets to anticipate the operation.' : 'despite adequate intelligence, operational execution fell short.') + ' Vigil recommends fugitive task force activation and enhanced surveillance on known associates. The failed arrest will alert the wider ' + v.orgName + ' network.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
@@ -1145,8 +1904,24 @@ DEBRIEF_GENERATORS.ARREST_OPERATION = function(op, v, success) {
 DEBRIEF_GENERATORS.EXPIRED = function(op, v, success) {
   var entries = [];
 
-  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' as an active threat in ' + v.city + ', ' + v.country + '. Threat level assessed at ' + v.threatLevel + '/5. Intelligence package compiled and forwarded for operator review.' });
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil completed threat analysis and generated operational recommendations. ' + (op.options ? op.options.length : 'Multiple') + ' viable courses of action presented to the operator. Operational window established: ' + (op.urgencyHours || '48') + ' hours.' });
+  // Build intel context for expired ops
+  var revealedCount = v._revealedIntel ? v._revealedIntel.length : 0;
+  var totalCount = (v._revealedIntel ? v._revealedIntel.length : 0) + (v._unrevealedIntel ? v._unrevealedIntel.length : 0);
+  var coverageStr = totalCount > 0 ? ' (' + v.intelCoverage + '% coverage — ' + revealedCount + ' of ' + totalCount + ' fields collected)' : '';
+
+  entries.push({ time: dayLabel(-3) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil intelligence identified ' + v.orgName + ' as an active threat in ' + v.city + ', ' + v.country + '. Threat level assessed at ' + v.threatLevel + '/5. ' + (v.threatLabel ? 'Classification: ' + v.threatLabel + '. ' : '') + 'Intelligence package compiled and forwarded for operator review' + coverageStr + '.' });
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil completed threat analysis and generated operational recommendations. ' + (op.options ? op.options.length : 'Multiple') + ' viable courses of action presented to the operator. Operational window established: ' + (op.urgencyHours || '48') + ' hours.' + (v.threatUrgent ? ' This was flagged as URGENT intelligence.' : '') });
+
+  // Show what intel was collected before expiry
+  if (revealedCount > 0 && v._revealedIntel) {
+    var intelSummary = v._revealedIntel.slice(0, 3).map(function(f) { return f.label; }).join(', ');
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-12), type: 'normal', text: 'Intelligence collected prior to expiry: ' + intelSummary + (revealedCount > 3 ? ' and ' + (revealedCount - 3) + ' additional fields' : '') + '. This intelligence is now stale and may require re-verification.' });
+  }
+  if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+    var gapSummary = v._unrevealedIntel.slice(0, 3).map(function(f) { return f.label; }).join(', ');
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-6), type: 'normal', text: 'Intelligence gaps at time of expiry: ' + gapSummary + '. These fields were never collected — operator did not deploy collection assets or commit to direct action.' });
+  }
+
   entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil issued reminder: operational window for ' + v.orgName + ' is closing. Deployment options remain available. No operator response received.' });
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'failure', text: 'Operational window EXPIRED. No assets were deployed. No action was taken against ' + v.orgName + '. The target has moved beyond the reach of previously recommended options.' });
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'failure', text: v.orgName + ' remains operational in ' + v.city + ', ' + v.country + '. Vigil\'s intelligence collection on the target will continue, but the window for direct action at the recommended confidence levels has passed.' });
@@ -1158,8 +1933,10 @@ DEBRIEF_GENERATORS.EXPIRED = function(op, v, success) {
     'the target has gone dark. Communications ceased, known locations abandoned. Vigil has lost the thread.',
   ]) });
 
-  var assessment = 'Operation ' + v.codename + ' expired without action. The operator was presented with viable options and chose not to deploy. ' +
-    v.orgName + ' remains an active threat in the ' + (v.theater || 'unknown') + ' theater. ' +
+  var assessment = 'Operation ' + v.codename + ' expired without action. ' +
+    (v.intelCoverage >= 70 ? 'Vigil had achieved ' + v.intelCoverage + '% intelligence coverage — more than sufficient for confident action. ' : 'Intelligence coverage was at ' + v.intelCoverage + '%. ') +
+    'The operator was presented with ' + (op.options ? op.options.length : 'multiple') + ' viable options and chose not to deploy. ' +
+    v.orgName + ' (' + (v.threatLabel || 'unknown type') + ') remains an active threat in the ' + (v.theater || 'unknown') + ' theater. ' +
     'Vigil notes that inaction carries consequences equal to failed action — threats do not resolve themselves. ' +
     'This operational lapse has been recorded in the operator\'s performance file.';
 

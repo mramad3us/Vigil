@@ -443,6 +443,28 @@
     var option = op.options[op.selectedOptionIdx];
     var transitStr = option ? formatTransitTime(option.transitTimeMinutes) : '?';
 
+    // --- Asset tactical details ---
+    var allEquipment = [];
+    var allVehicles = [];
+    var allDesignations = [];
+    var totalPersonnel = 0;
+    var hasCovert = false;
+    var hasOvert = false;
+    var highestReadiness = '';
+    var assetCats = {};
+    for (var j = 0; j < assets.length; j++) {
+      var aa = assets[j];
+      if (aa.equipment) allEquipment = allEquipment.concat(aa.equipment);
+      if (aa.vehicles) allVehicles = allVehicles.concat(aa.vehicles);
+      if (aa.designation) allDesignations.push(aa.designation);
+      if (aa.personnel) totalPersonnel += aa.personnel;
+      if (aa.deniability === 'COVERT') hasCovert = true;
+      if (aa.deniability === 'OVERT') hasOvert = true;
+      if (aa.readiness === 'TIER_1') highestReadiness = 'TIER_1';
+      else if (aa.readiness === 'TIER_2' && highestReadiness !== 'TIER_1') highestReadiness = 'TIER_2';
+      assetCats[aa.category] = (assetCats[aa.category] || 0) + 1;
+    }
+
     return {
       city: op.location.city,
       country: op.location.country,
@@ -460,6 +482,15 @@
       operationType: op.operationType,
       primaryAsset: assetNames[0] || 'deployed forces',
       primaryBase: baseNames[0] || 'forward operating base',
+      // Tactical details
+      equipment: allEquipment,
+      vehicles: allVehicles,
+      designations: allDesignations,
+      totalPersonnel: totalPersonnel,
+      hasCovert: hasCovert,
+      hasOvert: hasOvert,
+      readiness: highestReadiness,
+      assetCats: assetCats,
     };
   };
 

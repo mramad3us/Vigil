@@ -438,6 +438,21 @@ var ASSET_TEMPLATES = [
     unitComposition: '8 aircraft, loadmasters, aerial port squadron detachment, airdrop rigging teams',
   },
 
+  {
+    type: 'B21_RAIDER', name: 'B-21 Raider Wing', category: 'AIR', deniability: 'OVERT',
+    homeBaseId: 'ELLSWORTH', speed: 1000,
+    capabilities: ['STRIKE', 'ISR'],
+    collectionProfile: { IMAGERY: 2, ISR: 1 },
+    designation: '420th Flight Test Squadron (Operational)',
+    personnel: 250,
+    readiness: 'FULL',
+    platform: 'Next-Gen Stealth Bomber',
+    vehicles: ['4x B-21 Raider'],
+    equipment: ['AESA radar with LPI/LPD modes', 'open mission systems architecture', 'JDAM (internal bays)', 'GBU-57A/B Massive Ordnance Penetrator', 'AGM-158B JASSM-ER', 'hypersonic strike capability (planned)', 'advanced EW suite', 'integrated sensor package'],
+    description: 'Next-generation stealth bomber designed to penetrate the most advanced integrated air defense systems on Earth. Low-observable across all bands — radar, infrared, visual, electromagnetic. Capable of delivering both conventional and nuclear ordnance from intercontinental range. The B-2\'s successor.',
+    unitComposition: '4 operational bombers, mission planning cell, low-observable maintenance teams, STRATCOM liaison',
+  },
+
   // ======================= ISR =======================
   {
     type: 'MQ9_FLIGHT_ME', name: 'MQ-9 Reaper Flight (ME)', category: 'ISR', deniability: 'OVERT',
@@ -508,6 +523,77 @@ var ASSET_TEMPLATES = [
     equipment: ['AEELS electronic intelligence system', 'Real-Time Information in the Cockpit (RTIC)', 'satellite communications relay', 'automated ELINT analysis', 'cyber exploitation payload (classified)', 'threat warning receivers'],
     description: 'Strategic signals intelligence platform providing real-time electronic intelligence to theater and national-level consumers. On-board analysts detect, identify, and geolocate signals of interest across an entire theater of operations. The aircraft the adversary fears most.',
     unitComposition: '2 aircraft, 32-person mission crews per aircraft, signals intelligence analysts, electronic warfare officers, linguists',
+  },
+
+  {
+    type: 'U2_DRAGON', name: 'U-2S Dragon Lady Flight', category: 'ISR', deniability: 'OVERT',
+    homeBaseId: 'KADENA', speed: 690,
+    capabilities: ['ISR', 'SIGINT'],
+    collectionProfile: { IMAGERY: 5, ISR: 5, SIGINT: 3 },
+    designation: '5th Reconnaissance Squadron',
+    personnel: 80,
+    readiness: 'FULL',
+    platform: 'Ultra-High-Altitude Reconnaissance',
+    vehicles: ['3x U-2S Dragon Lady'],
+    equipment: ['SYERS-2C multispectral imagery sensor', 'ASARS-2A synthetic aperture radar', 'Senior Span SATCOM datalink', 'Senior Glass SIGINT system', 'Optical Bar Camera (OBC)', 'ELINT collection suite', 'real-time datalink to ground stations'],
+    description: 'Ultra-high-altitude reconnaissance platform operating above 70,000 feet — beyond the reach of most air defense systems. Each aircraft carries a 5,000 lb sensor payload providing imagery, SIGINT, and radar collection simultaneously. No satellite can match its persistence and resolution over a denied area.',
+    unitComposition: '3 aircraft, mobile processing stations, life support for pressure suits, maintenance crews trained on unique airframe',
+  },
+  {
+    type: 'E8C_JSTARS', name: 'E-8C JSTARS', category: 'ISR', deniability: 'OVERT',
+    homeBaseId: 'RAMSTEIN', speed: 850,
+    capabilities: ['ISR'],
+    collectionProfile: { IMAGERY: 3, ISR: 5 },
+    designation: '116th Air Control Wing Detachment',
+    personnel: 100,
+    readiness: 'FULL',
+    platform: 'Ground Surveillance / Battle Management',
+    vehicles: ['2x E-8C Joint STARS'],
+    equipment: ['AN/APY-7 side-looking radar', 'moving target indicator (MTI) mode', 'synthetic aperture radar (SAR) mode', 'JTIDS/Link 16 datalink', 'secure communications suite', 'mission crew workstations (18 per aircraft)'],
+    description: 'Airborne ground surveillance and battle management platform. The AN/APY-7 radar tracks every moving vehicle across an area the size of a country from standoff range. Each aircraft carries 18 mission crew operators analyzing ground movement in real-time. The eye that never blinks over the battlefield.',
+    unitComposition: '2 aircraft, 18-person mission crews per aircraft, ground analysis element, communications relay team',
+  },
+  {
+    type: 'P8A_POSEIDON', name: 'P-8A Poseidon Squadron', category: 'ISR', deniability: 'OVERT',
+    homeBaseId: 'SIGONELLA', speed: 900,
+    capabilities: ['ISR', 'STRIKE'],
+    collectionProfile: { IMAGERY: 4, ISR: 4, SIGINT: 2 },
+    designation: 'Patrol Squadron (VP) Detachment',
+    personnel: 120,
+    readiness: 'FULL',
+    platform: 'Maritime Patrol / ASW',
+    vehicles: ['4x P-8A Poseidon'],
+    equipment: ['AN/APY-10 maritime surveillance radar', 'MX-20HD EO/IR turret', 'sonobuoy dispensers (120 per aircraft)', 'AGM-84D Harpoon anti-ship missiles', 'Mk 54 lightweight torpedoes', 'AN/ALQ-240 EW suite', 'Link 16 / BAMS-D datalink'],
+    description: 'Maritime patrol and anti-submarine warfare squadron with secondary ISR and strike capability. Each P-8A covers 600,000 square miles of ocean per sortie. Tracks surface vessels, submarines, and coastal activity. Critical for maritime interdiction and naval threat awareness.',
+    unitComposition: '4 aircraft with 9-person crews, mission systems operators, tactical support center, sonobuoy analysis cell',
+  },
+  {
+    type: 'RQ170_SENTINEL', name: 'RQ-170 Sentinel Flight', category: 'ISR', deniability: 'COVERT',
+    homeBaseId: 'CREECH', speed: 460,
+    capabilities: ['ISR', 'SIGINT', 'CYBER'],
+    collectionProfile: { IMAGERY: 5, ISR: 5, SIGINT: 4, CYBER: 2 },
+    designation: '30th Reconnaissance Squadron (Classified)',
+    personnel: 40,
+    readiness: 'TIER_1',
+    platform: 'Stealth ISR UAS',
+    vehicles: ['3x RQ-170 Sentinel'],
+    equipment: ['AESA radar (classified)', 'full-spectrum SIGINT collection suite', 'electro-optical/infrared sensors', 'stealth airframe (all-aspect low observable)', 'SATCOM relay (LPI)', 'onboard signals processing', 'real-time intelligence dissemination'],
+    description: 'Stealth unmanned surveillance platform designed for operation over denied airspace. Low-observable design allows penetration of advanced air defense networks undetected. Provides SIGINT, IMAGERY, and CYBER collection from inside territory where no other platform can operate. The "Beast of Kandahar."',
+    unitComposition: '3 airframes (classified), ground control element, signals exploitation team, maintenance cell with Top Secret clearance',
+  },
+  {
+    type: 'CIA_AIR_BRANCH', name: 'CIA Air Branch Detachment', category: 'ISR', deniability: 'COVERT',
+    homeBaseId: 'CIA_CAIRO', speed: 500,
+    capabilities: ['ISR', 'INTEL'],
+    collectionProfile: { IMAGERY: 4, ISR: 3, HUMINT: 2, SIGINT: 2 },
+    designation: 'Special Activities Center — Air Branch',
+    personnel: 20,
+    readiness: 'TIER_1',
+    platform: 'Covert Aerial ISR',
+    vehicles: ['2x modified Beechcraft King Air 350ER', '1x Pilatus PC-12 (ISR configured)'],
+    equipment: ['belly-mounted EO/IR turret (concealed)', 'SIGINT collection pod (disguised)', 'covert communications relay', 'full-motion video with encrypted downlink', 'Stingray cellular intercept (airborne)', 'non-attributable registration and markings'],
+    description: 'CIA\'s covert aerial intelligence collection element operating modified civilian aircraft with concealed sensor suites. Flies under commercial cover with non-attributable registration. Provides persistent ISR in environments where military platforms would be provocative or compromising. Plausible deniability is inherent.',
+    unitComposition: 'Contract pilots (4), sensor operators (4), SIGINT analysts (4), maintenance (4), logistics/cover management (4)',
   },
 
   // ======================= INTEL =======================
@@ -853,6 +939,7 @@ var FORCE_STRUCTURE = {
   CREECH: [
     { type: 'MQ9_FLIGHT_ME', count: 2 },
     { type: 'RQ4_FLIGHT', count: 2 },
+    { type: 'RQ170_SENTINEL', count: 2 },
     { type: 'B2_WING', count: 1 },
   ],
   FORT_MEADE: [
@@ -894,6 +981,7 @@ var FORCE_STRUCTURE = {
   ],
   ELLSWORTH: [
     { type: 'B1B_SQN', count: 2 },
+    { type: 'B21_RAIDER', count: 1 },
     { type: 'KC135_SQN', count: 1 },
   ],
   TRAVIS: [
@@ -918,6 +1006,7 @@ var FORCE_STRUCTURE = {
   RAMSTEIN: [
     { type: 'F35_SQN_EU', count: 2 },
     { type: 'MQ9_FLIGHT_ME', count: 1 },
+    { type: 'E8C_JSTARS', count: 1 },
     { type: 'KC135_SQN', count: 1 },
     { type: 'C17_SQN', count: 1 },
   ],
@@ -932,6 +1021,7 @@ var FORCE_STRUCTURE = {
   CIA_LONDON: [
     { type: 'CIA_SAD_EU', count: 2 },
     { type: 'CIA_CASE_TEAM_1', count: 2 },
+    { type: 'CIA_AIR_BRANCH', count: 1 },
     { type: 'AMBASSADOR_EU', count: 1 },
     { type: 'CIA_POLITICAL_OFC', count: 1 },
     { type: 'DEFENSE_ATTACHE', count: 1 },
@@ -970,6 +1060,7 @@ var FORCE_STRUCTURE = {
   SIGONELLA: [
     { type: 'MQ9_FLIGHT_ME', count: 2 },
     { type: 'RQ4_FLIGHT', count: 1 },
+    { type: 'P8A_POSEIDON', count: 2 },
   ],
   NAPLES: [
     { type: 'DDG_SQUADRON', count: 1 },
@@ -1003,6 +1094,7 @@ var FORCE_STRUCTURE = {
   CIA_CAIRO: [
     { type: 'CIA_SAD_ME', count: 2 },
     { type: 'CIA_CASE_TEAM_2', count: 2 },
+    { type: 'CIA_AIR_BRANCH', count: 1 },
     { type: 'AMBASSADOR_ME', count: 1 },
     { type: 'CIA_POLITICAL_OFC', count: 1 },
     { type: 'DEFENSE_ATTACHE', count: 1 },
@@ -1046,6 +1138,7 @@ var FORCE_STRUCTURE = {
     { type: 'F35_SQN_PAC', count: 2 },
     { type: 'MQ9_FLIGHT_AF', count: 1 },
     { type: 'RQ4_FLIGHT', count: 1 },
+    { type: 'U2_DRAGON', count: 2 },
     { type: 'F15E_SQN', count: 1 },
     { type: 'KC135_SQN', count: 1 },
   ],
