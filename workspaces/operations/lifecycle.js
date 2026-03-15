@@ -392,7 +392,23 @@
     if (!op) return;
     if (op.status === 'EXECUTING' || op.status === 'ASSETS_IN_TRANSIT') return;
 
-    if (!confirm('CANCEL OPERATION ' + op.codename + '?\n\nThis will permanently archive the operation. The underlying threat will remain active. Viability will decrease by 1%.')) return;
+    var bodyHtml =
+      '<p style="color:var(--text);line-height:1.7;margin-bottom:var(--sp-4)">' +
+        'This will permanently archive <span style="color:var(--text-hi);font-weight:600">' + op.codename + '</span>. ' +
+        'The underlying threat will remain active and may escalate. Viability will decrease by 1%.' +
+      '</p>' +
+      '<div style="display:flex;gap:var(--sp-2);justify-content:flex-end">' +
+        '<button class="modal-btn" onclick="hideModal()" style="min-width:100px">ABORT</button>' +
+        '<button class="modal-btn modal-btn-primary" onclick="confirmCancelOperation(\'' + opId + '\')" style="min-width:100px;background:var(--red);border-color:var(--red)">CONFIRM CANCEL</button>' +
+      '</div>';
+
+    showModal('CANCEL OPERATION', bodyHtml);
+  };
+
+  window.confirmCancelOperation = function(opId) {
+    hideModal();
+    var op = getOp(opId);
+    if (!op) return;
 
     op.status = 'ARCHIVED';
     V.resources.viability = clamp(V.resources.viability - 1, 0, 100);
