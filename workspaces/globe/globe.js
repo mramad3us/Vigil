@@ -282,6 +282,30 @@
       }
     }
 
+    if (type === 'conflict' || type === 'conflictzone') {
+      var conflictId = id;
+      var conflict = null;
+      if (V.conflicts) {
+        for (var ci = 0; ci < V.conflicts.length; ci++) {
+          if (V.conflicts[ci].id === conflictId) { conflict = V.conflicts[ci]; break; }
+        }
+      }
+      if (conflict) {
+        title = '⚠ ' + conflict.typeLabel;
+        typeLabel = 'REGIONAL CONFLICT · ' + (THEATERS[conflict.theaterId] ? THEATERS[conflict.theaterId].name : conflict.theaterId);
+        var daysActive = V.time.day - conflict.startDay;
+        var daysLeft = conflict.maxDuration - daysActive;
+        detail = '<div class="globe-info-detail-grid">' +
+          '<span class="globe-info-key">LOCATION</span><span class="globe-info-val">' + conflict.hotZone.city + ', ' + conflict.hotZone.country + '</span>' +
+          '<span class="globe-info-key">COUNTRIES</span><span class="globe-info-val">' + conflict.countries.join(', ') + '</span>' +
+          '<span class="globe-info-key">RADIUS</span><span class="globe-info-val">' + (conflict.hotZone.radiusKm || 200) + ' km</span>' +
+          '<span class="globe-info-key">ACTIVE</span><span class="globe-info-val">' + daysActive + ' days</span>' +
+          '<span class="globe-info-key">EST. REMAINING</span><span class="globe-info-val" style="color:var(--red)">' + Math.max(0, daysLeft) + ' days</span>' +
+          '</div>';
+        action = '<button class="feed-action-btn" onclick="activateWorkspace(\'sitroom\')">VIEW IN SIT ROOM</button>';
+      }
+    }
+
     if (title) {
       info.innerHTML =
         '<div class="globe-info-title">' + title + '</div>' +

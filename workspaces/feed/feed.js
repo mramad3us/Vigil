@@ -497,7 +497,7 @@
     '</div>';
 
     // Diplomatic warning for overt deployment
-    if (threat.location && threat.location.country && threat.location.country !== 'United States') {
+    if (threat.location && threat.location.country && threat.location.country !== 'United States' && threat.location.country !== 'International Waters') {
       var deployCountry = threat.location.country;
       if (typeof getCountryStance === 'function') {
         var deployStance = getCountryStance(deployCountry);

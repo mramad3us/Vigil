@@ -486,7 +486,7 @@ function buildConsequences(op, strategy, riskLevel) {
   }
 
   // Diplomatic consequences
-  if (op.location && op.location.country && op.location.country !== 'United States' && typeof getCountryStance === 'function') {
+  if (op.location && op.location.country && op.location.country !== 'United States' && op.location.country !== 'International Waters' && typeof getCountryStance === 'function') {
     var country = op.location.country;
     var stance = getCountryStance(country);
     var perms = typeof getCountryPermissions === 'function' ? getCountryPermissions(country) : {};

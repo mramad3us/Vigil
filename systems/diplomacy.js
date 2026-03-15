@@ -373,7 +373,7 @@ function sendDiplomaticGift(country) {
     var op = data.operation;
     if (!op.location || !op.location.country) return;
     var country = op.location.country;
-    if (country === 'United States') return;
+    if (country === 'United States' || country === 'International Waters') return;
 
     // No assets were ever deployed — no diplomatic consequences
     if (!op.assignedAssetIds || op.assignedAssetIds.length === 0) return;
@@ -581,7 +581,7 @@ function getCountryPermissions(country) {
 }
 
 function canDeployOvert(country) {
-  if (country === 'United States') return true;
+  if (country === 'United States' || country === 'International Waters') return true;
   var cd = V.diplomacy[country];
   if (!cd) return false;
   var stance = deriveStance(country);

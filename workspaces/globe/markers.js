@@ -21,14 +21,14 @@ function addGlobeMarker(viewer, id, opts) {
     },
     label: opts.label ? {
       text: opts.label,
-      font: '600 12px Rajdhani, sans-serif',
-      fillColor: Cesium.Color.fromCssColorString('#b0b8c4'),
+      font: opts.labelFont || '600 12px Rajdhani, sans-serif',
+      fillColor: Cesium.Color.fromCssColorString(opts.labelColor || '#b0b8c4'),
       outlineColor: Cesium.Color.BLACK,
       outlineWidth: 2,
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      pixelOffset: new Cesium.Cartesian2(0, -14),
+      pixelOffset: new Cesium.Cartesian2(0, opts.labelOffsetY || -14),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      scale: 1.0,
+      scale: opts.labelScale || 1.0,
     } : undefined,
   });
 

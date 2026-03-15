@@ -4,6 +4,12 @@
    ============================================================ */
 
 var GLOBE_LAYERS = {
+  conflicts: {
+    label: 'Regional Conflicts',
+    color: '#ff2020',
+    visible: true,
+    tip: 'Active regional conflicts and war zones',
+  },
   threats: {
     label: 'Active Threats',
     color: '#e04040',
@@ -38,6 +44,14 @@ function toggleGlobeLayer(layerId) {
 
 function syncGlobeLayers(viewer) {
   if (!viewer) return;
+
+  // Sync conflicts
+  if (GLOBE_LAYERS.conflicts.visible) {
+    syncConflictMarkers(viewer);
+  } else {
+    removePrefixMarkers(viewer, 'conflict-');
+    removePrefixMarkers(viewer, 'conflictzone-');
+  }
 
   // Sync threats
   if (GLOBE_LAYERS.threats.visible) {
@@ -268,6 +282,61 @@ function cleanupArcs(viewer, activeAssetIds) {
       }
     }
   }
+}
+
+// --- Conflicts ---
+
+function syncConflictMarkers(viewer) {
+  if (!V.conflicts) return;
+  var activeIds = new Set();
+  var zoneIds = new Set();
+
+  var activeConflicts = typeof getActiveConflicts === 'function' ? getActiveConflicts() : [];
+
+  for (var i = 0; i < activeConflicts.length; i++) {
+    var c = activeConflicts[i];
+    if (!c.hotZone) continue;
+
+    var markerId = 'conflict-' + c.id;
+    var zoneId = 'conflictzone-' + c.id;
+    activeIds.add(markerId);
+    zoneIds.add(zoneId);
+
+    // Warning marker — large, bright red
+    if (!hasGlobeMarker(markerId)) {
+      addGlobeMarker(viewer, markerId, {
+        lat: c.hotZone.lat,
+        lon: c.hotZone.lon,
+        color: '#ff2020',
+        size: 12,
+        outlineWidth: 6,
+        label: '⚠ ' + c.typeLabel.toUpperCase(),
+        labelColor: '#ff4040',
+      });
+    }
+
+    // Danger zone circle — pulsing red ellipse around hot zone
+    if (!_globeEntities[zoneId]) {
+      var radiusMeters = (c.hotZone.radiusKm || 200) * 1000;
+      var entity = viewer.entities.add({
+        id: zoneId,
+        position: Cesium.Cartesian3.fromDegrees(c.hotZone.lon, c.hotZone.lat),
+        ellipse: {
+          semiMajorAxis: radiusMeters,
+          semiMinorAxis: radiusMeters,
+          material: Cesium.Color.fromCssColorString('#ff202018'),
+          outline: true,
+          outlineColor: Cesium.Color.fromCssColorString('#ff2020a0'),
+          outlineWidth: 2,
+          height: 0,
+        },
+      });
+      _globeEntities[zoneId] = entity;
+    }
+  }
+
+  removeStaleMarkers(viewer, 'conflict-', activeIds);
+  removeStaleMarkers(viewer, 'conflictzone-', zoneIds);
 }
 
 // --- Helpers ---

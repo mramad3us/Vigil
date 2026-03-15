@@ -466,7 +466,7 @@
       }
 
       // Diplomatic assessment
-      if (op.location && op.location.country && op.location.country !== 'United States' && typeof getCountryStance === 'function') {
+      if (op.location && op.location.country && op.location.country !== 'United States' && op.location.country !== 'International Waters' && typeof getCountryStance === 'function') {
         var opCountry = op.location.country;
         var opStance = getCountryStance(opCountry);
         var opPerms = typeof getCountryPermissions === 'function' ? getCountryPermissions(opCountry) : {};

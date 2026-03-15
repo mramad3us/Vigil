@@ -445,7 +445,7 @@ function spawnThreat(theaterId, forcedTypeId) {
 
   // --- AUTO-SPAWN THREATS (theater volatility) ---
 
-  hook('tick:day', function() {
+  hook('tick:hour', function() {
     for (var tid in V.theaters) {
       var theater = V.theaters[tid];
       var defcon = theater.defcon || 5;
