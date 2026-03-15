@@ -284,41 +284,94 @@ function cleanupArcs(viewer, activeAssetIds) {
 
 // --- Conflicts ---
 
+function getTheaterBounds(theaterId) {
+  var theater = typeof getTheater === 'function' ? getTheater(theaterId) : THEATERS[theaterId];
+  if (!theater || !theater.cities || theater.cities.length === 0) return null;
+  var minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+  for (var i = 0; i < theater.cities.length; i++) {
+    var city = theater.cities[i];
+    if (city.lat < minLat) minLat = city.lat;
+    if (city.lat > maxLat) maxLat = city.lat;
+    if (city.lon < minLon) minLon = city.lon;
+    if (city.lon > maxLon) maxLon = city.lon;
+  }
+  // Include maritime locations in this theater
+  if (typeof MARITIME_LOCATIONS !== 'undefined') {
+    for (var m = 0; m < MARITIME_LOCATIONS.length; m++) {
+      if (MARITIME_LOCATIONS[m].theaterId === theaterId) {
+        var ml = MARITIME_LOCATIONS[m];
+        if (ml.lat < minLat) minLat = ml.lat;
+        if (ml.lat > maxLat) maxLat = ml.lat;
+        if (ml.lon < minLon) minLon = ml.lon;
+        if (ml.lon > maxLon) maxLon = ml.lon;
+      }
+    }
+  }
+  // Pad bounds generously
+  var latPad = Math.max(3, (maxLat - minLat) * 0.2);
+  var lonPad = Math.max(4, (maxLon - minLon) * 0.2);
+  return {
+    minLat: minLat - latPad, maxLat: maxLat + latPad,
+    minLon: minLon - lonPad, maxLon: maxLon + lonPad,
+  };
+}
+
 function syncConflictMarkers(viewer) {
   if (!V.conflicts) return;
   var activeIds = new Set();
 
   for (var i = 0; i < V.conflicts.length; i++) {
     var c = V.conflicts[i];
-    if (!c.active || !c.hotZone) continue;
-    var markerId = 'conflict-' + c.id;
-    activeIds.add(markerId);
+    if (!c.active) continue;
 
-    if (!hasGlobeMarker(markerId)) {
-      var entity = viewer.entities.add({
-        id: markerId,
-        position: Cesium.Cartesian3.fromDegrees(c.hotZone.lon, c.hotZone.lat),
-        ellipse: {
-          semiMinorAxis: c.hotZone.radiusKm * 1000,
-          semiMajorAxis: c.hotZone.radiusKm * 1000,
-          material: Cesium.Color.fromCssColorString('#e0404030'),
+    var overlayId = 'conflict-overlay-' + c.id;
+    var labelId = 'conflict-label-' + c.id;
+    activeIds.add(overlayId);
+    activeIds.add(labelId);
+
+    if (!hasGlobeMarker(overlayId)) {
+      var bounds = getTheaterBounds(c.theaterId);
+      if (!bounds) continue;
+
+      // Theater-spanning transparent red polygon
+      var positions = Cesium.Cartesian3.fromDegreesArray([
+        bounds.minLon, bounds.minLat,
+        bounds.maxLon, bounds.minLat,
+        bounds.maxLon, bounds.maxLat,
+        bounds.minLon, bounds.maxLat,
+      ]);
+
+      var overlay = viewer.entities.add({
+        id: overlayId,
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(positions),
+          material: Cesium.Color.fromCssColorString('#e04040').withAlpha(0.08),
           outline: true,
-          outlineColor: Cesium.Color.fromCssColorString('#e04040'),
+          outlineColor: Cesium.Color.fromCssColorString('#e04040').withAlpha(0.4),
           outlineWidth: 1,
-        },
-        label: {
-          text: c.typeLabel,
-          font: '10px monospace',
-          fillColor: Cesium.Color.fromCssColorString('#e04040'),
-          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-          outlineWidth: 2,
-          outlineColor: Cesium.Color.BLACK,
-          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-          pixelOffset: new Cesium.Cartesian2(0, -10),
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          classificationType: Cesium.ClassificationType.BOTH,
         },
       });
-      _globeEntities[markerId] = entity;
+      _globeEntities[overlayId] = overlay;
+
+      // Label at center of bounds
+      var centerLat = (bounds.minLat + bounds.maxLat) / 2;
+      var centerLon = (bounds.minLon + bounds.maxLon) / 2;
+      var label = viewer.entities.add({
+        id: labelId,
+        position: Cesium.Cartesian3.fromDegrees(centerLon, centerLat),
+        label: {
+          text: '⚠ ' + c.typeLabel.toUpperCase(),
+          font: '11px monospace',
+          fillColor: Cesium.Color.fromCssColorString('#e04040'),
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 3,
+          outlineColor: Cesium.Color.BLACK,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          scaleByDistance: new Cesium.NearFarScalar(1e6, 1.0, 2e7, 0.4),
+        },
+      });
+      _globeEntities[labelId] = label;
     }
   }
 
