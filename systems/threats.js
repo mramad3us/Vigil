@@ -89,6 +89,10 @@ function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
 // ===================================================================
 
 function spawnThreat(theaterId, forcedTypeId) {
+  // Resolve location first so we know the theater for type filtering
+  var loc = theaterId ? generateLocationInTheater(theaterId) : generateRandomLocation();
+  var effectiveTheater = theaterId || (loc && loc.theaterId) || null;
+
   var type;
   if (forcedTypeId) {
     // Check both pools for the forced type
@@ -100,9 +104,9 @@ function spawnThreat(theaterId, forcedTypeId) {
   if (!type) {
     // Filter threat types to those valid for this theater
     var eligible = THREAT_TYPES;
-    if (theaterId) {
+    if (effectiveTheater) {
       eligible = THREAT_TYPES.filter(function(t) {
-        return !t.theaters || t.theaters.indexOf(theaterId) >= 0;
+        return !t.theaters || t.theaters.indexOf(effectiveTheater) >= 0;
       });
     }
     if (eligible.length === 0) eligible = THREAT_TYPES; // Fallback
@@ -111,12 +115,9 @@ function spawnThreat(theaterId, forcedTypeId) {
 
   // Military/strategic targets must only spawn in AT_WAR countries
   var isMilitaryType = (type.id === 'MILITARY_TARGET' || type.id === 'STRATEGIC_TARGET');
-  var loc;
-  if (isMilitaryType && theaterId) {
-    loc = generateLocationInAtWarCountry(theaterId);
+  if (isMilitaryType && effectiveTheater) {
+    loc = generateLocationInAtWarCountry(effectiveTheater);
     if (!loc) return null; // No AT_WAR countries in theater — skip spawn
-  } else {
-    loc = theaterId ? generateLocationInTheater(theaterId) : generateRandomLocation();
   }
 
   // Maritime spawn for eligible threat types
