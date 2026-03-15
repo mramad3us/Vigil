@@ -14,15 +14,21 @@
    ============================================================ */
 
 var THREAT_TYPES = [
+  // Global threats — can occur in any theater
   { id: 'TERROR_CELL', label: 'Terror Cell', weight: 3, threatRange: [3, 5] },
   { id: 'STATE_ACTOR', label: 'State Actor', weight: 2, threatRange: [4, 5] },
   { id: 'CYBER_GROUP', label: 'Cyber Threat Group', weight: 3, threatRange: [2, 4] },
-  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4], canBeMaritime: true },
-  { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5] },
-  { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5] },
-  { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
   { id: 'HVT_TARGET', label: 'High-Value Target', weight: 2, threatRange: [3, 5] },
   { id: 'ASSET_COMPROMISED', label: 'Compromised Asset', weight: 1, threatRange: [3, 5] },
+  { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
+
+  // Region-restricted threats
+  { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5],
+    theaters: ['MIDDLE_EAST', 'SOUTH_ASIA', 'AFRICA', 'LATIN_AMERICA'] },
+  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4], canBeMaritime: true,
+    theaters: ['LATIN_AMERICA', 'AFRICA', 'EAST_ASIA', 'MIDDLE_EAST', 'EUROPE'] },
+  { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5],
+    theaters: ['MIDDLE_EAST', 'EAST_ASIA', 'SOUTH_ASIA', 'RUSSIA_CIS'] },
 ];
 
 // Military/strategic targets are DEFCON-1-only — never in the general weighted pool.
@@ -91,7 +97,17 @@ function spawnThreat(theaterId, forcedTypeId) {
       if (allTypes[ti].id === forcedTypeId) { type = allTypes[ti]; break; }
     }
   }
-  if (!type) type = weightedPick(THREAT_TYPES);
+  if (!type) {
+    // Filter threat types to those valid for this theater
+    var eligible = THREAT_TYPES;
+    if (theaterId) {
+      eligible = THREAT_TYPES.filter(function(t) {
+        return !t.theaters || t.theaters.indexOf(theaterId) >= 0;
+      });
+    }
+    if (eligible.length === 0) eligible = THREAT_TYPES; // Fallback
+    type = weightedPick(eligible);
+  }
 
   // Military/strategic targets must only spawn in AT_WAR countries
   var isMilitaryType = (type.id === 'MILITARY_TARGET' || type.id === 'STRATEGIC_TARGET');

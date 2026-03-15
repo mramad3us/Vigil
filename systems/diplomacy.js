@@ -192,6 +192,8 @@ function proposeCeasefire(country) {
 function proposePeace(country) {
   var cd = V.diplomacy[country];
   if (!cd || cd.atWar) return false;
+  var hasCeasefire = cd.ceasefire && V.time.day < cd.ceasefire.expiryDay;
+  if (!hasCeasefire) return false;
   if (V.resources.intel < 25) return false;
   V.resources.intel -= 25;
   cd.peaceTreaty = { startDay: V.time.day, expiryDay: V.time.day + 90 };

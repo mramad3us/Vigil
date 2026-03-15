@@ -646,8 +646,7 @@
   function renderPeaceCard(country, cd) {
     if (cd.atWar) return '';
     var hasCeasefire = cd.ceasefire && V.time.day < cd.ceasefire.expiryDay;
-    var canPeace = hasCeasefire || cd.relations >= 20;
-    if (!canPeace) return '';
+    if (!hasCeasefire) return '';
     var disabled = V.resources.intel < 25;
     var reason = disabled ? 'Insufficient intel (25 required)' : '';
 
