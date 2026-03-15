@@ -346,10 +346,10 @@ function syncConflictMarkers(viewer) {
         polygon: {
           hierarchy: new Cesium.PolygonHierarchy(positions),
           material: Cesium.Color.fromCssColorString('#e04040').withAlpha(0.08),
+          height: 0,
           outline: true,
           outlineColor: Cesium.Color.fromCssColorString('#e04040').withAlpha(0.4),
           outlineWidth: 1,
-          classificationType: Cesium.ClassificationType.BOTH,
         },
       });
       _globeEntities[overlayId] = overlay;
