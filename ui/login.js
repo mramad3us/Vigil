@@ -144,6 +144,11 @@ function bootSequence() {
       $('auth-callsign').focus();
     }
   }, wordmarkDelay + 1200);
+
+  // Phase 8: Government warning footer — last element drawn
+  setTimeout(function() {
+    $('login-footer').classList.add('visible');
+  }, wordmarkDelay + 1800);
 }
 
 // --- Authentication ---
@@ -322,6 +327,7 @@ window.logoutGame = function() {
     $('auth-callsign').focus();
   }
 
+  $('login-footer').classList.add('visible');
   $('screen-login').scrollTop = 0;
 };
 

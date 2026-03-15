@@ -575,4 +575,10 @@
   color: var(--text-muted);
   letter-spacing: 0.5px;
   padding: var(--sp-6) var(--sp-4) var(--sp-4);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.login-footer.visible {
+  opacity: 1;
 }
