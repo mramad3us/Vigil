@@ -40,13 +40,13 @@ function activateWorkspace(id) {
     var isActive = btns[i].dataset.workspace === id;
     btns[i].classList.toggle('active', isActive);
 
-    // Re-trigger SVG animation on the newly active tab
-    if (isActive) {
-      var svg = btns[i].querySelector('.tb-svg');
-      if (svg) {
-        svg.style.animation = 'none';
-        svg.offsetHeight; // Force reflow
-        svg.style.animation = '';
+    // Trigger per-icon multi-frame animation on the newly active tab
+    var svg = btns[i].querySelector('.tb-svg');
+    if (svg) {
+      svg.classList.remove('tb-anim');
+      if (isActive) {
+        svg.offsetHeight; // Force reflow to restart animations
+        svg.classList.add('tb-anim');
       }
     }
   }

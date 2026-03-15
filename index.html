@@ -188,37 +188,37 @@
     <footer id="taskbar">
       <div class="tb-apps">
         <button class="tb-app active" data-workspace="globe" onclick="activateWorkspace('globe')" data-tip="3D tactical globe — view bases, assets, threats, and operations worldwide. Press 1." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="7.5" /><ellipse class="tb-svg-stroke" cx="10" cy="10" rx="3" ry="7.5" /><line class="tb-svg-stroke" x1="2.5" y1="10" x2="17.5" y2="10" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="globe" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke ic-globe-shell" cx="10" cy="10" r="7.5" /><ellipse class="tb-svg-stroke ic-globe-meridian" cx="10" cy="10" rx="3" ry="7.5" /><line class="tb-svg-stroke ic-globe-equator" x1="2.5" y1="10" x2="17.5" y2="10" /><line class="tb-svg-stroke ic-globe-scan" x1="2.5" y1="10" x2="17.5" y2="10" opacity="0" /></svg></span>
           <span class="tb-label">Globe</span>
           <span class="tb-badge" id="badge-globe"></span>
         </button>
         <button class="tb-app" data-workspace="feed" onclick="activateWorkspace('feed')" data-tip="Intelligence feed — SIGINT, HUMINT, IMAGERY, and analyst reports. Press 2." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="2" /><path class="tb-svg-stroke" d="M10 4.5 A5.5 5.5 0 0 1 15.5 10" /><path class="tb-svg-stroke" d="M10 1.5 A8.5 8.5 0 0 1 18.5 10" /><line class="tb-svg-stroke" x1="10" y1="12" x2="10" y2="18" /><line class="tb-svg-stroke" x1="6" y1="18" x2="14" y2="18" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="feed" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-fill ic-feed-dot" cx="10" cy="10" r="2" /><path class="tb-svg-stroke ic-feed-wave1" d="M10 4.5 A5.5 5.5 0 0 1 15.5 10" /><path class="tb-svg-stroke ic-feed-wave2" d="M10 1.5 A8.5 8.5 0 0 1 18.5 10" /><line class="tb-svg-stroke ic-feed-mast" x1="10" y1="12" x2="10" y2="18" /><line class="tb-svg-stroke ic-feed-base" x1="6" y1="18" x2="14" y2="18" /></svg></span>
           <span class="tb-label">Intel Feed</span>
           <span class="tb-badge" id="badge-feed"></span>
         </button>
         <button class="tb-app" data-workspace="operations" onclick="activateWorkspace('operations')" data-tip="Operations board — approve deployments, monitor transit, review debriefs. Press 3." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke" points="10,1.5 17.5,5.75 17.5,14.25 10,18.5 2.5,14.25 2.5,5.75" /><circle class="tb-svg-fill" cx="10" cy="10" r="2" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="ops" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke ic-ops-hex" points="10,1.5 17.5,5.75 17.5,14.25 10,18.5 2.5,14.25 2.5,5.75" /><circle class="tb-svg-fill ic-ops-core" cx="10" cy="10" r="2" /></svg></span>
           <span class="tb-label">Operations</span>
           <span class="tb-badge" id="badge-operations"></span>
         </button>
         <button class="tb-app" data-workspace="sitroom" onclick="activateWorkspace('sitroom')" data-tip="Situation room — theater risk assessment, active crises, global overview. Press 4." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="10" r="8" /><circle class="tb-svg-stroke" cx="10" cy="10" r="4.5" /><circle class="tb-svg-fill" cx="10" cy="10" r="1.5" /><line class="tb-svg-stroke" x1="10" y1="2" x2="10" y2="5" /><line class="tb-svg-stroke" x1="10" y1="15" x2="10" y2="18" /><line class="tb-svg-stroke" x1="2" y1="10" x2="5" y2="10" /><line class="tb-svg-stroke" x1="15" y1="10" x2="18" y2="10" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="sitroom" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke ic-sit-outer" cx="10" cy="10" r="8" /><circle class="tb-svg-stroke ic-sit-inner" cx="10" cy="10" r="4.5" /><circle class="tb-svg-fill ic-sit-dot" cx="10" cy="10" r="1.5" /><line class="tb-svg-stroke ic-sit-n" x1="10" y1="2" x2="10" y2="5" /><line class="tb-svg-stroke ic-sit-s" x1="10" y1="15" x2="10" y2="18" /><line class="tb-svg-stroke ic-sit-w" x1="2" y1="10" x2="5" y2="10" /><line class="tb-svg-stroke ic-sit-e" x1="15" y1="10" x2="18" y2="10" /></svg></span>
           <span class="tb-label">Sit Room</span>
           <span class="tb-badge" id="badge-sitroom"></span>
         </button>
         <button class="tb-app" data-workspace="media" onclick="activateWorkspace('media')" data-tip="Media monitoring — international news coverage of your operations. Press 5." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><rect class="tb-svg-stroke" x="2" y="3" width="16" height="14" rx="1.5" /><line class="tb-svg-stroke" x1="2" y1="7" x2="18" y2="7" /><line class="tb-svg-stroke" x1="2" y1="11" x2="18" y2="11" /><line class="tb-svg-stroke" x1="2" y1="15" x2="12" y2="15" /><line class="tb-svg-stroke" x1="10" y1="7" x2="10" y2="17" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="media" viewBox="0 0 20 20" width="16" height="16"><rect class="tb-svg-stroke ic-media-frame" x="2" y="3" width="16" height="14" rx="1.5" /><line class="tb-svg-stroke ic-media-h1" x1="2" y1="7" x2="18" y2="7" /><line class="tb-svg-stroke ic-media-h2" x1="2" y1="11" x2="18" y2="11" /><line class="tb-svg-stroke ic-media-h3" x1="2" y1="15" x2="12" y2="15" /><line class="tb-svg-stroke ic-media-v" x1="10" y1="7" x2="10" y2="17" /></svg></span>
           <span class="tb-label">Media</span>
           <span class="tb-badge" id="badge-media"></span>
         </button>
         <button class="tb-app" data-workspace="diplomacy" onclick="activateWorkspace('diplomacy')" data-tip="Diplomatic relations — manage stances, deploy envoys, request clearances. Press 6." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke" points="10,2 16,10 10,18 4,10" /><line class="tb-svg-stroke" x1="7" y1="6" x2="13" y2="14" /><line class="tb-svg-stroke" x1="13" y1="6" x2="7" y2="14" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="diplo" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke ic-diplo-diamond" points="10,2 16,10 10,18 4,10" /><line class="tb-svg-stroke ic-diplo-x1" x1="7" y1="6" x2="13" y2="14" /><line class="tb-svg-stroke ic-diplo-x2" x1="13" y1="6" x2="7" y2="14" /></svg></span>
           <span class="tb-label">Diplomacy</span>
           <span class="tb-badge" id="badge-diplomacy"></span>
         </button>
         <button class="tb-app" data-workspace="illegals" onclick="activateWorkspace('illegals')" data-tip="Counter-espionage — detained operatives, foreign intelligence services, interrogation. Press 7." data-tip-align="top">
-          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="6" r="3.5" /><path class="tb-svg-stroke" d="M4,18 Q4,12 10,12 Q16,12 16,18" /><line class="tb-svg-stroke" x1="14" y1="4" x2="17" y2="1" /><line class="tb-svg-stroke" x1="14" y1="1" x2="17" y2="4" /></svg></span>
+          <span class="tb-icon"><svg class="tb-svg" data-icon="spy" viewBox="0 0 20 20" width="16" height="16"><!-- hat brim --><ellipse class="tb-svg-stroke ic-spy-brim" cx="10" cy="5.5" rx="6" ry="1.5" /><!-- hat crown --><path class="tb-svg-stroke ic-spy-crown" d="M6,5.5 Q6,2 10,1.5 Q14,2 14,5.5" /><!-- face shadow --><rect class="tb-svg-fill ic-spy-shadow" x="6.5" y="5.5" width="7" height="2.5" rx="0.5" opacity="0.5" /><!-- eyes (glint) --><circle class="tb-svg-fill ic-spy-eye-l" cx="8.5" cy="6.5" r="0.7" /><circle class="tb-svg-fill ic-spy-eye-r" cx="11.5" cy="6.5" r="0.7" /><!-- collar --><path class="tb-svg-stroke ic-spy-collar" d="M7,8.5 L10,10.5 L13,8.5" /><!-- trenchcoat body --><path class="tb-svg-stroke ic-spy-coat" d="M5,8.5 L4,18.5 L8.5,18.5 L10,14 L11.5,18.5 L16,18.5 L15,8.5" /><!-- coat buttons --><circle class="tb-svg-fill ic-spy-btn1" cx="10" cy="11" r="0.5" /><circle class="tb-svg-fill ic-spy-btn2" cx="10" cy="13" r="0.5" /></svg></span>
           <span class="tb-label">Illegals</span>
           <span class="tb-badge" id="badge-illegals"></span>
         </button>
