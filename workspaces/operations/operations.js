@@ -41,16 +41,16 @@
     deactivate: function() {},
 
     render: function() {
-      // Preserve scroll position across re-renders
-      var detailEl = $('ops-detail');
-      var savedScroll = detailEl ? detailEl.scrollTop : 0;
-
       renderOpsList();
-      if (_selectedOpId) renderOpsDetail(_selectedOpId);
-
-      // Restore scroll position
-      detailEl = $('ops-detail');
-      if (detailEl && savedScroll > 0) detailEl.scrollTop = savedScroll;
+      // Skip detail re-render if op is in a terminal state (content is static)
+      // This prevents scroll position reset while reading after-action reports
+      if (_selectedOpId) {
+        var selOp = getOp(_selectedOpId);
+        var isTerminal = selOp && (selOp.status === 'SUCCESS' || selOp.status === 'FAILURE' || selOp.status === 'ARCHIVED' || selOp.status === 'EXPIRED');
+        if (!isTerminal) {
+          renderOpsDetail(_selectedOpId);
+        }
+      }
     },
   });
 
