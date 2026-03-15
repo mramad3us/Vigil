@@ -21,7 +21,7 @@ function addGlobeMarker(viewer, id, opts) {
     },
     label: opts.label ? {
       text: opts.label,
-      font: '10px Rajdhani, sans-serif',
+      font: '600 12px Rajdhani, sans-serif',
       fillColor: Cesium.Color.fromCssColorString('#b0b8c4'),
       outlineColor: Cesium.Color.BLACK,
       outlineWidth: 2,

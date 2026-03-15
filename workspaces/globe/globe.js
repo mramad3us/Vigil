@@ -56,7 +56,7 @@
             new Cesium.UrlTemplateImageryProvider({
               url: 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}@2x.png',
               credit: 'CartoDB',
-              maximumLevel: 18,
+              maximumLevel: 6,
             })
           ),
 
@@ -73,9 +73,11 @@
         _viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#040608');
         _viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0e14');
         _viewer.scene.globe.showGroundAtmosphere = false;
+        _viewer.scene.globe.maximumScreenSpaceError = 4;
         _viewer.scene.fog.enabled = false;
         _viewer.scene.sun = undefined;
         _viewer.scene.moon = undefined;
+        _viewer.resolutionScale = window.devicePixelRatio || 1;
 
         // Camera: start on North Atlantic, tilted
         _viewer.camera.setView({
