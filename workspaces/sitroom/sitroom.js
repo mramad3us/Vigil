@@ -91,17 +91,6 @@
 
     var html = '<div class="sitroom-defcon-header">THEATER DEFCON STATUS</div>';
 
-    // TEST: spawn conflict button (remove for release)
-    html += '<div style="margin:var(--sp-2) var(--sp-3);display:flex;gap:var(--sp-2);flex-wrap:wrap">';
-    var theaterKeys = Object.keys(THEATERS);
-    for (var tk = 0; tk < theaterKeys.length; tk++) {
-      var tkId = theaterKeys[tk];
-      if (tkId === 'NORTH_AMERICA') continue;
-      html += '<button style="font-family:var(--font-mono);font-size:9px;padding:4px 8px;background:var(--red);color:var(--text-hi);border:none;border-radius:3px;cursor:pointer;font-weight:700" ' +
-        'onclick="window._testSpawnConflict(\'' + tkId + '\')">⚠ CONFLICT: ' + (THEATERS[tkId].shortName) + '</button>';
-    }
-    html += '</div>';
-
     html += '<div class="defcon-cards">';
 
     for (var tid in THEATERS) {

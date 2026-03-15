@@ -157,31 +157,3 @@ function getConflictSpawnMultiplier(theaterId) {
   return conflicts.length > 0 ? 3.0 : 1.0;
 }
 
-// TEST: remove for release
-window._testSpawnConflict = function(theaterId) {
-  var types = [
-    { id: 'BORDER_WAR', label: 'Border War', weight: 3 },
-    { id: 'NAVAL_CONFRONTATION', label: 'Naval Confrontation', weight: 2 },
-    { id: 'PROXY_CONFLICT', label: 'Proxy Conflict', weight: 3 },
-    { id: 'INSURGENT_OFFENSIVE', label: 'Insurgent Offensive', weight: 2 },
-  ];
-  var type = weightedPick(types);
-  var theater = THEATERS[theaterId];
-  if (!theater) return;
-  var city = pick(theater.cities);
-  var conflict = {
-    id: uid('CONF'),
-    theaterId: theaterId,
-    type: type.id,
-    typeLabel: type.label,
-    hotZone: { lat: city.lat, lon: city.lon, radiusKm: randInt(100, 500), city: city.city, country: city.country },
-    countries: [city.country],
-    startDay: V.time.day,
-    maxDuration: randInt(14, 45),
-    active: true,
-  };
-  V.conflicts.push(conflict);
-  addLog('TEST CONFLICT: ' + type.label + ' in ' + theater.name, 'log-warn');
-  fire('conflict:spawned', { conflict: conflict });
-  if (typeof renderWorkspace === 'function') renderWorkspace('sitroom');
-};
