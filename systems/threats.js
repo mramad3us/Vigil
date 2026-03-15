@@ -17,7 +17,7 @@ var THREAT_TYPES = [
   { id: 'TERROR_CELL', label: 'Terror Cell', weight: 3, threatRange: [3, 5] },
   { id: 'STATE_ACTOR', label: 'State Actor', weight: 2, threatRange: [4, 5] },
   { id: 'CYBER_GROUP', label: 'Cyber Threat Group', weight: 3, threatRange: [2, 4] },
-  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4] },
+  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4], canBeMaritime: true },
   { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5] },
   { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
@@ -102,6 +102,29 @@ function spawnThreat(theaterId, forcedTypeId) {
   } else {
     loc = theaterId ? generateLocationInTheater(theaterId) : generateRandomLocation();
   }
+
+  // Maritime spawn for eligible threat types
+  var isMaritime = false;
+  if (type.canBeMaritime && typeof MARITIME_LOCATIONS !== 'undefined' && Math.random() < 0.45) {
+    isMaritime = true;
+    var maritimeLocs = MARITIME_LOCATIONS;
+    if (theaterId) {
+      var theaterMaritimeLocs = maritimeLocs.filter(function(m) { return m.theaterId === theaterId; });
+      if (theaterMaritimeLocs.length > 0) maritimeLocs = theaterMaritimeLocs;
+    }
+    var mLoc = pick(maritimeLocs);
+    var mTheater = getTheater(mLoc.theaterId);
+    loc = {
+      theater: mTheater,
+      theaterId: mLoc.theaterId,
+      city: mLoc.name,
+      country: 'International Waters',
+      lat: mLoc.lat,
+      lon: mLoc.lon,
+      maritime: true,
+    };
+  }
+
   var threatLevel = randInt(type.threatRange[0], type.threatRange[1]);
 
   // Expiration timer — higher threat = shorter window
@@ -142,6 +165,7 @@ function spawnThreat(theaterId, forcedTypeId) {
     spawnedAt: V.time.totalMinutes,
     expiresAt: V.time.totalMinutes + expiresIn,
     urgent: isUrgent,
+    maritime: isMaritime || (loc.maritime && type.canBeMaritime) || false,
 
     // Target info (revealed when TARGET_INTENT field is collected)
     _targetInfo: targetInfo,
@@ -184,7 +208,11 @@ function spawnThreat(theaterId, forcedTypeId) {
       'Cyber threat group operating from ' + loc.city + ', ' + loc.country + ' has been identified targeting US critical infrastructure. Attribution in progress. Intrusion vectors aimed at American defense networks, financial systems, and government communications.',
       'Vigil has detected organized cyber intrusion operations originating from ' + loc.city + ' targeting US government and defense contractor networks. Exploitation patterns consistent with state-sponsored group conducting espionage against American interests.',
     ],
-    CRIMINAL_ORG: [
+    CRIMINAL_ORG: isMaritime ? [
+      'Vigil has identified a maritime smuggling operation in the ' + loc.city + '. Vessel intercepts indicate illicit cargo bound for US ports or allied nations. Naval interdiction assets recommended.',
+      'Maritime criminal network detected operating in ' + loc.city + '. SIGINT confirms trafficking operations across international shipping lanes threatening US maritime security. Interdiction assets required.',
+      'Organized criminal activity detected in ' + loc.city + '. Pattern analysis indicates at-sea transfer operations and evasive routing to avoid maritime patrols. US-bound contraband assessed as likely.',
+    ] : [
       'Criminal organization flagged in ' + loc.city + ', ' + loc.country + '. Intelligence indicates trafficking operations threatening US national security — narcotics flowing to American cities, weapons, or human trafficking involving US-bound routes.',
       'Vigil has identified organized criminal activity in ' + loc.city + ' with direct links to US-bound operations. Scale and sophistication threaten American border security and domestic law enforcement. US citizens may be among victims.',
     ],
@@ -850,6 +878,11 @@ function spawnOperationFromThreat(threat) {
 
   var opType = pick(opTypes);
 
+  // If NAVAL_INTERDICTION was picked, force maritime flag for consistency
+  if (opType === 'NAVAL_INTERDICTION' && !threat.maritime) {
+    threat.maritime = true;
+  }
+
   var codename = generateCodename();
   var detectionDelay = randInt(2, 5); // Vigil processes near-instantly
 
@@ -918,6 +951,8 @@ function spawnOperationFromThreat(threat) {
 
     // Domestic flag
     domestic: threat.domestic || false,
+    // Maritime flag — open-ocean or port-city maritime threat
+    maritime: threat.maritime || false,
 
     // References
     relatedEventId: null,

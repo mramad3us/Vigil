@@ -59,6 +59,7 @@ function generateRandomLocation() {
         theater: theater, theaterId: theater.id,
         city: city.city, country: city.country,
         lat: city.lat, lon: city.lon,
+        maritime: city.maritime || false,
       };
     }
     attempts++;
@@ -66,7 +67,7 @@ function generateRandomLocation() {
   // Fallback — shouldn't happen
   var fallbackTheater = THEATERS.EUROPE;
   var fallbackCity = pick(fallbackTheater.cities);
-  return { theater: fallbackTheater, theaterId: 'EUROPE', city: fallbackCity.city, country: fallbackCity.country, lat: fallbackCity.lat, lon: fallbackCity.lon };
+  return { theater: fallbackTheater, theaterId: 'EUROPE', city: fallbackCity.city, country: fallbackCity.country, lat: fallbackCity.lat, lon: fallbackCity.lon, maritime: fallbackCity.maritime || false };
 }
 
 function generateTargetLocation(originCountry) {
@@ -97,6 +98,7 @@ function generateLocationInTheater(theaterId) {
     theater: theater, theaterId: theater.id,
     city: city.city, country: city.country,
     lat: city.lat, lon: city.lon,
+    maritime: city.maritime || false,
   };
 }
 
@@ -117,6 +119,7 @@ function generateLocationInAtWarCountry(theaterId) {
     theater: theater, theaterId: theater.id,
     city: city.city, country: city.country,
     lat: city.lat, lon: city.lon,
+    maritime: city.maritime || false,
   };
 }
 

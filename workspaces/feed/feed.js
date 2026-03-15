@@ -441,6 +441,15 @@
       // Domestic threats: exclude NAVY/AIR (nonsensical on US soil)
       available = available.filter(function(a) { return a.category !== 'NAVY' && a.category !== 'AIR'; });
     }
+    // Maritime filtering: NAVY only for maritime threats; USCG only for domestic port cities
+    var isMaritime = threat.maritime || false;
+    available = available.filter(function(a) {
+      if (a.category === 'NAVY' && !isMaritime) return false;
+      if (a.category === 'DOMESTIC' && a.capabilities && a.capabilities.indexOf('NAVAL') >= 0) {
+        if (!threat.domestic || !threat.location || !threat.location.maritime) return false;
+      }
+      return true;
+    });
 
     if (available.length === 0) {
       return '<div class="threat-deploy-empty">No collection-capable assets available. All assets are currently deployed or in transit.</div>' +

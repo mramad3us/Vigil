@@ -24,6 +24,7 @@ function generateDomesticLocation() {
     country: city.country,
     lat: city.lat,
     lon: city.lon,
+    maritime: city.maritime || false,
   };
 }
 

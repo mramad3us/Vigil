@@ -524,6 +524,7 @@
     // Filter to assets with relevant capabilities
     var mustHaveAll = opType ? opType.assetMustHaveAll : null;
     var restrictCats = opType ? opType.restrictToCategories : null;
+    var isMaritimeOp = op.maritime || (opType && opType.maritime);
     var eligibleAvailable = allAvailable.filter(function(a) {
       if (cfg.assetIds.indexOf(a.id) >= 0) return false; // already selected
       // Domestic agencies only available for domestic ops
@@ -532,6 +533,13 @@
       if (op.domestic) {
         if (a.category === 'NAVY' || a.category === 'AIR') return false;
         if (!a.domesticAuthority && a.deniability !== 'COVERT') return false;
+      }
+      // Maritime filtering: NAVY assets only for maritime ops
+      if (a.category === 'NAVY' && !isMaritimeOp) return false;
+      if (isMaritimeOp && a.category === 'DOMESTIC' && a.capabilities.indexOf('NAVAL') < 0) return false;
+      // USCG: only domestic ops at port cities
+      if (a.category === 'DOMESTIC' && a.capabilities.indexOf('NAVAL') >= 0) {
+        if (!op.domestic || !op.location || !op.location.maritime) return false;
       }
       // User filter: SANCTIONED or COVERT
       if (_customFilter === 'SANCTIONED' && !a.domesticAuthority) return false;

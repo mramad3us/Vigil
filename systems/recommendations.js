@@ -22,6 +22,8 @@ function generateVigilOptions(op) {
   var restrictCats = opType.restrictToCategories || null;
 
   // Find all available assets with relevant capabilities
+  var isMaritimeOp = op.maritime || (opType && opType.maritime);
+
   var eligible = getAvailableAssets().filter(function(a) {
     // Domestic agencies only available for domestic ops
     if (a.domesticAuthority && !op.domestic) return false;
@@ -32,6 +34,15 @@ function generateVigilOptions(op) {
       if (a.category === 'NAVY' || a.category === 'AIR') return false;
       // Non-domestic-authority assets must be COVERT to even be considered
       if (!a.domesticAuthority && a.deniability !== 'COVERT') return false;
+    }
+
+    // Maritime filtering: NAVY assets only for maritime ops
+    if (a.category === 'NAVY' && !isMaritimeOp) return false;
+    // Non-maritime ops: land-only domestics cannot do open-ocean work
+    if (isMaritimeOp && a.category === 'DOMESTIC' && a.capabilities.indexOf('NAVAL') < 0) return false;
+    // USCG (DOMESTIC + NAVAL): only for domestic ops at port cities
+    if (a.category === 'DOMESTIC' && a.capabilities.indexOf('NAVAL') >= 0) {
+      if (!op.domestic || !op.location || !op.location.maritime) return false;
     }
 
     // Category restriction
