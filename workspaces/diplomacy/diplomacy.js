@@ -560,7 +560,12 @@
 
   function renderShareIntelCard(country) {
     var threats = getDisclosableThreats(country);
-    var disabled = threats.length === 0;
+    var disabled = false;
+    var reason = '';
+
+    if (threats.length === 0) { disabled = true; reason = 'No disclosable threats for this country.'; }
+    else if (V.resources.intel < 10) { disabled = true; reason = 'Insufficient intel (10 required)'; }
+
     var expanded = (_activeAction === 'SHARE_INTEL' && !disabled);
 
     var html = '<div class="diplo-action-card' + (disabled ? ' disabled' : '') + (expanded ? ' expanded' : '') + '"' +
@@ -569,7 +574,8 @@
         '<span class="diplo-action-name">SHARE INTELLIGENCE</span>' +
         '<span class="diplo-action-cost">10 INTEL</span>' +
       '</div>' +
-      '<div class="diplo-action-desc">' + (disabled ? 'No disclosable threats for this country.' : threats.length + ' threat(s) can be disclosed.') + '</div>';
+      '<div class="diplo-action-desc">' + (threats.length === 0 ? 'No disclosable threats for this country.' : threats.length + ' threat(s) can be disclosed.') + '</div>' +
+      (reason && threats.length > 0 ? '<div class="diplo-action-disabled-reason">' + reason + '</div>' : '');
 
     if (expanded) {
       html += '<div class="diplo-asset-panel">';
