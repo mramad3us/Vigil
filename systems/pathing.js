@@ -303,7 +303,7 @@ function getAtWarCountriesOnRoute(fromLat, fromLon, toLat, toLon) {
   var atWar = [];
   for (var i = 0; i < crossed.length; i++) {
     var cd = V.diplomacy[crossed[i]];
-    if (cd && cd.stance === 0) {
+    if (cd && cd.atWar) {
       atWar.push(crossed[i]);
     }
   }

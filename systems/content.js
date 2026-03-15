@@ -109,7 +109,7 @@ function generateLocationInAtWarCountry(theaterId) {
   for (var i = 0; i < theater.cities.length; i++) {
     var city = theater.cities[i];
     var cd = V.diplomacy[city.country];
-    if (cd && cd.stance === 0) {
+    if (cd && cd.atWar) {
       eligible.push(city);
     }
   }

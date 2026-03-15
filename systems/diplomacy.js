@@ -1,7 +1,9 @@
 /* ============================================================
    VIGIL — systems/diplomacy.js
-   Country relationships, stance tiers, permissions, clearance
-   requests, diplomatic consequences, disclosure mechanics.
+   Country relationships, continuous relations (0-100%),
+   stance derivation, permissions, clearance requests,
+   diplomatic consequences, disclosure, war/ceasefire/peace,
+   alliances, diplomatic gifts.
    ============================================================ */
 
 // --- Stance Tiers (worst → best) ---
@@ -24,7 +26,6 @@ function getStanceTier(level) {
 // --- Permissions per stance level ---
 
 function getStancePermissions(level, theaterId) {
-  // At DEFCON <= 3, grant covert ops in hostile countries with reduced risk
   var defconCovertOverride = false;
   if (theaterId && V.theaters[theaterId] && V.theaters[theaterId].defcon <= 3) {
     defconCovertOverride = true;
@@ -32,11 +33,11 @@ function getStancePermissions(level, theaterId) {
 
   var covertRisk = getStanceTier(level).covertRisk;
   if (defconCovertOverride && level <= 2) {
-    covertRisk = Math.max(0.10, covertRisk * 0.5); // 50% reduced risk at elevated DEFCON
+    covertRisk = Math.max(0.10, covertRisk * 0.5);
   }
 
   return {
-    covertOps: true,  // always allowed, but risky at low stances
+    covertOps: true,
     station: level >= 6,
     overtOps: level >= 6,
     covertRisk: covertRisk,
@@ -44,31 +45,258 @@ function getStancePermissions(level, theaterId) {
   };
 }
 
-// --- Initial Country Stances ---
+// --- Initial Country Relations (0-100%) ---
 
-var INITIAL_STANCES = {
-  // ALLIED_FULL (7)
-  'United States': 7, 'Canada': 7, 'United Kingdom': 7,
-  'Japan': 7, 'South Korea': 7, 'Australia': 7,
-  // ALLIED_MILITARY (6)
-  'Germany': 6, 'France': 6, 'Poland': 6, 'Italy': 6, 'Spain': 6, 'Turkey': 6,
-  // ALLIED_ECONOMIC (5)
-  'Israel': 5, 'Saudi Arabia': 5, 'India': 5, 'Brazil': 5,
-  'Mexico': 5, 'Egypt': 5, 'Kenya': 5, 'South Africa': 5,
-  'Argentina': 5, 'Nigeria': 5,
-  // FRIENDLY (4)
-  'Taiwan': 4, 'Georgia': 4, 'Ukraine': 4, 'Colombia': 4,
-  'Iraq': 4, 'Ethiopia': 4, 'Bangladesh': 4, 'Kazakhstan': 4,
-  // NEUTRAL (3)
-  'Pakistan': 3, 'Lebanon': 3, 'Mali': 3, 'Libya': 3,
-  // TENSE (2)
-  'Venezuela': 2, 'Cuba': 2, 'Syria': 2, 'Yemen': 2,
-  'Somalia': 2, 'Afghanistan': 2, 'Belarus': 2, 'China': 2,
-  // HOSTILE (1)
-  'Iran': 1, 'Russia': 1,
-  // AT_WAR (0)
-  'North Korea': 0,
+var INITIAL_RELATIONS = {
+  // ALLIED_FULL (90%)
+  'United States': { relations: 90 },
+  'Canada': { relations: 90 },
+  'United Kingdom': { relations: 90 },
+  'Japan': { relations: 90 },
+  'South Korea': { relations: 90 },
+  'Australia': { relations: 90 },
+  // ALLIED_MILITARY (75%)
+  'Germany': { relations: 75 },
+  'France': { relations: 75 },
+  'Poland': { relations: 75 },
+  'Italy': { relations: 75 },
+  'Spain': { relations: 75 },
+  'Turkey': { relations: 75 },
+  // ALLIED_ECONOMIC (65%)
+  'Israel': { relations: 65 },
+  'Saudi Arabia': { relations: 65 },
+  'India': { relations: 65 },
+  'Brazil': { relations: 65 },
+  'Mexico': { relations: 65 },
+  'Egypt': { relations: 65 },
+  'Kenya': { relations: 65 },
+  'South Africa': { relations: 65 },
+  'Argentina': { relations: 65 },
+  'Nigeria': { relations: 65 },
+  // FRIENDLY (50%)
+  'Taiwan': { relations: 50 },
+  'Georgia': { relations: 50 },
+  'Ukraine': { relations: 50 },
+  'Colombia': { relations: 50 },
+  'Iraq': { relations: 50 },
+  'Ethiopia': { relations: 50 },
+  'Bangladesh': { relations: 50 },
+  'Kazakhstan': { relations: 50 },
+  // NEUTRAL (35%)
+  'Pakistan': { relations: 35 },
+  'Lebanon': { relations: 35 },
+  'Mali': { relations: 35 },
+  'Libya': { relations: 35 },
+  // TENSE (20%)
+  'Venezuela': { relations: 20 },
+  'Cuba': { relations: 20 },
+  'Syria': { relations: 20 },
+  'Yemen': { relations: 20 },
+  'Somalia': { relations: 20 },
+  'Afghanistan': { relations: 20 },
+  'Belarus': { relations: 20 },
+  'China': { relations: 20 },
+  // HOSTILE (10%)
+  'Iran': { relations: 10 },
+  'Russia': { relations: 10 },
+  // AT_WAR (5%)
+  'North Korea': { relations: 5, atWar: true },
 };
+
+// --- Derive Stance from Relations + Flags ---
+
+function deriveStance(country) {
+  var cd = V.diplomacy[country];
+  if (!cd) return 3;
+  if (cd.atWar) return 0;
+  if (cd.alliance === 'FULL')     return 7;
+  if (cd.alliance === 'MILITARY') return 6;
+  if (cd.alliance === 'ECONOMIC') return 5;
+  if (cd.relations >= 50) return 4;
+  if (cd.relations >= 30) return 3;
+  if (cd.relations >= 15) return 2;
+  return 1;
+}
+
+// --- Shift Relations (replaces shiftStance) ---
+
+function shiftRelations(country, delta, reason) {
+  var cd = V.diplomacy[country];
+  if (!cd) return;
+  var prev = cd.relations;
+  cd.relations = clamp(Math.round(cd.relations + delta), 0, 100);
+  if (cd.relations !== prev) {
+    cd.relationsHistory.push({
+      from: prev,
+      to: cd.relations,
+      day: V.time.day,
+      hour: V.time.hour,
+      reason: reason || '',
+    });
+    if (cd.relationsHistory.length > 50) cd.relationsHistory.shift();
+    addLog('DIPLOMACY: ' + country + ' relations ' + (delta > 0 ? 'improved' : 'degraded') +
+      ' (' + prev + '% → ' + cd.relations + '%).', delta > 0 ? 'log-info' : 'log-warn');
+  }
+}
+
+// --- Betrayal Penalty ---
+
+function calcBetrayalPenalty(country, baseDelta) {
+  var cd = V.diplomacy[country];
+  if (!cd) return baseDelta;
+  var multiplier = 1.0 + (cd.relations / 100);
+  return Math.round(baseDelta * multiplier);
+}
+
+// --- War / Ceasefire / Peace ---
+
+function declareWar(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || cd.atWar || cd.relations >= 15) return;
+  cd.atWar = true;
+  cd.relations = 0;
+  cd.alliance = null;
+  cd.ceasefire = null;
+  cd.peaceTreaty = null;
+  cd.relationsHistory.push({ from: cd.relations, to: 0, day: V.time.day, hour: V.time.hour, reason: 'War declared' });
+  addLog('DIPLOMACY: The United States has declared war on ' + country + '.', 'log-warn');
+  pushFeedItem({
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'CRITICAL',
+    header: 'WAR DECLARED: ' + country,
+    body: 'The United States has formally declared war on ' + country + '. All diplomatic relations are severed. Military operations are authorized without restriction.',
+    timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+    read: false,
+  });
+  fire('diplomacy:war', { country: country });
+}
+
+function proposeCeasefire(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || !cd.atWar) return false;
+  if (V.resources.intel < 15) return false;
+  V.resources.intel -= 15;
+  cd.atWar = false;
+  cd.ceasefire = { startDay: V.time.day, expiryDay: V.time.day + 30 };
+  cd.relations = 10;
+  cd.relationsHistory.push({ from: 0, to: 10, day: V.time.day, hour: V.time.hour, reason: 'Ceasefire agreed' });
+  addLog('DIPLOMACY: Ceasefire established with ' + country + '. Hostilities suspended for 30 days.', 'log-info');
+  pushFeedItem({
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
+    header: 'CEASEFIRE: ' + country,
+    body: 'A ceasefire has been established with ' + country + '. Hostilities are suspended for 30 days. Relations reset to 10%. Use this window to pursue peace.',
+    timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+    read: false,
+  });
+  fire('diplomacy:ceasefire', { country: country });
+  return true;
+}
+
+function proposePeace(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || cd.atWar) return false;
+  if (V.resources.intel < 25) return false;
+  V.resources.intel -= 25;
+  cd.peaceTreaty = { startDay: V.time.day, expiryDay: V.time.day + 90 };
+  cd.ceasefire = null;
+  shiftRelations(country, 10, 'Peace treaty signed');
+  addLog('DIPLOMACY: Peace treaty signed with ' + country + '. Relations +10%.', 'log-info');
+  pushFeedItem({
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+    header: 'PEACE TREATY: ' + country,
+    body: 'A peace treaty has been signed with ' + country + '. Sovereignty violation penalties halved for 90 days. Relations improved by 10%.',
+    timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+    read: false,
+  });
+  fire('diplomacy:peace', { country: country });
+  return true;
+}
+
+// --- Alliance System ---
+
+function proposeAlliance(country, tier) {
+  var cd = V.diplomacy[country];
+  if (!cd || cd.atWar) return false;
+  var thresholds = { 'ECONOMIC': 60, 'MILITARY': 70, 'FULL': 80 };
+  var minRelations = thresholds[tier];
+  if (!minRelations || cd.relations < minRelations) return false;
+  if (V.resources.intel < 10) return false;
+
+  // Check upgrade path
+  if (tier === 'MILITARY' && cd.alliance !== 'ECONOMIC') return false;
+  if (tier === 'FULL' && cd.alliance !== 'MILITARY') return false;
+  if (tier === 'ECONOMIC' && cd.alliance) return false;
+
+  V.resources.intel -= 10;
+  // Acceptance probability: 70% at threshold, 95% at threshold+20
+  var acceptChance = Math.min(0.95, 0.70 + ((cd.relations - minRelations) / 20) * 0.25);
+  if (Math.random() < acceptChance) {
+    cd.alliance = tier;
+    addLog('DIPLOMACY: ' + country + ' accepted ' + tier + ' alliance proposal.', 'log-info');
+    pushFeedItem({
+      id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+      header: 'ALLIANCE FORMED: ' + country,
+      body: country + ' has accepted the ' + tier + ' alliance proposal. Bilateral cooperation will deepen across agreed domains.',
+      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+      read: false,
+    });
+    fire('diplomacy:alliance', { country: country, tier: tier });
+    return true;
+  } else {
+    addLog('DIPLOMACY: ' + country + ' declined ' + tier + ' alliance proposal.', 'log-warn');
+    pushFeedItem({
+      id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
+      header: 'ALLIANCE DECLINED: ' + country,
+      body: country + ' has declined the ' + tier + ' alliance proposal at this time. Relations are unchanged.',
+      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+      read: false,
+    });
+    return false;
+  }
+}
+
+function acceptAllianceProposal(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || !cd.pendingProposal) return;
+  cd.alliance = cd.pendingProposal;
+  addLog('DIPLOMACY: Accepted ' + cd.pendingProposal + ' alliance with ' + country + '.', 'log-info');
+  pushFeedItem({
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+    header: 'ALLIANCE FORMED: ' + country,
+    body: 'The ' + cd.pendingProposal + ' alliance with ' + country + ' has been formalized.',
+    timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+    read: false,
+  });
+  fire('diplomacy:alliance', { country: country, tier: cd.pendingProposal });
+  cd.pendingProposal = null;
+}
+
+function declineAllianceProposal(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || !cd.pendingProposal) return;
+  addLog('DIPLOMACY: Declined ' + cd.pendingProposal + ' alliance proposal from ' + country + '.', 'log-info');
+  cd.pendingProposal = null;
+}
+
+// --- Diplomatic Gift ---
+
+function sendDiplomaticGift(country) {
+  var cd = V.diplomacy[country];
+  if (!cd || cd.atWar) return false;
+  if (V.time.day - cd.lastGiftDay < 14) return false;
+  if (V.resources.intel < 15) return false;
+  V.resources.intel -= 15;
+  cd.lastGiftDay = V.time.day;
+  shiftRelations(country, 8, 'Diplomatic aid');
+  addLog('DIPLOMACY: Diplomatic aid sent to ' + country + '. Relations +8%.', 'log-info');
+  pushFeedItem({
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+    header: 'DIPLOMATIC AID: ' + country,
+    body: 'A diplomatic aid package has been dispatched to ' + country + '. Relations have improved by 8%.',
+    timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+    read: false,
+  });
+  return true;
+}
 
 // --- Initialize Diplomacy State ---
 
@@ -78,23 +306,29 @@ var INITIAL_STANCES = {
     if (V.initialized) return;
 
     V.diplomacy = {};
-    for (var country in INITIAL_STANCES) {
+    for (var country in INITIAL_RELATIONS) {
+      var init = INITIAL_RELATIONS[country];
       V.diplomacy[country] = {
-        stance: INITIAL_STANCES[country],
-        stanceHistory: [],
+        relations: init.relations,
+        atWar: init.atWar || false,
+        ceasefire: null,
+        peaceTreaty: null,
+        alliance: init.relations >= 90 ? 'FULL' : init.relations >= 75 ? 'MILITARY' : init.relations >= 65 ? 'ECONOMIC' : null,
+        lastGiftDay: 0,
         pendingClearance: null,
         lastIncident: null,
         missions: [],
+        relationsHistory: [],
+        pendingProposal: null,
       };
     }
-  }, 1); // Early — before assets
+  }, 1);
 
   // --- Process Pending Clearances ---
 
   hook('tick:hour', function() {
     for (var country in V.diplomacy) {
       var cd = V.diplomacy[country];
-      // Expire granted clearances after 1 year (525600 minutes)
       if (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED' && cd.pendingClearance.grantedAt) {
         if (V.time.totalMinutes - cd.pendingClearance.grantedAt >= 525600) {
           cd.pendingClearance = null;
@@ -106,16 +340,14 @@ var INITIAL_STANCES = {
 
       var now = V.time.totalMinutes;
       if (now >= cd.pendingClearance.estimatedCompletion) {
-        // Roll for approval
-        var approvalChance = getClearanceApprovalChance(cd.stance, country);
+        var stance = deriveStance(country);
+        var approvalChance = getClearanceApprovalChance(stance, country);
         if (Math.random() < approvalChance) {
           cd.pendingClearance.status = 'GRANTED';
           cd.pendingClearance.grantedAt = V.time.totalMinutes;
           addLog('DIPLOMACY: ' + country + ' has GRANTED clearance for operation.', 'log-info');
           pushFeedItem({
-            id: uid('FI'),
-            type: 'DIPLOMATIC',
-            severity: 'ROUTINE',
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
             header: 'CLEARANCE GRANTED: ' + country,
             body: country + ' has authorized the requested military operation. Overt assets may be deployed without diplomatic penalty.',
             timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
@@ -125,9 +357,7 @@ var INITIAL_STANCES = {
           cd.pendingClearance.status = 'DENIED';
           addLog('DIPLOMACY: ' + country + ' has DENIED clearance request.', 'log-warn');
           pushFeedItem({
-            id: uid('FI'),
-            type: 'DIPLOMATIC',
-            severity: 'ELEVATED',
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
             header: 'CLEARANCE DENIED: ' + country,
             body: country + ' has denied the requested operational clearance. Deploying overt assets will be considered a sovereignty violation.',
             timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
@@ -144,9 +374,8 @@ var INITIAL_STANCES = {
     var op = data.operation;
     if (!op.location || !op.location.country) return;
     var country = op.location.country;
-    if (country === 'United States') return; // Domestic ops — no diplomatic issue
+    if (country === 'United States') return;
 
-    // Check if any assigned assets are overt
     var hasOvert = false;
     if (op.assignedAssetIds) {
       for (var i = 0; i < op.assignedAssetIds.length; i++) {
@@ -156,14 +385,14 @@ var INITIAL_STANCES = {
     }
 
     if (!hasOvert) {
-      // Covert op — check exposure on failure
       if (op.status === 'FAILURE') {
         var cd = V.diplomacy[country];
         if (cd) {
-          var covertRisk = getStancePermissions(cd.stance).covertRisk;
+          var stance = deriveStance(country);
+          var covertRisk = getStancePermissions(stance).covertRisk;
           if (Math.random() > covertRisk) {
-            // Exposed!
-            shiftStance(country, -2);
+            var penalty = calcBetrayalPenalty(country, -10);
+            shiftRelations(country, penalty, 'Covert op exposed');
             fireDiplomaticIncident(country, 'COVERT_EXPOSED', op);
           }
         }
@@ -171,32 +400,161 @@ var INITIAL_STANCES = {
       return;
     }
 
-    // Overt operation
     var cd = V.diplomacy[country];
     if (!cd) return;
-    var perms = getStancePermissions(cd.stance);
+    var stance = deriveStance(country);
+    var perms = getStancePermissions(stance);
     var hasClearance = cd.pendingClearance && cd.pendingClearance.status === 'GRANTED';
     var authorized = perms.overtOps || hasClearance;
 
     if (authorized) {
       if (op.status === 'SUCCESS') {
-        shiftStance(country, 1);
+        shiftRelations(country, 5, 'Authorized op success');
       }
-      // Authorized failure: no meaningful diplomatic penalty — they knew the risks
     } else {
-      // Unauthorized overt deployment
-      if (op.status === 'SUCCESS') {
-        shiftStance(country, -3);
+      // Unauthorized overt deployment — apply betrayal penalty
+      if (cd.atWar) {
+        // At war — minimal penalty, war is expected
+        shiftRelations(country, -1, 'War-time overt operation');
+      } else if (op.status === 'SUCCESS') {
+        var basePenalty = -15;
+        // Halve penalty during active peace treaty
+        if (cd.peaceTreaty && V.time.day <= cd.peaceTreaty.expiryDay) {
+          basePenalty = Math.round(basePenalty / 2);
+        }
+        var penalty = calcBetrayalPenalty(country, basePenalty);
+        shiftRelations(country, penalty, 'Sovereignty violation');
         fireDiplomaticIncident(country, 'SOVEREIGNTY_VIOLATION', op);
       } else {
-        shiftStance(country, -5);
+        var basePenalty = -25;
+        if (cd.peaceTreaty && V.time.day <= cd.peaceTreaty.expiryDay) {
+          basePenalty = Math.round(basePenalty / 2);
+        }
+        var penalty = calcBetrayalPenalty(country, basePenalty);
+        shiftRelations(country, penalty, 'Catastrophic violation');
         fireDiplomaticIncident(country, 'CATASTROPHIC_VIOLATION', op);
       }
     }
 
-    // Clear clearance tied to this specific op
     if (cd.pendingClearance && cd.pendingClearance.opId === op.id) {
       cd.pendingClearance = null;
+    }
+  });
+
+  // --- Daily Tick: War AI, Ceasefire Expiry, Alliance Drift/Proposals/Dissolution ---
+
+  hook('tick:day', function() {
+    for (var country in V.diplomacy) {
+      var cd = V.diplomacy[country];
+
+      // AI declares war when relations < 10
+      if (!cd.atWar && cd.relations < 10 && Math.random() < 0.15) {
+        cd.atWar = true;
+        cd.relations = 0;
+        cd.alliance = null;
+        cd.ceasefire = null;
+        cd.peaceTreaty = null;
+        cd.relationsHistory.push({ from: cd.relations, to: 0, day: V.time.day, hour: V.time.hour, reason: country + ' declared war' });
+        addLog('DIPLOMACY: ' + country + ' has declared war on the United States.', 'log-warn');
+        pushFeedItem({
+          id: uid('FI'), type: 'DIPLOMATIC', severity: 'CRITICAL',
+          header: 'WAR DECLARED: ' + country,
+          body: country + ' has formally declared war on the United States. All diplomatic channels are severed.',
+          timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+          read: false,
+        });
+        fire('diplomacy:war', { country: country, aiDeclared: true });
+        continue;
+      }
+
+      // Ceasefire expiry
+      if (cd.ceasefire && V.time.day >= cd.ceasefire.expiryDay) {
+        cd.ceasefire = null;
+        if (cd.relations < 15) {
+          cd.atWar = true;
+          cd.relations = 0;
+          cd.relationsHistory.push({ from: cd.relations, to: 0, day: V.time.day, hour: V.time.hour, reason: 'Ceasefire expired — war resumed' });
+          addLog('DIPLOMACY: Ceasefire with ' + country + ' has expired. War resumes.', 'log-warn');
+          pushFeedItem({
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'HIGH',
+            header: 'CEASEFIRE EXPIRED: ' + country,
+            body: 'The ceasefire with ' + country + ' has expired without achieving peace. Hostilities have resumed.',
+            timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+            read: false,
+          });
+        } else {
+          addLog('DIPLOMACY: Ceasefire with ' + country + ' expired. Relations stable — no war resumption.', 'log-info');
+        }
+      }
+
+      // Peace treaty expiry
+      if (cd.peaceTreaty && V.time.day >= cd.peaceTreaty.expiryDay) {
+        cd.peaceTreaty = null;
+        addLog('DIPLOMACY: Peace treaty with ' + country + ' has expired.', 'log-info');
+      }
+
+      // Alliance weekly drift (+1% every 7 days)
+      if (cd.alliance && V.time.day % 7 === 0) {
+        shiftRelations(country, 1, 'Alliance drift');
+      }
+
+      // Alliance auto-dissolution below 50%
+      if (cd.alliance && cd.relations < 50) {
+        var oldAlliance = cd.alliance;
+        cd.alliance = null;
+        addLog('DIPLOMACY: ' + country + ' has suspended the ' + oldAlliance + ' alliance.', 'log-warn');
+        pushFeedItem({
+          id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
+          header: 'ALLIANCE SUSPENDED: ' + country,
+          body: country + ' has suspended the ' + oldAlliance + ' alliance due to deteriorating relations.',
+          timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+          read: false,
+        });
+      }
+
+      // Country-initiated alliance proposals
+      if (!cd.atWar && !cd.pendingProposal) {
+        if (!cd.alliance && cd.relations >= 70 && Math.random() < 0.10) {
+          cd.pendingProposal = 'ECONOMIC';
+          pushFeedItem({
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+            header: 'ALLIANCE PROPOSAL: ' + country,
+            body: country + ' has proposed an ECONOMIC alliance. Review the proposal in the Diplomacy workspace.',
+            timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+            read: false,
+            actions: [
+              { label: 'ACCEPT', fn: 'acceptAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+              { label: 'DECLINE', fn: 'declineAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+            ],
+          });
+        } else if (cd.alliance === 'ECONOMIC' && cd.relations >= 80 && Math.random() < 0.08) {
+          cd.pendingProposal = 'MILITARY';
+          pushFeedItem({
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+            header: 'ALLIANCE UPGRADE: ' + country,
+            body: country + ' has proposed upgrading to a MILITARY alliance.',
+            timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+            read: false,
+            actions: [
+              { label: 'ACCEPT', fn: 'acceptAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+              { label: 'DECLINE', fn: 'declineAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+            ],
+          });
+        } else if (cd.alliance === 'MILITARY' && cd.relations >= 90 && Math.random() < 0.05) {
+          cd.pendingProposal = 'FULL';
+          pushFeedItem({
+            id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
+            header: 'ALLIANCE UPGRADE: ' + country,
+            body: country + ' has proposed upgrading to a FULL alliance.',
+            timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+            read: false,
+            actions: [
+              { label: 'ACCEPT', fn: 'acceptAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+              { label: 'DECLINE', fn: 'declineAllianceProposal(\'' + country.replace(/'/g, "\\'") + '\')' },
+            ],
+          });
+        }
+      }
     }
   });
 
@@ -206,15 +564,15 @@ var INITIAL_STANCES = {
 
 function getCountryStance(country) {
   var cd = V.diplomacy[country];
-  if (!cd) return getStanceTier(3); // Default NEUTRAL for unknown
-  return getStanceTier(cd.stance);
+  if (!cd) return getStanceTier(3);
+  return getStanceTier(deriveStance(country));
 }
 
 function getCountryPermissions(country) {
   var cd = V.diplomacy[country];
   if (!cd) return getStancePermissions(3);
-  var perms = getStancePermissions(cd.stance);
-  // Granted clearance overrides overtOps
+  var stance = deriveStance(country);
+  var perms = getStancePermissions(stance);
   if (!perms.overtOps && cd.pendingClearance && cd.pendingClearance.status === 'GRANTED') {
     perms.overtOps = true;
     perms.clearanceGranted = true;
@@ -226,25 +584,9 @@ function canDeployOvert(country) {
   if (country === 'United States') return true;
   var cd = V.diplomacy[country];
   if (!cd) return false;
-  var perms = getStancePermissions(cd.stance);
+  var stance = deriveStance(country);
+  var perms = getStancePermissions(stance);
   return perms.overtOps || (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED');
-}
-
-function shiftStance(country, delta) {
-  var cd = V.diplomacy[country];
-  if (!cd) return;
-  var prev = cd.stance;
-  cd.stance = clamp(cd.stance + delta, 0, 7);
-  if (cd.stance !== prev) {
-    cd.stanceHistory.push({
-      from: prev,
-      to: cd.stance,
-      day: V.time.day,
-      hour: V.time.hour,
-    });
-    addLog('DIPLOMACY: ' + country + ' stance ' + (delta > 0 ? 'improved' : 'degraded') +
-      ' (' + getStanceTier(prev).label + ' → ' + getStanceTier(cd.stance).label + ').', delta > 0 ? 'log-info' : 'log-warn');
-  }
 }
 
 function fireDiplomaticIncident(country, type, op) {
@@ -254,26 +596,25 @@ function fireDiplomaticIncident(country, type, op) {
   }
 
   var stance = getCountryStance(country);
+  var rel = cd ? cd.relations : 35;
   var incidentMessages = {
     SOVEREIGNTY_VIOLATION: 'Unauthorized deployment of overt military assets into ' + country + ' constitutes a sovereignty violation. ' +
-      'Diplomatic relations have deteriorated significantly. Stance now: ' + stance.label + '.',
+      'Diplomatic relations have deteriorated significantly. Relations: ' + rel + '%. Stance: ' + stance.label + '.',
     CATASTROPHIC_VIOLATION: 'CATASTROPHIC: Failed unauthorized overt operation in ' + country + ' has been exposed internationally. ' +
-      'Severe diplomatic fallout. Multiple allied nations are reconsidering security cooperation. Stance now: ' + stance.label + '.',
+      'Severe diplomatic fallout. Relations: ' + rel + '%. Stance: ' + stance.label + '.',
     OVERT_AUTH_FAILURE: 'Authorized operation in ' + country + ' failed to achieve objectives. ' +
-      'While authorized, the failure has strained relations. Stance now: ' + stance.label + '.',
+      'While authorized, the failure has strained relations. Relations: ' + rel + '%. Stance: ' + stance.label + '.',
     COVERT_EXPOSED: 'A covert operation in ' + country + ' has been exposed following operational failure. ' +
-      country + ' has summoned the US ambassador and is demanding an explanation. Stance now: ' + stance.label + '.',
+      country + ' has summoned the US ambassador and is demanding an explanation. Relations: ' + rel + '%. Stance: ' + stance.label + '.',
   };
 
-  var body = incidentMessages[type] || 'Diplomatic incident with ' + country + '. Stance: ' + stance.label + '.';
+  var body = incidentMessages[type] || 'Diplomatic incident with ' + country + '. Relations: ' + rel + '%.';
 
   var severity = (type === 'CATASTROPHIC_VIOLATION') ? 'CRITICAL' :
                  (type === 'SOVEREIGNTY_VIOLATION' || type === 'COVERT_EXPOSED') ? 'HIGH' : 'ELEVATED';
 
   var feedItem = {
-    id: uid('FI'),
-    type: 'DIPLOMATIC',
-    severity: severity,
+    id: uid('FI'), type: 'DIPLOMATIC', severity: severity,
     header: 'DIPLOMATIC INCIDENT: ' + country,
     body: body,
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
@@ -295,19 +636,13 @@ function requestClearance(country, opId) {
   if (!cd) return null;
   if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') return cd.pendingClearance;
 
-  // Completion time by stance
+  var stance = deriveStance(country);
   var delayRanges = {
-    7: [60, 120],     // ALLIED_FULL: 1-2h
-    6: [120, 360],    // ALLIED_MILITARY: 2-6h
-    5: [360, 720],    // ALLIED_ECONOMIC: 6-12h
-    4: [720, 1440],   // FRIENDLY: 12-24h
-    3: [1440, 2880],  // NEUTRAL: 24-48h
-    2: [1440, 2880],  // TENSE: 24-48h
-    1: [1440, 2880],  // HOSTILE: 24-48h
-    0: [1440, 2880],  // AT_WAR: 24-48h
+    7: [60, 120], 6: [120, 360], 5: [360, 720], 4: [720, 1440],
+    3: [1440, 2880], 2: [1440, 2880], 1: [1440, 2880], 0: [1440, 2880],
   };
 
-  var range = delayRanges[cd.stance] || delayRanges[3];
+  var range = delayRanges[stance] || delayRanges[3];
   var delayMinutes = randInt(range[0], range[1]);
 
   cd.pendingClearance = {
@@ -318,14 +653,11 @@ function requestClearance(country, opId) {
   };
 
   addLog('DIPLOMACY: Clearance requested from ' + country + '. ETA: ' + formatTransitTime(delayMinutes) + '.', 'log-info');
-
   pushFeedItem({
-    id: uid('FI'),
-    type: 'DIPLOMATIC',
-    severity: 'ROUTINE',
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
     header: 'CLEARANCE REQUESTED: ' + country,
     body: 'Diplomatic clearance has been requested from ' + country + ' for overt military operations. ' +
-      'Estimated response time: ' + formatTransitTime(delayMinutes) + '. Stance: ' + getStanceTier(cd.stance).label + '.',
+      'Estimated response time: ' + formatTransitTime(delayMinutes) + '. Relations: ' + cd.relations + '%. Stance: ' + getStanceTier(stance).label + '.',
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,
     opId: opId,
@@ -338,7 +670,6 @@ function getClearanceApprovalChance(stance, country) {
   var chances = { 7: 0.95, 6: 0.70, 5: 0.50, 4: 0.30, 3: 0.20, 2: 0.15, 1: 0.10, 0: 0.10 };
   var base = chances[stance] || 0.10;
 
-  // Active disclosed threats targeting this country boost approval by 10% each
   if (country && V.threats) {
     for (var i = 0; i < V.threats.length; i++) {
       var t = V.threats[i];
@@ -371,12 +702,10 @@ function discloseToCountry(threatId, disclosureType) {
     threat.foreignTarget.disclosed = true;
     threat.foreignTarget.disclosureType = disclosureType;
     V.resources.intel -= 10;
-    shiftStance(country, 2);
-    addLog('DIPLOMACY: Official disclosure to ' + country + ' regarding threat ' + threat.orgName + '. Stance +2.', 'log-info');
+    shiftRelations(country, 10, 'Official disclosure: ' + threat.orgName);
+    addLog('DIPLOMACY: Official disclosure to ' + country + ' regarding threat ' + threat.orgName + '. Relations +10%.', 'log-info');
     pushFeedItem({
-      id: uid('FI'),
-      type: 'DIPLOMATIC',
-      severity: 'ROUTINE',
+      id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
       header: 'OFFICIAL DISCLOSURE: ' + country,
       body: 'Intelligence on ' + threat.orgName + ' has been officially shared with ' + country + ' through diplomatic channels. ' +
         'This disclosure cost 10 INTEL but has significantly improved bilateral relations.',
@@ -387,16 +716,9 @@ function discloseToCountry(threatId, disclosureType) {
   } else if (disclosureType === 'ANONYMOUS') {
     threat.foreignTarget.disclosed = true;
     threat.foreignTarget.disclosureType = disclosureType;
-    shiftStance(country, 0); // +0.5 rounded to 0, but we can give +1 for gameplay
-    // Actually let's do a partial: track fractional internally
-    var cd = V.diplomacy[country];
-    if (cd) {
-      // Small positive gesture — shift by 1 on a coin flip
-      if (Math.random() < 0.5) shiftStance(country, 1);
-    }
+    shiftRelations(country, 3, 'Anonymous disclosure: ' + threat.orgName);
     addLog('DIPLOMACY: Anonymous intel leak to ' + country + ' regarding ' + threat.orgName + '.', 'log-info');
   }
-  // DO_NOTHING — no action needed
 
   return true;
 }
@@ -454,17 +776,18 @@ function getCountryTheater(country) {
 function startDiplomaticOutreach(country, assetId, mode) {
   var cd = V.diplomacy[country];
   if (!cd) return null;
-  if (cd.stance <= 0) return null; // Can't outreach AT_WAR
+  var stance = deriveStance(country);
+  if (cd.atWar) return null;
   if (hasActiveMission(country, 'OUTREACH')) return null;
 
-  var cost = getOutreachCost(cd.stance);
+  var cost = getOutreachCost(stance);
   if (cost === null) return null;
   if (V.resources.intel < cost) return null;
 
   V.resources.intel -= cost;
 
   var now = V.time.totalMinutes;
-  var executionDuration = randInt(240, 480); // 4-8h
+  var executionDuration = randInt(240, 480);
   var dipEff = 0;
 
   var mission = {
@@ -474,7 +797,7 @@ function startDiplomaticOutreach(country, assetId, mode) {
     mode: mode || 'REMOTE',
     status: 'EXECUTING',
     startedAt: now,
-    completionAt: now + randInt(120, 240), // 2-4h for remote
+    completionAt: now + randInt(120, 240),
     successChance: 0,
     intelCost: cost,
   };
@@ -487,7 +810,6 @@ function startDiplomaticOutreach(country, assetId, mode) {
     var capital = getCountryCapital(country);
     var transitMin = calcTransitMinutes(asset, capital.lat, capital.lon);
 
-    // Deploy asset
     asset.status = 'IN_TRANSIT';
     asset.assignedOpId = null;
     asset.currentBaseId = null;
@@ -499,10 +821,10 @@ function startDiplomaticOutreach(country, assetId, mode) {
     asset.transitDurationMinutes = transitMin;
 
     mission.status = 'IN_TRANSIT';
-    mission.completionAt = null; // Set when asset arrives
+    mission.completionAt = null;
     mission._executionDuration = executionDuration;
   } else {
-    dipEff = 2; // Remote baseline
+    dipEff = 2;
   }
 
   mission.successChance = getOutreachSuccessChance(mode, dipEff);
@@ -510,14 +832,13 @@ function startDiplomaticOutreach(country, assetId, mode) {
   if (!cd.missions) cd.missions = [];
   cd.missions.push(mission);
 
+  var tierLabel = getStanceTier(stance).label;
   addLog('DIPLOMACY: Outreach initiated with ' + country + ' (' + mode + '). Cost: ' + cost + ' INTEL.', 'log-info');
   pushFeedItem({
-    id: uid('FI'),
-    type: 'DIPLOMATIC',
-    severity: 'ROUTINE',
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
     header: 'DIPLOMATIC OUTREACH: ' + country,
     body: 'Diplomatic outreach to ' + country + ' has been initiated (' + mode.toLowerCase().replace('_', '-') +
-      '). Objective: improve bilateral relations. Current stance: ' + getStanceTier(cd.stance).label + '.',
+      '). Objective: improve bilateral relations. Relations: ' + cd.relations + '%. Stance: ' + tierLabel + '.',
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,
   });
@@ -530,15 +851,15 @@ function requestProactiveClearance(country, assetId) {
   if (!cd) return null;
   if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') return cd.pendingClearance;
 
+  var stance = deriveStance(country);
   var delayRanges = {
     7: [60, 120], 6: [120, 360], 5: [360, 720], 4: [720, 1440],
     3: [1440, 2880], 2: [1440, 2880], 1: [1440, 2880], 0: [1440, 2880],
   };
 
-  var range = delayRanges[cd.stance] || delayRanges[3];
+  var range = delayRanges[stance] || delayRanges[3];
   var delayMinutes = randInt(range[0], range[1]);
 
-  // IN_PERSON reduces delay by 40-60%
   var mode = 'REMOTE';
   if (assetId) {
     var asset = getAsset(assetId);
@@ -551,7 +872,6 @@ function requestProactiveClearance(country, assetId) {
       var transitMin = calcTransitMinutes(asset, capital.lat, capital.lon);
       delayMinutes += transitMin;
 
-      // Deploy asset
       var now = V.time.totalMinutes;
       asset.status = 'IN_TRANSIT';
       asset.assignedOpId = null;
@@ -566,7 +886,7 @@ function requestProactiveClearance(country, assetId) {
   }
 
   cd.pendingClearance = {
-    opId: null, // Proactive — not tied to a specific op
+    opId: null,
     requestedAt: V.time.totalMinutes,
     estimatedCompletion: V.time.totalMinutes + delayMinutes,
     status: 'PENDING',
@@ -574,15 +894,14 @@ function requestProactiveClearance(country, assetId) {
     mode: mode,
   };
 
+  var tierLabel = getStanceTier(stance).label;
   addLog('DIPLOMACY: Proactive clearance requested from ' + country + ' (' + mode + '). ETA: ' + formatTransitTime(delayMinutes) + '.', 'log-info');
   pushFeedItem({
-    id: uid('FI'),
-    type: 'DIPLOMATIC',
-    severity: 'ROUTINE',
+    id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
     header: 'CLEARANCE REQUESTED: ' + country,
     body: 'Proactive diplomatic clearance has been requested from ' + country + ' for future overt operations (' +
       mode.toLowerCase().replace('_', '-') + '). Estimated response time: ' + formatTransitTime(delayMinutes) +
-      '. Stance: ' + getStanceTier(cd.stance).label + '.',
+      '. Relations: ' + cd.relations + '%. Stance: ' + tierLabel + '.',
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,
   });
@@ -605,7 +924,6 @@ function requestProactiveClearance(country, assetId) {
         var m = cd.missions[i];
 
         if (m.status === 'IN_TRANSIT') {
-          // Check if asset has arrived
           if (m.assetId) {
             var asset = getAsset(m.assetId);
             if (asset && (asset.status === 'DEPLOYED' || asset.status === 'STATIONED' ||
@@ -617,35 +935,31 @@ function requestProactiveClearance(country, assetId) {
         }
 
         if (m.status === 'EXECUTING' && m.completionAt && now >= m.completionAt) {
-          // Roll success/failure
+          var stance = deriveStance(country);
+          var tierLabel = getStanceTier(stance).label;
           if (Math.random() < m.successChance) {
             m.status = 'SUCCESS';
-            shiftStance(country, 1);
+            shiftRelations(country, 5, 'Outreach success');
             pushFeedItem({
-              id: uid('FI'),
-              type: 'DIPLOMATIC',
-              severity: 'ROUTINE',
+              id: uid('FI'), type: 'DIPLOMATIC', severity: 'ROUTINE',
               header: 'OUTREACH SUCCESS: ' + country,
-              body: 'Diplomatic outreach to ' + country + ' has concluded successfully. Bilateral relations have improved. New stance: ' + getStanceTier(cd.stance).label + '.',
+              body: 'Diplomatic outreach to ' + country + ' has concluded successfully. Relations improved. Relations: ' + cd.relations + '%. Stance: ' + getStanceTier(deriveStance(country)).label + '.',
               timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
               read: false,
             });
-            addLog('DIPLOMACY: Outreach to ' + country + ' succeeded. Stance improved to ' + getStanceTier(cd.stance).label + '.', 'log-info');
+            addLog('DIPLOMACY: Outreach to ' + country + ' succeeded. Relations: ' + cd.relations + '%.', 'log-info');
           } else {
             m.status = 'FAILURE';
             pushFeedItem({
-              id: uid('FI'),
-              type: 'DIPLOMATIC',
-              severity: 'ELEVATED',
+              id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
               header: 'OUTREACH FAILED: ' + country,
-              body: 'Diplomatic outreach to ' + country + ' did not achieve the desired outcome. Relations unchanged. Stance: ' + getStanceTier(cd.stance).label + '.',
+              body: 'Diplomatic outreach to ' + country + ' did not achieve the desired outcome. Relations unchanged. Relations: ' + cd.relations + '%. Stance: ' + tierLabel + '.',
               timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
               read: false,
             });
-            addLog('DIPLOMACY: Outreach to ' + country + ' failed. No stance change.', 'log-warn');
+            addLog('DIPLOMACY: Outreach to ' + country + ' failed. No change.', 'log-warn');
           }
 
-          // Return asset to base
           if (m.assetId) {
             returnAssetsToBase([m.assetId]);
           }
@@ -656,7 +970,6 @@ function requestProactiveClearance(country, assetId) {
     }
   }, 8);
 
-  // Listen to asset:arrived for IN_TRANSIT → EXECUTING transition
   hook('asset:arrived', function(data) {
     if (!data || !data.asset) return;
     var asset = data.asset;
@@ -675,7 +988,6 @@ function requestProactiveClearance(country, assetId) {
     }
   });
 
-  // Return clearance assets when clearance resolves
   hook('tick:hour', function() {
     for (var country in V.diplomacy) {
       var cd = V.diplomacy[country];
@@ -691,4 +1003,37 @@ function requestProactiveClearance(country, assetId) {
     }
   }, 10);
 
+})();
+
+// --- Save Compatibility Migration ---
+
+(function() {
+  hook('game:load', function() {
+    for (var country in V.diplomacy) {
+      var cd = V.diplomacy[country];
+      if (cd.stance !== undefined && cd.relations === undefined) {
+        var stanceToRelations = { 0: 5, 1: 10, 2: 20, 3: 35, 4: 50, 5: 65, 6: 75, 7: 90 };
+        cd.relations = stanceToRelations[cd.stance] || 35;
+        cd.atWar = (cd.stance === 0);
+        cd.ceasefire = null;
+        cd.peaceTreaty = null;
+        cd.alliance = cd.stance >= 7 ? 'FULL' : cd.stance >= 6 ? 'MILITARY' : cd.stance >= 5 ? 'ECONOMIC' : null;
+        cd.lastGiftDay = 0;
+        cd.pendingProposal = null;
+        cd.relationsHistory = (cd.stanceHistory || []).map(function(h) {
+          return { from: (stanceToRelations[h.from] || 35), to: (stanceToRelations[h.to] || 35), day: h.day, hour: h.hour, reason: 'migrated' };
+        });
+        delete cd.stance;
+        delete cd.stanceHistory;
+      }
+      // Ensure new fields exist on partially-migrated saves
+      if (cd.relationsHistory === undefined) cd.relationsHistory = [];
+      if (cd.atWar === undefined) cd.atWar = false;
+      if (cd.ceasefire === undefined) cd.ceasefire = null;
+      if (cd.peaceTreaty === undefined) cd.peaceTreaty = null;
+      if (cd.alliance === undefined) cd.alliance = null;
+      if (cd.lastGiftDay === undefined) cd.lastGiftDay = 0;
+      if (cd.pendingProposal === undefined) cd.pendingProposal = null;
+    }
+  });
 })();

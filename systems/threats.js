@@ -462,7 +462,7 @@ function spawnThreat(theaterId, forcedTypeId) {
           if (theaterDef) {
             for (var ci = 0; ci < theaterDef.countries.length; ci++) {
               var cd = V.diplomacy[theaterDef.countries[ci]];
-              if (cd && cd.stance === 0) { hasAtWar = true; break; }
+              if (cd && cd.atWar) { hasAtWar = true; break; }
             }
           }
           if (hasAtWar && Math.random() < 0.4) {

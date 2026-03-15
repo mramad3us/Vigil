@@ -70,7 +70,7 @@ var CONFLICT_TYPES = [
     for (var ci = 0; ci < theater.countries.length; ci++) {
       var country = theater.countries[ci];
       var cd = V.diplomacy[country];
-      if (cd && cd.stance <= 2) {
+      if (cd && deriveStance(country) <= 2) {
         conflictCountries.push(country);
       }
     }

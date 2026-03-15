@@ -293,9 +293,9 @@
           if (threat.foreignTarget && threat.foreignTarget.disclosed && threat.foreignTarget.country) {
             var ftCountry = threat.foreignTarget.country;
             if (V.diplomacy[ftCountry]) {
-              shiftStance(ftCountry, 2);
-              op.diplomaticImpacts.push({ country: ftCountry, delta: 2, reason: 'Threat neutralization goodwill' });
-              addLog('DIPLOMACY: ' + ftCountry + ' grateful for neutralizing ' + threat.orgName + '. Stance +2.', 'log-info');
+              shiftRelations(ftCountry, 10, 'Threat neutralization goodwill');
+              op.diplomaticImpacts.push({ country: ftCountry, delta: 10, reason: 'Threat neutralization goodwill' });
+              addLog('DIPLOMACY: ' + ftCountry + ' grateful for neutralizing ' + threat.orgName + '. Relations +10%.', 'log-info');
               pushFeedItem({
                 id: uid('FI'),
                 type: 'DIPLOMATIC',
