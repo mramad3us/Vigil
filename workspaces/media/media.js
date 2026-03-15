@@ -207,18 +207,19 @@
     }
   }, 12);
 
-  // Operation resolved — only if overt assets involved
+  // Operation resolved — only if overt assets were actually deployed
   hook('operation:resolved', function(data) {
     var op = data.operation;
     if (!op || !op.location) return;
 
+    // No assets deployed — op never happened operationally, no media coverage
+    if (!op.assignedAssetIds || op.assignedAssetIds.length === 0) return;
+
     // Check for overt assets
     var hasOvert = false;
-    if (op.assignedAssetIds) {
-      for (var i = 0; i < op.assignedAssetIds.length; i++) {
-        var asset = getAsset(op.assignedAssetIds[i]);
-        if (asset && asset.deniability === 'OVERT') { hasOvert = true; break; }
-      }
+    for (var i = 0; i < op.assignedAssetIds.length; i++) {
+      var asset = getAsset(op.assignedAssetIds[i]);
+      if (asset && asset.deniability === 'OVERT') { hasOvert = true; break; }
     }
 
     if (!hasOvert) return; // Covert ops stay hidden
