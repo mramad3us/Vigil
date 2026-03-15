@@ -376,12 +376,13 @@ function sendDiplomaticGift(country) {
     var country = op.location.country;
     if (country === 'United States') return;
 
+    // No assets were ever deployed — no diplomatic consequences
+    if (!op.assignedAssetIds || op.assignedAssetIds.length === 0) return;
+
     var hasOvert = false;
-    if (op.assignedAssetIds) {
-      for (var i = 0; i < op.assignedAssetIds.length; i++) {
-        var asset = getAsset(op.assignedAssetIds[i]);
-        if (asset && asset.deniability === 'OVERT') { hasOvert = true; break; }
-      }
+    for (var i = 0; i < op.assignedAssetIds.length; i++) {
+      var asset = getAsset(op.assignedAssetIds[i]);
+      if (asset && asset.deniability === 'OVERT') { hasOvert = true; break; }
     }
 
     if (!hasOvert) {
