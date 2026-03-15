@@ -54,7 +54,7 @@ var DOMESTIC_ASSET_TEMPLATES = [
   {
     type: 'FBI_JTTF', name: 'Joint Terrorism Task Force', category: 'DOMESTIC', deniability: 'OVERT',
     homeBaseId: 'FBI_WASHINGTON', speed: 0, domesticAuthority: true,
-    capabilities: ['COUNTER_TERROR', 'INTEL'],
+    capabilities: ['COUNTER_TERROR', 'INTEL', 'HUMINT'],
     collectionProfile: { HUMINT: 4, SIGINT: 3, OSINT: 3 },
     designation: 'National JTTF — FBI Counterterrorism Division',
     personnel: 200,
@@ -82,7 +82,7 @@ var DOMESTIC_ASSET_TEMPLATES = [
   {
     type: 'FBI_FIELD_OFFICE', name: 'FBI Field Office', category: 'DOMESTIC', deniability: 'OVERT',
     homeBaseId: 'FBI_WASHINGTON', speed: 0, domesticAuthority: true,
-    capabilities: ['INTEL', 'COUNTER_TERROR', 'LAW_ENFORCEMENT'],
+    capabilities: ['INTEL', 'COUNTER_TERROR', 'LAW_ENFORCEMENT', 'HUMINT'],
     collectionProfile: { HUMINT: 3, SIGINT: 2, OSINT: 3 },
     designation: 'FBI Field Division',
     personnel: 50,
@@ -96,7 +96,7 @@ var DOMESTIC_ASSET_TEMPLATES = [
   {
     type: 'FBI_COUNTERINTEL', name: 'FBI Counterintelligence Division', category: 'DOMESTIC', deniability: 'OVERT',
     homeBaseId: 'FBI_WASHINGTON', speed: 0, domesticAuthority: true,
-    capabilities: ['INTEL', 'COUNTER_TERROR'],
+    capabilities: ['INTEL', 'COUNTER_TERROR', 'HUMINT'],
     collectionProfile: { HUMINT: 4, SIGINT: 3 },
     designation: 'Counterintelligence Division — FBI National Security Branch',
     personnel: 80,
@@ -188,7 +188,7 @@ var DOMESTIC_ASSET_TEMPLATES = [
   {
     type: 'DEA_FAST', name: 'DEA FAST Team', category: 'DOMESTIC', deniability: 'OVERT',
     homeBaseId: 'DEA_ARLINGTON', speed: 700, domesticAuthority: true,
-    capabilities: ['SOF', 'INTEL'],
+    capabilities: ['SOF', 'INTEL', 'HUMINT'],
     collectionProfile: { HUMINT: 4, SIGINT: 2 },
     designation: 'Foreign-deployed Advisory and Support Team — DEA Special Operations Division',
     personnel: 40,
