@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.6.10';
+V.version = '0.7.0';
 
 function initState() {
 
@@ -124,6 +124,12 @@ function initState() {
     intelFieldsRevealed: 0,
   };
 
+  // Prisoners (illegals system)
+  V.prisoners = [];
+
+  // Agencies (populated by illegals.js at game:start from INTELLIGENCE_SERVICES + NON_STATE_AGENCIES)
+  V.agencies = {};
+
   // Initialization flag — set after first game:start completes.
   // Persisted in saves to prevent re-initialization on load.
   V.initialized = false;
@@ -148,6 +154,38 @@ function getThreat(id) {
 function getCrisis(id) {
   for (var i = 0; i < V.crises.length; i++) {
     if (V.crises[i].id === id) return V.crises[i];
+  }
+  return null;
+}
+
+function getPrisoner(id) {
+  for (var i = 0; i < V.prisoners.length; i++) {
+    if (V.prisoners[i].id === id) return V.prisoners[i];
+  }
+  return null;
+}
+
+function getAgency(id) {
+  return V.agencies[id] || null;
+}
+
+function getServicesForCountry(country) {
+  var services = [];
+  for (var i = 0; i < INTELLIGENCE_SERVICES.length; i++) {
+    if (INTELLIGENCE_SERVICES[i].country === country) services.push(INTELLIGENCE_SERVICES[i]);
+  }
+  for (var j = 0; j < NON_STATE_AGENCIES.length; j++) {
+    if (NON_STATE_AGENCIES[j].countries.indexOf(country) >= 0) services.push(NON_STATE_AGENCIES[j]);
+  }
+  return services;
+}
+
+function getServiceById(serviceId) {
+  for (var i = 0; i < INTELLIGENCE_SERVICES.length; i++) {
+    if (INTELLIGENCE_SERVICES[i].id === serviceId) return INTELLIGENCE_SERVICES[i];
+  }
+  for (var j = 0; j < NON_STATE_AGENCIES.length; j++) {
+    if (NON_STATE_AGENCIES[j].id === serviceId) return NON_STATE_AGENCIES[j];
   }
   return null;
 }

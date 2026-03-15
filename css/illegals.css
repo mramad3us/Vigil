@@ -1,0 +1,438 @@
+/* ============================================================
+   VIGIL — css/illegals.css
+   Illegals workspace styling — prisoner cards, tier badges,
+   interrogation bars, agency intel sections.
+   ============================================================ */
+
+/* --- List Pane --- */
+.ill-toolbar {
+  display: flex;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.ill-tab-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ill-tab-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.ill-tab-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* --- Prisoner Card --- */
+.ill-prisoner-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.ill-prisoner-row:hover {
+  background: var(--bg-hover);
+}
+
+.ill-prisoner-row.selected {
+  border-left-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.ill-prisoner-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ill-prisoner-name {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ill-prisoner-agency {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.ill-prisoner-site {
+  font-size: 8px;
+  color: var(--text-dim);
+}
+
+/* --- Tier Badges --- */
+.ill-tier-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ill-tier-badge.tier-deep {
+  background: var(--red);
+  color: var(--bg-dark);
+}
+
+.ill-tier-badge.tier-mission {
+  background: var(--amber);
+  color: var(--bg-dark);
+}
+
+.ill-tier-badge.tier-recruited {
+  background: var(--text-dim);
+  color: var(--bg-dark);
+}
+
+.ill-dried-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  background: var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.ill-repatriated-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  background: var(--green);
+  color: var(--bg-dark);
+}
+
+/* --- Mini Progress Bar (list pane) --- */
+.ill-mini-bar {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ill-mini-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+/* --- Agency Row --- */
+.ill-agency-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.ill-agency-row:hover {
+  background: var(--bg-hover);
+}
+
+.ill-agency-row.selected {
+  border-left-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.ill-agency-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ill-agency-short {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ill-agency-country {
+  font-size: 8px;
+  color: var(--text-dim);
+}
+
+.ill-agency-type-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.ill-agency-type-badge.state {
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.ill-agency-type-badge.nonstate {
+  border: 1px solid var(--amber);
+  color: var(--amber);
+}
+
+.ill-prisoner-count-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+  padding: 1px 4px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg-dark);
+}
+
+/* --- Group Headers --- */
+.ill-group-header {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+  border-bottom: 1px solid var(--border);
+}
+
+/* --- Detail Pane --- */
+.ill-detail-header {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.ill-detail-title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: var(--sp-1);
+}
+
+.ill-detail-subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.ill-detail-body {
+  padding: var(--sp-3) var(--sp-4);
+  overflow-y: auto;
+}
+
+.ill-detail-section {
+  margin-bottom: var(--sp-4);
+}
+
+.ill-detail-section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: var(--sp-2);
+}
+
+/* --- Interrogation Progress --- */
+.ill-interrog-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: var(--sp-2) 0;
+}
+
+.ill-interrog-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.ill-interrog-bar-fill.dried {
+  background: var(--text-dim);
+}
+
+.ill-interrog-stats {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.ill-interrog-stat-value {
+  color: var(--text);
+}
+
+/* --- Intel Field (prisoner + agency) --- */
+.ill-intel-field {
+  padding: var(--sp-2);
+  margin-bottom: var(--sp-1);
+  background: var(--bg-medium);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--border);
+}
+
+.ill-intel-field.revealed {
+  border-left-color: var(--green);
+}
+
+.ill-intel-field.dynamic-pending {
+  border-left-color: var(--amber);
+}
+
+.ill-intel-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-1);
+}
+
+.ill-intel-field-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.ill-intel-field-diff {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.ill-intel-field-value {
+  font-size: var(--fs-sm);
+  color: var(--text);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.ill-intel-field-progress {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: var(--sp-1);
+}
+
+.ill-intel-field-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+
+/* --- Pursue Button --- */
+.ill-pursue-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border: 1px solid var(--amber);
+  background: transparent;
+  color: var(--amber);
+  cursor: pointer;
+  margin-top: var(--sp-1);
+  transition: all var(--transition-fast);
+}
+
+.ill-pursue-btn:hover {
+  background: var(--amber);
+  color: var(--bg-dark);
+}
+
+/* --- Repatriate Button --- */
+.ill-repatriate-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 16px;
+  border: 1px solid var(--green);
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  margin-top: var(--sp-2);
+  transition: all var(--transition-fast);
+}
+
+.ill-repatriate-btn:hover {
+  background: var(--green);
+  color: var(--bg-dark);
+}
+
+/* --- Empty State --- */
+.ill-empty {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+  text-align: center;
+  padding: var(--sp-6) var(--sp-3);
+  letter-spacing: 0.5px;
+}
+
+/* --- Meta Row --- */
+.ill-meta-row {
+  display: flex;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-1);
+}
+
+.ill-meta-item {
+  font-size: 9px;
+}
+
+.ill-meta-label {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.ill-meta-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* --- Associated Threats / Prisoners links --- */
+.ill-link-row {
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--accent);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.ill-link-row:hover {
+  color: var(--text);
+}

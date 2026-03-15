@@ -230,6 +230,30 @@ var OPERATION_TYPES = {
     baseSuccessRate: 80,
     intelReward: [5, 10],
   },
+  // --- Illegals Operation Types ---
+  CAPTURE_OP: {
+    id: 'CAPTURE_OP', label: 'Capture Operation', shortLabel: 'CAPTURE',
+    description: 'Covert snatch operation to capture a foreign intelligence operative alive. Yields a prisoner for interrogation. Requires precise intelligence and SOF teams.',
+    pros: ['Prisoner for interrogation', 'High intelligence yield over time', 'Deniable if executed cleanly'],
+    cons: ['Complex operation', 'Risk of diplomatic incident', 'Target may resist or self-terminate', 'Requires extraction plan'],
+    requiredCapabilities: ['SOF'],
+    preferredCapabilities: ['SOF', 'INTEL', 'ISR'],
+    execHoursRange: [2, 8],
+    baseSuccessRate: 55,
+    intelReward: [5, 10],
+    yieldsPrisoner: true,
+  },
+  BURN_NOTICE: {
+    id: 'BURN_NOTICE', label: 'Burn Notice', shortLabel: 'BURN',
+    description: 'Expose a foreign illegal to the local authorities of the country they are operating in. A diplomatic play — no prisoner, no intel, but a major relations boost with the host country.',
+    pros: ['Major relations boost with host country (+15-20%)', 'No US personnel at risk', 'Deniable'],
+    cons: ['No prisoner for interrogation', 'No intel yield', 'Foreign service learns their agent is burned'],
+    requiredCapabilities: ['DIPLOMATIC'],
+    preferredCapabilities: ['DIPLOMATIC', 'INTEL'],
+    execHoursRange: [4, 12],
+    baseSuccessRate: 90,
+    intelReward: [0, 0],
+  },
 };
 
 // --- Intel Difficulty Tiers ---
@@ -471,6 +495,29 @@ var THREAT_INTEL_FIELDS = {
     { key: 'LEADERSHIP_ID',         label: 'Cell Leader Identification',      difficulty: 'HARD',      source: 'HUMINT' },
     { key: 'INTERNAL_COMMS',        label: 'Encrypted Communications',        difficulty: 'VERY_HARD', source: 'SIGINT' },
     { key: 'FINANCING_TRAIL',       label: 'Financial Trail',                 difficulty: 'VERY_HARD', source: 'SIGINT' },
+  ],
+  // === ILLEGAL AGENT THREAT TYPES ===
+  ILLEGAL_AGENT_DOMESTIC: [
+    { key: 'AGENT_TIER',             label: 'Agent Classification',            difficulty: 'EASY',      source: 'HUMINT' },
+    { key: 'SPONSORING_SERVICE',     label: 'Sponsoring Intelligence Service', difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'COVER_IDENTITY',         label: 'Cover Identity',                  difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'OPERATIONAL_METHOD',     label: 'Operational Method',              difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'HANDLER_CONTACT',        label: 'Handler Contact Protocol',        difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'COMMUNICATION_PROTOCOL', label: 'Communication Protocol',          difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'TARGET_ASSESSMENT',      label: 'Target & Mission Assessment',     difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'NETWORK_MAPPING',        label: 'Agent Network & Safe Houses',     difficulty: 'VERY_HARD', source: 'HUMINT' },
+    { key: 'REAL_IDENTITY',          label: 'True Identity',                   difficulty: 'VERY_HARD', source: 'HUMINT' },
+  ],
+  ILLEGAL_AGENT_FOREIGN: [
+    { key: 'AGENT_TIER',             label: 'Agent Classification',            difficulty: 'EASY',      source: 'HUMINT' },
+    { key: 'SPONSORING_SERVICE',     label: 'Sponsoring Intelligence Service', difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'COVER_IDENTITY',         label: 'Cover Identity',                  difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'OPERATIONAL_METHOD',     label: 'Operational Method',              difficulty: 'MEDIUM',    source: 'SIGINT' },
+    { key: 'HANDLER_CONTACT',        label: 'Handler Contact Protocol',        difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'COMMUNICATION_PROTOCOL', label: 'Communication Protocol',          difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'TARGET_ASSESSMENT',      label: 'Target & Mission Assessment',     difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'NETWORK_MAPPING',        label: 'Agent Network & Safe Houses',     difficulty: 'VERY_HARD', source: 'HUMINT' },
+    { key: 'REAL_IDENTITY',          label: 'True Identity',                   difficulty: 'VERY_HARD', source: 'HUMINT' },
   ],
 };
 
@@ -789,4 +836,154 @@ var EVENT_TO_OP_TYPE = {
   SPACE: 'SURVEILLANCE',
   HUMANITARIAN: 'DIPLOMATIC_RESPONSE',
   DOMESTIC: 'SURVEILLANCE',
+};
+
+// ===================================================================
+//  INTELLIGENCE SERVICES — Real-world agencies mapped to game countries
+// ===================================================================
+
+var INTELLIGENCE_SERVICES = [
+  // --- Hostile / At War ---
+  { id: 'SVR',      label: 'SVR (Foreign Intelligence Service)',                    shortLabel: 'SVR',    country: 'Russia',          type: 'STATE' },
+  { id: 'GRU',      label: 'GRU (Military Intelligence)',                           shortLabel: 'GRU',    country: 'Russia',          type: 'STATE' },
+  { id: 'MSS',      label: 'MSS (Ministry of State Security)',                      shortLabel: 'MSS',    country: 'China',           type: 'STATE' },
+  { id: 'MOIS',     label: 'MOIS (Ministry of Intelligence)',                       shortLabel: 'MOIS',   country: 'Iran',            type: 'STATE' },
+  { id: 'RGB',      label: 'RGB (Reconnaissance General Bureau)',                   shortLabel: 'RGB',    country: 'North Korea',     type: 'STATE' },
+  // --- Tense ---
+  { id: 'SEBIN',    label: 'SEBIN (Bolivarian Intelligence Service)',               shortLabel: 'SEBIN',  country: 'Venezuela',       type: 'STATE' },
+  { id: 'DI',       label: 'DI (Directorate of Intelligence)',                      shortLabel: 'DI',     country: 'Cuba',            type: 'STATE' },
+  { id: 'GSD',      label: 'GSD (General Security Directorate)',                    shortLabel: 'GSD',    country: 'Syria',           type: 'STATE' },
+  { id: 'PSO',      label: 'PSO (Political Security Organization)',                 shortLabel: 'PSO',    country: 'Yemen',           type: 'STATE' },
+  { id: 'NISA',     label: 'NISA (National Intelligence and Security Agency)',       shortLabel: 'NISA',   country: 'Somalia',         type: 'STATE' },
+  { id: 'GDI',      label: 'GDI (General Directorate of Intelligence)',             shortLabel: 'GDI',    country: 'Afghanistan',     type: 'STATE' },
+  { id: 'KGB_BY',   label: 'KGB (State Security Committee)',                        shortLabel: 'KGB',    country: 'Belarus',         type: 'STATE' },
+  // --- Neutral ---
+  { id: 'ISI',      label: 'ISI (Inter-Services Intelligence)',                     shortLabel: 'ISI',    country: 'Pakistan',        type: 'STATE' },
+  { id: 'GSO',      label: 'GSO (General Security Directorate)',                    shortLabel: 'GSO',    country: 'Lebanon',         type: 'STATE' },
+  { id: 'DGSE_ML',  label: 'DGSE (General Directorate for State Security)',         shortLabel: 'DGSE',   country: 'Mali',            type: 'STATE' },
+  { id: 'LIA',      label: 'LIA (Libyan Intelligence Agency)',                      shortLabel: 'LIA',    country: 'Libya',           type: 'STATE' },
+  // --- Friendly ---
+  { id: 'NSB',      label: 'NSB (National Security Bureau)',                        shortLabel: 'NSB',    country: 'Taiwan',          type: 'STATE' },
+  { id: 'SSSG',     label: 'SSSG (State Security Service)',                         shortLabel: 'SSSG',   country: 'Georgia',         type: 'STATE' },
+  { id: 'SZR',      label: 'SZR (Foreign Intelligence Service)',                    shortLabel: 'SZR',    country: 'Ukraine',         type: 'STATE' },
+  { id: 'DNI_CO',   label: 'DNI (National Intelligence Directorate)',               shortLabel: 'DNI',    country: 'Colombia',        type: 'STATE' },
+  { id: 'INIS',     label: 'INIS (Iraqi National Intelligence Service)',            shortLabel: 'INIS',   country: 'Iraq',            type: 'STATE' },
+  { id: 'NISS',     label: 'NISS (National Intelligence and Security Service)',     shortLabel: 'NISS',   country: 'Ethiopia',        type: 'STATE' },
+  { id: 'NSI_BD',   label: 'NSI (National Security Intelligence)',                  shortLabel: 'NSI',    country: 'Bangladesh',      type: 'STATE' },
+  { id: 'KNB',      label: 'KNB (National Security Committee)',                     shortLabel: 'KNB',    country: 'Kazakhstan',      type: 'STATE' },
+  // --- Allied (Economic) ---
+  { id: 'MOSSAD',   label: 'Mossad (Institute for Intelligence and Special Operations)', shortLabel: 'MOSSAD', country: 'Israel',     type: 'STATE' },
+  { id: 'GIP',      label: 'GIP (General Intelligence Presidency)',                 shortLabel: 'GIP',    country: 'Saudi Arabia',    type: 'STATE' },
+  { id: 'RAW',      label: 'RAW (Research and Analysis Wing)',                      shortLabel: 'RAW',    country: 'India',           type: 'STATE' },
+  { id: 'ABIN',     label: 'ABIN (Brazilian Intelligence Agency)',                  shortLabel: 'ABIN',   country: 'Brazil',          type: 'STATE' },
+  { id: 'CISEN',    label: 'CISEN (Center for Investigation and National Security)',shortLabel: 'CISEN',  country: 'Mexico',          type: 'STATE' },
+  { id: 'GIS',      label: 'GIS (General Intelligence Service)',                    shortLabel: 'GIS',    country: 'Egypt',           type: 'STATE' },
+  { id: 'NIS_KE',   label: 'NIS (National Intelligence Service)',                   shortLabel: 'NIS',    country: 'Kenya',           type: 'STATE' },
+  { id: 'SSA',      label: 'SSA (State Security Agency)',                           shortLabel: 'SSA',    country: 'South Africa',    type: 'STATE' },
+  { id: 'AFI',      label: 'AFI (Federal Intelligence Agency)',                     shortLabel: 'AFI',    country: 'Argentina',       type: 'STATE' },
+  { id: 'NIA',      label: 'NIA (National Intelligence Agency)',                    shortLabel: 'NIA',    country: 'Nigeria',         type: 'STATE' },
+  // --- Allied (Military) ---
+  { id: 'BND',      label: 'BND (Federal Intelligence Service)',                    shortLabel: 'BND',    country: 'Germany',         type: 'STATE' },
+  { id: 'DGSE',     label: 'DGSE (General Directorate for External Security)',      shortLabel: 'DGSE',   country: 'France',          type: 'STATE' },
+  { id: 'AW',       label: 'AW (Foreign Intelligence Agency)',                      shortLabel: 'AW',     country: 'Poland',          type: 'STATE' },
+  { id: 'AISE',     label: 'AISE (External Intelligence and Security Agency)',      shortLabel: 'AISE',   country: 'Italy',           type: 'STATE' },
+  { id: 'CNI',      label: 'CNI (National Intelligence Centre)',                    shortLabel: 'CNI',    country: 'Spain',           type: 'STATE' },
+  { id: 'MIT',      label: 'MIT (National Intelligence Organization)',              shortLabel: 'MIT',    country: 'Turkey',          type: 'STATE' },
+  // --- Allied (Full) ---
+  { id: 'CSIS',     label: 'CSIS (Canadian Security Intelligence Service)',         shortLabel: 'CSIS',   country: 'Canada',          type: 'STATE' },
+  { id: 'SIS',      label: 'SIS/MI6 (Secret Intelligence Service)',                shortLabel: 'MI6',    country: 'United Kingdom',  type: 'STATE' },
+  { id: 'CIRO',     label: 'CIRO (Cabinet Intelligence and Research Office)',       shortLabel: 'CIRO',   country: 'Japan',           type: 'STATE' },
+  { id: 'NIS_KR',   label: 'NIS (National Intelligence Service)',                  shortLabel: 'NIS',    country: 'South Korea',     type: 'STATE' },
+  { id: 'ASIS',     label: 'ASIS (Australian Secret Intelligence Service)',        shortLabel: 'ASIS',   country: 'Australia',       type: 'STATE' },
+];
+
+// --- Non-State Agencies (terror/militant organizations that run illegals) ---
+// Can run MISSION_SPECIFIC and RECRUITED_AGENT illegals only (never DEEP_COVER).
+
+var NON_STATE_AGENCIES = [
+  { id: 'HEZBOLLAH',    label: 'Hezbollah (External Security Organization)',   shortLabel: 'HEZB',   type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Lebanon', 'Syria', 'Iran'] },
+  { id: 'HAMAS',        label: 'Hamas (Izz ad-Din al-Qassam Brigades)',        shortLabel: 'HAMAS',  type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Lebanon', 'Syria'] },
+  { id: 'IRGC_QF',      label: 'IRGC Quds Force',                             shortLabel: 'QF',     type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Iran', 'Iraq', 'Syria', 'Lebanon', 'Yemen'] },
+  { id: 'IRA_SPLINTER',  label: 'Dissident Irish Republican Movement',         shortLabel: 'DIRA',   type: 'NON_STATE', region: 'EUROPE',      countries: ['United Kingdom'] },
+  { id: 'PKK',           label: 'PKK (Kurdistan Workers Party)',               shortLabel: 'PKK',    type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Turkey', 'Iraq', 'Syria'] },
+  { id: 'AL_QAEDA',      label: 'Al-Qaeda Network',                           shortLabel: 'AQ',     type: 'NON_STATE', region: null,          countries: ['Afghanistan', 'Pakistan', 'Yemen', 'Somalia', 'Mali', 'Libya'] },
+  { id: 'ISIS_REMNANT',  label: 'Islamic State Remnant Network',              shortLabel: 'ISIS',   type: 'NON_STATE', region: null,          countries: ['Syria', 'Iraq', 'Libya', 'Afghanistan', 'Somalia', 'Mali'] },
+  { id: 'WAGNER',        label: 'Wagner Group / Africa Corps',                shortLabel: 'WAGNER', type: 'NON_STATE', region: null,          countries: ['Russia', 'Mali', 'Libya', 'Syria'] },
+  { id: 'HOUTHI',        label: 'Ansar Allah (Houthi Movement)',              shortLabel: 'HOUTHI', type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Yemen'] },
+  { id: 'BOKO_HARAM',    label: 'Boko Haram / ISWAP',                        shortLabel: 'BH',     type: 'NON_STATE', region: 'AFRICA',      countries: ['Nigeria'] },
+  { id: 'AL_SHABAAB',    label: 'Al-Shabaab',                                 shortLabel: 'AS',     type: 'NON_STATE', region: 'AFRICA',      countries: ['Somalia', 'Kenya', 'Ethiopia'] },
+];
+
+// --- Agent Tiers ---
+// confidencePenalty: applied to ALL ops against illegals of this tier.
+// difficultyMod: multiplier on intel field ticksToReveal.
+// stateOnly: if true, only state services can run this tier (not terror orgs).
+
+var AGENT_TIERS = {
+  DEEP_COVER:       { id: 'DEEP_COVER',       label: 'Deep Cover Illegal',     weight: 2, difficultyMod: 1.5, confidencePenalty: -30, stateOnly: true },
+  MISSION_SPECIFIC: { id: 'MISSION_SPECIFIC',  label: 'Mission-Specific Agent', weight: 3, difficultyMod: 1.0, confidencePenalty: -20, stateOnly: false },
+  RECRUITED_AGENT:  { id: 'RECRUITED_AGENT',   label: 'Recruited Local Agent',  weight: 4, difficultyMod: 0.7, confidencePenalty: -10, stateOnly: false },
+};
+
+// --- Killing Methods (narrative only — randomly picked for TARGETED_KILLING on illegals) ---
+
+var KILLING_METHODS = [
+  { id: 'CAR_BOMB',    label: 'Vehicle-Borne IED',         desc: 'Explosive device placed under the target\'s vehicle. Detonated remotely or by proximity trigger.' },
+  { id: 'SNIPER',      label: 'Precision Sniper Shot',     desc: 'Long-range engagement from a concealed position. Single shot, immediate exfiltration.' },
+  { id: 'POISON',      label: 'Chemical Agent / Poison',   desc: 'Covert administration of a lethal chemical agent — Novichok, ricin, or thallium derivatives. Death appears natural or delayed.' },
+  { id: 'CLOSE_RANGE', label: 'Close-Range Assassination', desc: 'Operative approaches target in public and neutralizes at close range. Suppressed sidearm or edged weapon. High risk, high certainty.' },
+];
+
+// --- Detention Sites ---
+
+var DETENTION_SITES = [
+  // Federal Prisons (domestic arrests)
+  { id: 'ADX_FLORENCE',       label: 'USP ADX Florence',                    type: 'FEDERAL',    location: 'Florence, Colorado',          security: 'SUPERMAX' },
+  { id: 'FCI_TERRE_HAUTE',   label: 'FCI Terre Haute',                     type: 'FEDERAL',    location: 'Terre Haute, Indiana',        security: 'HIGH' },
+  { id: 'MCC_NEW_YORK',      label: 'MCC New York',                        type: 'FEDERAL',    location: 'New York, New York',          security: 'HIGH' },
+  { id: 'FDC_ALEXANDRIA',    label: 'FDC Alexandria',                      type: 'FEDERAL',    location: 'Alexandria, Virginia',        security: 'HIGH' },
+  { id: 'USP_LEWISBURG',     label: 'USP Lewisburg',                       type: 'FEDERAL',    location: 'Lewisburg, Pennsylvania',     security: 'HIGH' },
+  // Military Facilities
+  { id: 'USDB_LEAVENWORTH',  label: 'USDB Fort Leavenworth',               type: 'MILITARY',   location: 'Fort Leavenworth, Kansas',    security: 'MAXIMUM' },
+  { id: 'BRIG_QUANTICO',     label: 'Marine Corps Brig, Quantico',         type: 'MILITARY',   location: 'Quantico, Virginia',          security: 'MAXIMUM' },
+  { id: 'NAVCON_CHARLESTON',  label: 'Naval Consolidated Brig, Charleston', type: 'MILITARY',   location: 'Charleston, South Carolina',  security: 'HIGH' },
+  { id: 'CAMP_JUSTICE',      label: 'Camp Justice, Guantanamo Bay',        type: 'MILITARY',   location: 'Guantanamo Bay, Cuba',        security: 'MAXIMUM' },
+  { id: 'CAMP_SEVEN',        label: 'Camp VII, Guantanamo Bay',            type: 'MILITARY',   location: 'Guantanamo Bay, Cuba',        security: 'BLACK' },
+  // Black Sites (foreign captures)
+  { id: 'SITE_COBALT',       label: 'CIA Detention Facility COBALT',       type: 'BLACK_SITE', location: 'Classified — Eastern Europe',  security: 'BLACK' },
+  { id: 'SITE_ORANGE',       label: 'CIA Detention Facility ORANGE',       type: 'BLACK_SITE', location: 'Classified — Horn of Africa',  security: 'BLACK' },
+  { id: 'SITE_INDIGO',       label: 'CIA Detention Facility INDIGO',       type: 'BLACK_SITE', location: 'Classified — Central Asia',    security: 'BLACK' },
+  { id: 'SITE_GREEN',        label: 'CIA Detention Facility GREEN',        type: 'BLACK_SITE', location: 'Classified — Southeast Asia',  security: 'BLACK' },
+];
+
+// --- Agency Intel Fields ---
+// Persistent per-agency fields revealed through passive Vigil collection + prisoner interrogation.
+// Tick pools are orders of magnitude larger than threat fields.
+// ACTIVE_OPS is dynamic: reveals, shows "Pursue" button, spawns threat, resets.
+
+var AGENCY_INTEL_FIELDS = [
+  { key: 'STATION_LOCATIONS',    label: 'Known Station Locations',          difficulty: 'EASY',      source: 'HUMINT' },
+  { key: 'COMM_PROTOCOLS',       label: 'Communication Protocols',          difficulty: 'EASY',      source: 'SIGINT' },
+  { key: 'ACTIVE_OPS',           label: 'Active Operations',               difficulty: 'MEDIUM',    source: 'HUMINT', dynamic: true },
+  { key: 'RECRUITMENT_METHODS',  label: 'Recruitment Tradecraft',           difficulty: 'MEDIUM',    source: 'HUMINT' },
+  { key: 'ACTIVE_AGENTS',        label: 'Active Agent Estimate',            difficulty: 'HARD',      source: 'HUMINT' },
+  { key: 'STRATEGIC_PRIORITIES', label: 'Strategic Collection Priorities',  difficulty: 'VERY_HARD', source: 'HUMINT' },
+];
+
+// Agency intel difficulty — massively scaled compared to threat fields.
+// Scales further by organization size (see systems/illegals.js).
+var AGENCY_INTEL_DIFFICULTY = {
+  EASY:      { ticksRange: [2000, 5000] },
+  MEDIUM:    { ticksRange: [20000, 50000] },
+  HARD:      { ticksRange: [200000, 500000] },
+  VERY_HARD: { ticksRange: [2000000, 10000000] },
+};
+
+// --- Interrogation Parameters ---
+// Per-tier: progressRate (per game-hour), intelPerHour (INTEL resource), agencyTicksPerHour (contribution to agency field reveals)
+
+var INTERROGATION_PARAMS = {
+  RECRUITED_AGENT:  { progressRate: 1.5, intelPerHour: 3, agencyTicksPerHour: 1 },
+  MISSION_SPECIFIC: { progressRate: 0.8, intelPerHour: 2, agencyTicksPerHour: 5 },
+  DEEP_COVER:       { progressRate: 0.4, intelPerHour: 1.5, agencyTicksPerHour: 20 },
 };

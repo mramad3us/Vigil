@@ -398,7 +398,17 @@ function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCove
   // <40% revealed = penalty (up to -15), 40-60% = neutral, >60% = bonus (up to +15)
   var intelModifier = calcIntelModifier(op);
 
-  var total = base + assetBonus - transitPenalty + capBonus + threatAdj + intelModifier;
+  // Illegal agent confidence penalty — higher-tier agents are harder to capture/neutralize
+  var illegalPenalty = 0;
+  if (op && op.relatedThreatId) {
+    var relThreat = getThreat(op.relatedThreatId);
+    if (relThreat && relThreat.agentTier && typeof AGENT_TIERS !== 'undefined') {
+      var tierDef = AGENT_TIERS[relThreat.agentTier];
+      if (tierDef) illegalPenalty = tierDef.confidencePenalty; // negative value
+    }
+  }
+
+  var total = base + assetBonus - transitPenalty + capBonus + threatAdj + intelModifier + illegalPenalty;
   return clamp(Math.round(total), 15, 95);
 }
 

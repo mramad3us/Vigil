@@ -27,6 +27,8 @@ var THREAT_TYPES = [
     theaters: ['LATIN_AMERICA', 'AFRICA', 'EAST_ASIA', 'MIDDLE_EAST', 'EUROPE'] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5],
     theaters: ['MIDDLE_EAST', 'EAST_ASIA', 'SOUTH_ASIA', 'RUSSIA_CIS'] },
+  { id: 'ILLEGAL_AGENT_FOREIGN', label: 'Foreign Illegal Agent', weight: 1, threatRange: [3, 5],
+    theaters: ['EUROPE', 'MIDDLE_EAST', 'EAST_ASIA', 'SOUTH_ASIA', 'AFRICA', 'RUSSIA_CIS', 'LATIN_AMERICA'] },
 ];
 
 // Military/strategic targets are DEFCON-1-only — never in the general weighted pool.
@@ -53,6 +55,7 @@ var THREAT_TO_OP_TYPE = {
   ASSET_COMPROMISED: ['ASSET_EXTRACTION', 'SOF_RAID'],
   MILITARY_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE', 'SOF_RAID'],
   STRATEGIC_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE'],
+  ILLEGAL_AGENT_FOREIGN: ['CAPTURE_OP', 'TARGETED_KILLING', 'BURN_NOTICE'],
 };
 
 // ===================================================================
@@ -118,13 +121,14 @@ function spawnThreat(theaterId, forcedTypeId) {
   }
   if (!type) {
     // Filter threat types to those valid for this theater
-    var eligible = THREAT_TYPES;
+    // Exclude ILLEGAL_AGENT_FOREIGN — spawned by illegals.js with its own pipeline
+    var eligible = THREAT_TYPES.filter(function(t) { return t.id !== 'ILLEGAL_AGENT_FOREIGN'; });
     if (effectiveTheater) {
-      eligible = THREAT_TYPES.filter(function(t) {
+      eligible = eligible.filter(function(t) {
         return !t.theaters || t.theaters.indexOf(effectiveTheater) >= 0;
       });
     }
-    if (eligible.length === 0) eligible = THREAT_TYPES; // Fallback
+    if (eligible.length === 0) eligible = THREAT_TYPES.filter(function(t) { return t.id !== 'ILLEGAL_AGENT_FOREIGN'; }); // Fallback
     type = weightedPick(eligible);
   }
 
@@ -770,6 +774,28 @@ function approveMoveThreatToOps(threatId) {
         'Asset condition is unknown. Vigil requires this field to determine ' +
         'whether a covert extraction or a direct action rescue is appropriate.<br><br>' +
         'Continue intelligence collection to reveal <strong>ASSET CONDITION &amp; STATUS</strong> before approving response.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
+  // ILLEGAL_AGENT: require AGENT_TIER and COVER_IDENTITY before allowing move to ops
+  if (threat.type === 'ILLEGAL_AGENT_DOMESTIC' || threat.type === 'ILLEGAL_AGENT_FOREIGN') {
+    var tierRevealed = false, coverRevealed = false;
+    for (var ilf = 0; ilf < threat.intelFields.length; ilf++) {
+      if (threat.intelFields[ilf].key === 'AGENT_TIER' && threat.intelFields[ilf].revealed) tierRevealed = true;
+      if (threat.intelFields[ilf].key === 'COVER_IDENTITY' && threat.intelFields[ilf].revealed) coverRevealed = true;
+    }
+    if (!tierRevealed || !coverRevealed) {
+      dismissUrgentAlert();
+      var missing = [];
+      if (!tierRevealed) missing.push('<strong>AGENT CLASSIFICATION</strong>');
+      if (!coverRevealed) missing.push('<strong>COVER IDENTITY</strong>');
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'The following critical intelligence has not been collected: ' + missing.join(' and ') + '.<br><br>' +
+        'Vigil requires agent classification to determine appropriate response options and cover identity ' +
+        'to enable targeting. Continue intelligence collection before approving direct action.</div>',
         { pause: false });
       return;
     }

@@ -23,6 +23,7 @@ var DOMESTIC_THREAT_TYPES = [
   { id: 'HOSTAGE_DOMESTIC', label: 'Hostage Situation', weight: 1, threatRange: [4, 5] },
   { id: 'ASSASSINATION_TARGET', label: 'Targeted Elimination', weight: 1, threatRange: [3, 5] },
   { id: 'DOMESTIC_CAPTURE_TARGET', label: 'High-Priority Fugitive', weight: 2, threatRange: [3, 4] },
+  { id: 'ILLEGAL_AGENT_DOMESTIC', label: 'Foreign Illegal Agent', weight: 2, threatRange: [3, 5] },
 ];
 
 // --- Map domestic threat types to domestic operation types ---
@@ -41,6 +42,7 @@ var DOMESTIC_THREAT_TO_OP_TYPE = {
   HOSTAGE_DOMESTIC: ['DOMESTIC_HOSTAGE_RESCUE', 'LAW_ENFORCEMENT', 'COUNTER_TERROR'],
   ASSASSINATION_TARGET: ['ARREST_OPERATION', 'LAW_ENFORCEMENT', 'INVESTIGATION'],
   DOMESTIC_CAPTURE_TARGET: ['ARREST_OPERATION', 'LAW_ENFORCEMENT', 'INVESTIGATION', 'DOMESTIC_SURVEILLANCE'],
+  ILLEGAL_AGENT_DOMESTIC: ['TARGETED_KILLING', 'ARREST_OPERATION', 'INVESTIGATION', 'DOMESTIC_SURVEILLANCE'],
 };
 
 // ===================================================================
@@ -48,7 +50,9 @@ var DOMESTIC_THREAT_TO_OP_TYPE = {
 // ===================================================================
 
 function spawnDomesticThreat() {
-  var type = weightedPick(DOMESTIC_THREAT_TYPES);
+  // Filter out ILLEGAL_AGENT_DOMESTIC — spawned by illegals.js with its own pipeline
+  var spawnableTypes = DOMESTIC_THREAT_TYPES.filter(function(t) { return t.id !== 'ILLEGAL_AGENT_DOMESTIC'; });
+  var type = weightedPick(spawnableTypes);
   var loc = generateDomesticLocation();
   var threatLevel = randInt(type.threatRange[0], type.threatRange[1]);
 

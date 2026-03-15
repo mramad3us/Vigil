@@ -186,6 +186,7 @@ function initKeyboard() {
       case '4': activateWorkspace('sitroom'); break;
       case '5': activateWorkspace('media'); break;
       case '6': activateWorkspace('diplomacy'); break;
+      case '7': activateWorkspace('illegals'); break;
       case ' ':
         e.preventDefault();
         togglePause();

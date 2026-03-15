@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/tooltip.css">
   <link rel="stylesheet" href="css/media.css">
   <link rel="stylesheet" href="css/diplomacy.css">
+  <link rel="stylesheet" href="css/illegals.css">
 
   <!-- CesiumJS -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
@@ -180,6 +181,7 @@
       <div class="workspace" id="ws-sitroom" data-workspace="sitroom"></div>
       <div class="workspace" id="ws-media" data-workspace="media"></div>
       <div class="workspace" id="ws-diplomacy" data-workspace="diplomacy"></div>
+      <div class="workspace" id="ws-illegals" data-workspace="illegals"></div>
     </div>
 
     <!-- Taskbar -->
@@ -214,6 +216,11 @@
           <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><polygon class="tb-svg-stroke" points="10,2 16,10 10,18 4,10" /><line class="tb-svg-stroke" x1="7" y1="6" x2="13" y2="14" /><line class="tb-svg-stroke" x1="13" y1="6" x2="7" y2="14" /></svg></span>
           <span class="tb-label">Diplomacy</span>
           <span class="tb-badge" id="badge-diplomacy"></span>
+        </button>
+        <button class="tb-app" data-workspace="illegals" onclick="activateWorkspace('illegals')" data-tip="Counter-espionage — detained operatives, foreign intelligence services, interrogation. Press 7." data-tip-align="top">
+          <span class="tb-icon"><svg class="tb-svg" viewBox="0 0 20 20" width="16" height="16"><circle class="tb-svg-stroke" cx="10" cy="6" r="3.5" /><path class="tb-svg-stroke" d="M4,18 Q4,12 10,12 Q16,12 16,18" /><line class="tb-svg-stroke" x1="14" y1="4" x2="17" y2="1" /><line class="tb-svg-stroke" x1="14" y1="1" x2="17" y2="4" /></svg></span>
+          <span class="tb-label">Illegals</span>
+          <span class="tb-badge" id="badge-illegals"></span>
         </button>
       </div>
       <div class="tb-right">
@@ -272,6 +279,8 @@
   <script src="systems/diplomacy.js"></script>
   <script src="systems/defcon.js"></script>
   <script src="systems/conflicts.js"></script>
+  <script src="systems/illegals-content.js"></script>
+  <script src="systems/illegals.js"></script>
   <script src="systems/saves.js"></script>
 
   <!-- Workspaces -->
@@ -287,6 +296,7 @@
   <script src="workspaces/sitroom/sitroom.js"></script>
   <script src="workspaces/media/media.js"></script>
   <script src="workspaces/diplomacy/diplomacy.js"></script>
+  <script src="workspaces/illegals/illegals.js"></script>
 
 </body>
 </html>

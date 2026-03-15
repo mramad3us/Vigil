@@ -435,6 +435,46 @@ var THREAT_CONTEXT = {
     assessmentSuccess: 'Counter-sabotage raid {codename} in {city} neutralized {sponsor}\'s sabotage cell operating as {org}. Planned attacks against US critical infrastructure prevented. Recovered materials will enable counter-intelligence operations against {sponsor}\'s sabotage directorate.',
     assessmentFailure: 'Counter-sabotage raid {codename} in {city} failed to neutralize {sponsor}\'s cell. {org}\'s sabotage capability remains intact and target list is unknown. All US installations in the {theater} theater should increase security posture. Follow-up intelligence collection is critical.',
   },
+  ILLEGAL_AGENT_DOMESTIC: {
+    targetDesc: 'subject\'s residence',
+    objective: 'counter-espionage operation',
+    preMission: [
+      'Foreign intelligence operative {org} identified in {city}. {agency} sponsorship confirmed through SIGINT analysis. Cover identity documented. Domestic law enforcement assets briefed. Objective: apprehend the operative and exploit for intelligence.',
+      'Counter-espionage target {org} operating on US soil under commercial cover in {city}. Sponsored by {agency}. Vigil assesses the operative has been conducting intelligence collection targeting US national security interests. Domestic authorities cleared for action.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Subject detained without incident at {loc}. Cover identity documents, encrypted communication devices, and intelligence materials seized. Subject is cooperating at a minimal level. Transfer to detention facility in progress.',
+      '"JACKPOT." Operative apprehended. Found in possession of classified material, tradecraft equipment, and communication devices linked to {agency}. Arrest conducted cleanly — no public attention. Subject now in federal custody.',
+    ],
+    jackpotFailure: [
+      'Subject was alerted and initiated counter-surveillance evasion. By the time the arrest team reached the location, the operative had sanitized their residence and vanished. {agency}\'s agent is in the wind.',
+      'Arrest operation compromised. Subject detected surveillance and activated emergency extraction protocol. Residence was empty — all intelligence materials removed. {agency} likely exfiltrated the operative within hours.',
+    ],
+    sseSuccess: 'Exploitation of subject\'s residence and devices recovered encrypted communications, handler contact information, intelligence reports, and collection tasking. Damage assessment to US intelligence programs initiated.',
+    sseFailure: 'Subject\'s residence was professionally sanitized. Communication devices were destroyed or missing. Minimal intelligence value recovered. The scope of espionage damage may never be fully assessed.',
+    assessmentSuccess: 'Counter-espionage operation {codename} in {city} successfully neutralized a {agency} operative on US soil. Subject detained and transferred to federal custody. Intelligence exploitation is underway — damage assessment to US programs will follow.',
+    assessmentFailure: 'Counter-espionage operation {codename} in {city} failed to apprehend the {agency} operative. Subject evaded arrest and is presumed to have been exfiltrated. The espionage operation against US interests continues through other agents.',
+  },
+  ILLEGAL_AGENT_FOREIGN: {
+    targetDesc: 'safe house',
+    objective: 'capture operation',
+    preMission: [
+      '{agency} operative {org} identified operating in {city}, {country}. Subject is conducting intelligence operations targeting US interests from a third country. Capture team deployed under non-official cover. Objective: snatch the operative for interrogation and intelligence exploitation.',
+      'Foreign illegal {org} operating in {city}, {country} on behalf of {agency}. Cover identity documented. Capture operation planned: close target surveillance, isolate the subject, execute a covert snatch, and exfiltrate to a secure facility.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Subject snatched from {loc} without alerting local authorities. Encrypted devices, documentation, and intelligence materials secured. Operative is now in transit to a secure detention facility. {country} host government was not informed.',
+      '"JACKPOT." Capture operation successful. Subject isolated during a routine movement pattern and apprehended by the snatch team. No local witnesses, no police involvement. Operative and seized materials en route to secure facility.',
+    ],
+    jackpotFailure: [
+      'Capture team was detected during approach. Subject activated emergency protocols and fled to the {agency} diplomatic mission — now beyond reach. Operation is blown and {country} authorities are asking questions.',
+      'Subject\'s counter-surveillance training proved effective. The snatch team was identified and the operative evaded through a pre-planned escape route. Local police responded to the disturbance. Diplomatic complications likely.',
+    ],
+    sseSuccess: 'Exploitation of seized devices and documents revealing operational communications with {agency} headquarters, collection tasking, and intelligence reports. Prisoner interrogation will supplement technical exploitation.',
+    sseFailure: 'Subject destroyed primary communication device during the struggle. Limited materials seized. Intelligence value will depend primarily on prisoner interrogation.',
+    assessmentSuccess: 'Capture operation {codename} in {city}, {country} successfully apprehended a {agency} operative. Subject is in custody and being transported to a secure detention facility. Intelligence exploitation and interrogation will commence immediately.',
+    assessmentFailure: 'Capture operation {codename} in {city}, {country} failed. The {agency} operative evaded the snatch team and is presumed to have been exfiltrated or sought diplomatic protection. The operation\'s exposure may compromise other intelligence activities in {country}.',
+  },
 };
 
 // Fill template variables in threat context strings
@@ -497,6 +537,14 @@ function generateDebrief(op, success) {
       if (_threat.assetStatus) v.assetStatus = _threat.assetStatus;
       if (_threat.activityType) v.activityType = _threat.activityType;
       if (_threat.sponsorCountry) v.sponsor = _threat.sponsorCountry;
+      if (_threat.agencyId) v.agencyId = _threat.agencyId;
+      if (_threat.agencyLabel) v.agency = _threat.agencyLabel;
+      if (_threat.agencyCountry) v.agencyCountry = _threat.agencyCountry;
+      if (_threat.agentTier) v.agentTier = _threat.agentTier;
+      if (op._killingMethod) v.killingMethod = op._killingMethod;
+      if (op._prisonerName) v.prisonerName = op._prisonerName;
+      if (op._burnNoticeCountry) v.burnNoticeCountry = op._burnNoticeCountry;
+      if (op._burnNoticeBoost) v.burnNoticeBoost = op._burnNoticeBoost;
     }
   }
 
@@ -1661,7 +1709,8 @@ DEBRIEF_GENERATORS.HVT_CAPTURE = function(op, v, success) {
 
 DEBRIEF_GENERATORS.TARGETED_KILLING = function(op, v, success) {
   var entries = [];
-  var method = pick(['vehicle-borne IED on target route', 'sniper team at overwatch position', 'command-detonated device at chokepoint', 'covert close-range engagement']);
+  var method = v.killingMethod ? v.killingMethod.desc : pick(['vehicle-borne IED on target route', 'sniper team at overwatch position', 'command-detonated device at chokepoint', 'covert close-range engagement']);
+  var methodLabel = v.killingMethod ? v.killingMethod.label : method;
 
   // Pull real intel
   var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'SUBJECT_ID');
@@ -2011,6 +2060,93 @@ DEBRIEF_GENERATORS.EXPIRED = function(op, v, success) {
     v.orgName + ' (' + (v.threatLabel || 'unknown type') + ') remains an active threat in the ' + (v.theater || 'unknown') + ' theater. ' +
     'Vigil notes that inaction carries consequences equal to failed action — threats do not resolve themselves. ' +
     'This operational lapse has been recorded in the operator\'s performance file.';
+
+  return [buildTimeline(entries), buildAssessment(assessment)];
+};
+
+// =====================================================================
+//  CAPTURE_OP — Foreign illegal agent snatch operation
+// =====================================================================
+
+DEBRIEF_GENERATORS.CAPTURE_OP = function(op, v, success) {
+  var callsign = pick(DEBRIEF_CALLSIGNS);
+  var weather = pick(DEBRIEF_WEATHER);
+  var entries = [];
+
+  var tcKey = v.threatType;
+  var tc = (tcKey && THREAT_CONTEXT[tcKey]) ? THREAT_CONTEXT[tcKey] : null;
+  var targetDesc = (tc && tc.targetDesc) || 'target location';
+
+  var agencyLabel = v.agency || 'foreign intelligence service';
+  var coverIntel = getIntel(v, 'COVER_IDENTITY');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING');
+  var methodIntel = getIntel(v, 'OPERATIONAL_METHOD');
+  var handlerIntel = getIntel(v, 'HANDLER_CONTACT');
+
+  var tcVars = {
+    org: v.orgName, city: v.city, country: v.country, theater: v.theater,
+    codename: v.codename, agency: agencyLabel,
+    loc: pick(['a commercial district apartment', 'a rented villa', 'a hotel room', 'a café meeting point', 'a residential safe house']),
+    count: randInt(2, 4),
+  };
+
+  var preMission = tc && tc.preMission ? fillThreatContext(pick(tc.preMission), tcVars) : (agencyLabel + ' operative ' + v.orgName + ' identified in ' + v.city + '. Capture team deployed.');
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-4), type: 'normal', text: callsign + ' capture team briefed. Target: ' + v.orgName + ' (' + agencyLabel + ' operative). Weather: ' + weather + '.' });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-2), type: 'normal', text: preMission + (coverIntel ? ' Cover identity: ' + coverIntel + '.' : '') });
+
+  if (methodIntel) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(-3), type: 'normal', text: 'Close target surveillance confirms operational pattern: ' + methodIntel });
+  }
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: callsign + ' team in position. Subject under continuous surveillance. Snatch window identified during routine movement pattern. Counter-surveillance screen active.' });
+
+  if (success) {
+    var jackpot = tc && tc.jackpotSuccess ? fillThreatContext(pick(tc.jackpotSuccess), tcVars) : '"JACKPOT." Subject apprehended. Encrypted devices and documentation seized.';
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'success', text: jackpot });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'success', text: 'Subject sedated and moved to exfiltration vehicle. ' + (networkIntel ? 'Network intelligence: ' + networkIntel + '. ' : '') + 'Clean extraction — no local law enforcement response.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(3), type: 'normal', text: 'Subject delivered to secure facility. ' + (v.prisonerName ? 'Prisoner designated: ' + v.prisonerName + '. ' : '') + 'Interrogation team standing by. Biometrics collected, personal effects catalogued.' });
+    if (tc && tc.sseSuccess) entries.push({ time: dayLabel(0) + ' ' + zuluTime(5), type: 'normal', text: fillThreatContext(tc.sseSuccess, tcVars) });
+  } else {
+    var fail = tc && tc.jackpotFailure ? fillThreatContext(pick(tc.jackpotFailure), tcVars) : 'Subject detected the approach and evaded capture.';
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'failure', text: fail });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'failure', text: callsign + ' team withdrawing. Local security responding. Subject\'s location unknown.' + (handlerIntel ? ' Handler protocol suggests emergency extraction underway.' : '') });
+    if (tc && tc.sseFailure) entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'failure', text: fillThreatContext(tc.sseFailure, tcVars) });
+  }
+
+  var assessment = tc ? fillThreatContext(success ? tc.assessmentSuccess : tc.assessmentFailure, tcVars) :
+    (success ? 'Capture operation ' + v.codename + ' achieved its objective. ' + agencyLabel + ' operative detained.' :
+    'Capture operation ' + v.codename + ' failed. ' + agencyLabel + ' operative evaded.');
+
+  return [buildTimeline(entries), buildAssessment(assessment)];
+};
+
+// =====================================================================
+//  BURN_NOTICE — Diplomatic exposure of foreign illegal
+// =====================================================================
+
+DEBRIEF_GENERATORS.BURN_NOTICE = function(op, v, success) {
+  var entries = [];
+  var agencyLabel = v.agency || 'foreign intelligence service';
+  var hostCountry = v.burnNoticeCountry || v.country || 'the host country';
+  var coverIntel = getIntel(v, 'COVER_IDENTITY');
+  var serviceIntel = getIntel(v, 'SPONSORING_SERVICE');
+
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil compiled evidence package documenting ' + v.orgName + '\'s intelligence activities in ' + v.city + ', ' + v.country + '. Sponsoring service: ' + agencyLabel + '.' });
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Evidence package transmitted to ' + hostCountry + ' counterintelligence liaison.' + (serviceIntel ? ' Attribution: ' + serviceIntel : '') + (coverIntel ? ' Cover identity documented: ' + coverIntel + '.' : '') });
+
+  if (success) {
+    var boost = v.burnNoticeBoost || randInt(15, 20);
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'success', text: hostCountry + ' confirmed receipt and verified the intelligence. ' + v.orgName + ' declared persona non grata. Expulsion in progress.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'success', text: 'Diplomatic back-channel: ' + hostCountry + ' appreciates the sharing. Relations improved by ' + boost + '%. Counterintelligence investigation opened into ' + agencyLabel + ' activities.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: agencyLabel + '\'s local station is scrambling. Exposed operative being withdrawn. SIGINT confirms spike in encrypted comms between station and headquarters.' });
+  } else {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'failure', text: hostCountry + ' declined to act on the evidence. Political considerations outweigh counterintelligence concerns.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'failure', text: 'Burn notice failed. ' + v.orgName + ' remains operational. ' + agencyLabel + ' has been alerted — they will rotate the agent and adjust tradecraft.' });
+  }
+
+  var assessment = success ?
+    'Burn notice ' + v.codename + ' exposed ' + agencyLabel + '\'s operative in ' + v.city + ', ' + v.country + '. ' + hostCountry + ' expelled the agent. Relations improved. No prisoner — operative expelled rather than detained.' :
+    'Burn notice ' + v.codename + ' failed. ' + hostCountry + ' declined to act. ' + agencyLabel + '\'s operative remains in place but now aware of US interest.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };
