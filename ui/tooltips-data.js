@@ -12,7 +12,6 @@ var TIPS = {
     STATE_ACTOR:       'Government-sponsored threat — military, intelligence, or proxy force acting on behalf of a nation-state. High resources, sophisticated tradecraft.',
     CYBER_GROUP:       'Advanced persistent threat conducting cyber operations — espionage, sabotage, or destructive attacks against critical infrastructure.',
     CRIMINAL_ORG:      'Transnational criminal organization engaged in trafficking, weapons smuggling, or financial crimes that pose national security risks.',
-    INSURGENCY:        'Armed insurgent movement challenging state authority through guerrilla warfare, territorial control, and political subversion.',
     PROLIFERATOR:      'Entity involved in WMD proliferation — acquisition, development, or transfer of nuclear, chemical, or biological weapons materials.',
     HOSTAGE_CRISIS:    'Active hostage situation involving US citizens or allied nationals. Time-critical — hostage survival probability degrades over time.',
     HVT_TARGET:        'High-Value Target identified for capture or elimination. Senior leadership, bomb-makers, or key operational figures.',

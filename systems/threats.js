@@ -23,8 +23,6 @@ var THREAT_TYPES = [
   { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
 
   // Region-restricted threats
-  { id: 'INSURGENCY', label: 'Insurgent Movement', weight: 2, threatRange: [3, 5],
-    theaters: ['MIDDLE_EAST', 'SOUTH_ASIA', 'AFRICA', 'LATIN_AMERICA'] },
   { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4], canBeMaritime: true,
     theaters: ['LATIN_AMERICA', 'AFRICA', 'EAST_ASIA', 'MIDDLE_EAST', 'EUROPE'] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5],
@@ -38,17 +36,21 @@ var MILITARY_THREAT_TYPES = [
   { id: 'STRATEGIC_TARGET', label: 'Strategic Target', threatRange: [5, 5] },
 ];
 
+// Countries where WMD proliferation threats can spawn (must also have ≤10% relations)
+var PROLIFERATOR_COUNTRIES = [
+  'Iran', 'North Korea', 'Syria', 'Pakistan', 'Russia', 'China', 'Belarus', 'Libya',
+];
+
 // --- Map threat types to operation types for the DA phase ---
 var THREAT_TO_OP_TYPE = {
-  TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'DRONE_STRIKE', 'HVT_ELIMINATION', 'HOSTAGE_RESCUE'],
-  STATE_ACTOR: ['MILITARY_STRIKE', 'SURVEILLANCE', 'CYBER_OP', 'DIPLOMATIC_RESPONSE'],
-  CYBER_GROUP: ['CYBER_OP', 'INTEL_COLLECTION', 'SURVEILLANCE'],
-  CRIMINAL_ORG: ['NAVAL_INTERDICTION', 'SOF_RAID', 'INTEL_COLLECTION', 'HVT_CAPTURE'],
-  INSURGENCY: ['COUNTER_TERROR', 'MILITARY_STRIKE', 'SOF_RAID', 'DRONE_STRIKE', 'HVT_ELIMINATION'],
-  PROLIFERATOR: ['SURVEILLANCE', 'INTEL_COLLECTION', 'MILITARY_STRIKE', 'SOF_RAID'],
-  HOSTAGE_CRISIS: ['HOSTAGE_RESCUE', 'SOF_RAID', 'COUNTER_TERROR'],
-  HVT_TARGET: ['HVT_ELIMINATION', 'HVT_CAPTURE', 'DRONE_STRIKE', 'TARGETED_KILLING', 'SOF_RAID'],
-  ASSET_COMPROMISED: ['ASSET_EXTRACTION', 'SOF_RAID', 'HOSTAGE_RESCUE'],
+  TERROR_CELL: ['COUNTER_TERROR', 'SOF_RAID', 'MILITARY_STRIKE', 'DRONE_STRIKE', 'SURVEILLANCE', 'INTEL_COLLECTION'],
+  STATE_ACTOR: ['MILITARY_STRIKE', 'DRONE_STRIKE', 'SOF_RAID', 'SURVEILLANCE', 'INTEL_COLLECTION', 'CYBER_OP', 'DIPLOMATIC_RESPONSE'],
+  CYBER_GROUP: ['CYBER_OP', 'SURVEILLANCE', 'INTEL_COLLECTION'],
+  CRIMINAL_ORG: ['SOF_RAID', 'SURVEILLANCE', 'INTEL_COLLECTION', 'NAVAL_INTERDICTION'],
+  PROLIFERATOR: ['SURVEILLANCE', 'INTEL_COLLECTION', 'MILITARY_STRIKE', 'DRONE_STRIKE', 'SOF_RAID'],
+  HOSTAGE_CRISIS: ['HOSTAGE_RESCUE'],
+  HVT_TARGET: ['HVT_ELIMINATION', 'TARGETED_KILLING', 'HVT_CAPTURE', 'MILITARY_STRIKE', 'DRONE_STRIKE', 'SURVEILLANCE', 'INTEL_COLLECTION'],
+  ASSET_COMPROMISED: ['ASSET_EXTRACTION', 'SOF_RAID'],
   MILITARY_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE', 'SOF_RAID'],
   STRATEGIC_TARGET: ['MILITARY_STRIKE', 'DRONE_STRIKE'],
 };
@@ -57,7 +59,7 @@ var THREAT_TO_OP_TYPE = {
 //  BUILD INTEL FIELDS FOR A NEW THREAT
 // ===================================================================
 
-function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
+function buildThreatIntelFields(threatType, location, orgName, targetInfo, sponsorCountry) {
   var fieldDefs = THREAT_INTEL_FIELDS[threatType];
   if (!fieldDefs) return [];
 
@@ -70,7 +72,9 @@ function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
     var ticksToReveal = randInt(diff.ticksRange[0], diff.ticksRange[1]);
     var preRevealed = Math.random() < diff.preRevealChance;
 
-    fields.push({
+    var value = generateIntelValue(def.key, location, orgName, def.key === 'TARGET_INTENT' ? targetInfo : null, sponsorCountry);
+
+    var fieldObj = {
       key: def.key,
       label: def.label,
       difficulty: def.difficulty,
@@ -78,8 +82,19 @@ function buildThreatIntelFields(threatType, location, orgName, targetInfo) {
       ticksToReveal: ticksToReveal,
       ticksAccumulated: preRevealed ? ticksToReveal : 0,
       revealed: preRevealed,
-      value: generateIntelValue(def.key, location, orgName, def.key === 'TARGET_INTENT' ? targetInfo : null),
-    });
+      value: value,
+    };
+
+    // Parse tagged prefixes from intel values
+    var taggedKeys = { CELL_STRUCTURE: '_cellType', PROGRAM_TYPE: '_programType', ASSET_CONDITION: '_assetStatus', ACTIVITY_TYPE: '_activityType' };
+    if (taggedKeys[def.key] && value.indexOf('|') > 0 && value.indexOf('|') < 12) {
+      var pipeIdx = value.indexOf('|');
+      var tag = value.substring(0, pipeIdx);
+      fieldObj.value = value.substring(pipeIdx + 1);
+      fieldObj[taggedKeys[def.key]] = tag;
+    }
+
+    fields.push(fieldObj);
   }
   return fields;
 }
@@ -111,6 +126,19 @@ function spawnThreat(theaterId, forcedTypeId) {
     }
     if (eligible.length === 0) eligible = THREAT_TYPES; // Fallback
     type = weightedPick(eligible);
+  }
+
+  // PROLIFERATOR: must spawn in a plausible country with ≤10% relations
+  if (type.id === 'PROLIFERATOR') {
+    var prolifCountry = loc ? loc.country : null;
+    var prolifOk = prolifCountry && PROLIFERATOR_COUNTRIES.indexOf(prolifCountry) >= 0;
+    if (prolifOk && typeof V !== 'undefined' && V.diplomacy && V.diplomacy[prolifCountry]) {
+      prolifOk = V.diplomacy[prolifCountry].relations <= 10;
+    }
+    if (!prolifOk) {
+      // Re-roll: skip this spawn entirely — the type doesn't fit this location
+      return null;
+    }
   }
 
   // Military/strategic targets must only spawn in AT_WAR countries
@@ -169,6 +197,18 @@ function spawnThreat(theaterId, forcedTypeId) {
     }
   }
 
+  // STATE_ACTOR: pick a hostile sponsor country (relations ≤10%)
+  var sponsorCountry = null;
+  if (type.id === 'STATE_ACTOR' && typeof V !== 'undefined' && V.diplomacy) {
+    var hostileCountries = [];
+    for (var dc in V.diplomacy) {
+      if (V.diplomacy[dc].relations <= 10 && dc !== loc.country) {
+        hostileCountries.push(dc);
+      }
+    }
+    sponsorCountry = hostileCountries.length > 0 ? pick(hostileCountries) : loc.country;
+  }
+
   var threat = {
     id: uid('THR'),
     type: type.id,
@@ -183,12 +223,13 @@ function spawnThreat(theaterId, forcedTypeId) {
     expiresAt: V.time.totalMinutes + expiresIn,
     urgent: isUrgent,
     maritime: isMaritime || (loc.maritime && type.canBeMaritime) || false,
+    sponsorCountry: sponsorCountry,
 
     // Target info (revealed when TARGET_INTENT field is collected)
     _targetInfo: targetInfo,
 
     // Intel collection state
-    intelFields: buildThreatIntelFields(type.id, loc, orgName, targetInfo),
+    intelFields: buildThreatIntelFields(type.id, loc, orgName, targetInfo, sponsorCountry),
     collectorAssetIds: [],
 
     // Ops phase reference (set when moved to Ops)
@@ -198,6 +239,16 @@ function spawnThreat(theaterId, forcedTypeId) {
     urgencyAlertSent: false,
     criticalAlertSent: false,
   };
+
+  // Extract tagged intel metadata from pre-revealed fields
+  for (var ci = 0; ci < threat.intelFields.length; ci++) {
+    var f = threat.intelFields[ci];
+    if (!f.revealed) continue;
+    if (f.key === 'CELL_STRUCTURE' && f._cellType) threat.cellType = f._cellType;
+    if (f.key === 'PROGRAM_TYPE' && f._programType) threat.programType = f._programType;
+    if (f.key === 'ASSET_CONDITION' && f._assetStatus) threat.assetStatus = f._assetStatus;
+    if (f.key === 'ACTIVITY_TYPE' && f._activityType) threat.activityType = f._activityType;
+  }
 
   V.threats.push(threat);
   fire('threat:spawned', { threat: threat });
@@ -232,10 +283,6 @@ function spawnThreat(theaterId, forcedTypeId) {
     ] : [
       'Criminal organization flagged in ' + loc.city + ', ' + loc.country + '. Intelligence indicates trafficking operations threatening US national security — narcotics flowing to American cities, weapons, or human trafficking involving US-bound routes.',
       'Vigil has identified organized criminal activity in ' + loc.city + ' with direct links to US-bound operations. Scale and sophistication threaten American border security and domestic law enforcement. US citizens may be among victims.',
-    ],
-    INSURGENCY: [
-      'Insurgent movement detected in ' + loc.city + ' region, ' + loc.country + '. Activity patterns indicate growing threat to US personnel, allied forces, and American-supported governance structures in the ' + loc.theater.name + ' theater.',
-      'Vigil has flagged insurgent activity near ' + loc.city + ' threatening US forward operating positions and allied partners. Force estimates suggest organized resistance with capability to strike American installations.',
     ],
     PROLIFERATOR: [
       'WMD proliferation activity detected in ' + loc.country + '. Facility near ' + loc.city + ' shows signatures consistent with weapons program capable of threatening US forces in-theater and potentially the American homeland. Threat level: CRITICAL.',
@@ -400,6 +447,32 @@ function spawnThreat(theaterId, forcedTypeId) {
               fire('threat:foreign_target', { threat: threat });
               addLog('INTEL: ' + threat.orgName + ' target identified as ' + threat._targetInfo.city + ', ' + threat._targetInfo.country + ' (non-US).', 'log-intel');
             }
+          }
+        }
+
+        // Extract tagged intel metadata when revealed
+        for (var cs = 0; cs < threat.intelFields.length; cs++) {
+          var csField = threat.intelFields[cs];
+          if (csField.key === 'CELL_STRUCTURE' && csField.revealed && csField._cellType && !threat.cellType) {
+            threat.cellType = csField._cellType;
+            addLog('INTEL: ' + threat.orgName + ' cell structure assessed as ' +
+              (threat.cellType === 'MULTI' ? 'multi-site network' : 'single-site operation') + '.', 'log-intel');
+          }
+          if (csField.key === 'PROGRAM_TYPE' && csField.revealed && csField._programType && !threat.programType) {
+            threat.programType = csField._programType;
+            addLog('INTEL: ' + threat.orgName + ' classified as ' +
+              (threat.programType === 'FACILITY' ? 'fixed-site production program' : 'proliferation network') + '.', 'log-intel');
+          }
+          if (csField.key === 'ASSET_CONDITION' && csField.revealed && csField._assetStatus && !threat.assetStatus) {
+            threat.assetStatus = csField._assetStatus;
+            addLog('INTEL: Compromised asset assessed as ' +
+              (threat.assetStatus === 'DETAINED' ? 'IN CUSTODY — direct action required' : 'EVADING — extraction window open') + '.', 'log-intel');
+          }
+          if (csField.key === 'ACTIVITY_TYPE' && csField.revealed && csField._activityType && !threat.activityType) {
+            threat.activityType = csField._activityType;
+            var atLabels = { ESPIONAGE: 'intelligence collection operation', PROXY: 'proxy military operation', SABOTAGE: 'covert sabotage operation' };
+            addLog('INTEL: ' + threat.orgName + ' classified as ' + (atLabels[threat.activityType] || threat.activityType) +
+              (threat.sponsorCountry ? ' directed by ' + threat.sponsorCountry : '') + '.', 'log-intel');
           }
         }
 
@@ -648,18 +721,154 @@ function approveMoveThreatToOps(threatId) {
     return;
   }
 
+  // TERROR_CELL: require CELL_STRUCTURE intel before allowing move to ops
+  if (threat.type === 'TERROR_CELL' && !threat.cellType) {
+    var cellField = null;
+    for (var cf = 0; cf < threat.intelFields.length; cf++) {
+      if (threat.intelFields[cf].key === 'CELL_STRUCTURE') { cellField = threat.intelFields[cf]; break; }
+    }
+    if (cellField && !cellField.revealed) {
+      dismissUrgentAlert();
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'Cell structure intelligence has not been collected. Vigil requires this field to determine ' +
+        'whether a single-site raid or coordinated multi-site operation is appropriate.<br><br>' +
+        'Continue intelligence collection to reveal <strong>CELL STRUCTURE</strong> before approving direct action.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
+  // PROLIFERATOR: require PROGRAM_TYPE intel before allowing move to ops
+  if (threat.type === 'PROLIFERATOR' && !threat.programType) {
+    var progField = null;
+    for (var pf = 0; pf < threat.intelFields.length; pf++) {
+      if (threat.intelFields[pf].key === 'PROGRAM_TYPE') { progField = threat.intelFields[pf]; break; }
+    }
+    if (progField && !progField.revealed) {
+      dismissUrgentAlert();
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'Program classification has not been determined. Vigil requires this field to assess ' +
+        'whether this is a fixed-site facility or a proliferation network — the response differs significantly.<br><br>' +
+        'Continue intelligence collection to reveal <strong>PROGRAM CLASSIFICATION</strong> before approving direct action.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
+  // ASSET_COMPROMISED: require ASSET_CONDITION intel before allowing move to ops
+  if (threat.type === 'ASSET_COMPROMISED' && !threat.assetStatus) {
+    var condField = null;
+    for (var af = 0; af < threat.intelFields.length; af++) {
+      if (threat.intelFields[af].key === 'ASSET_CONDITION') { condField = threat.intelFields[af]; break; }
+    }
+    if (condField && !condField.revealed) {
+      dismissUrgentAlert();
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'Asset condition is unknown. Vigil requires this field to determine ' +
+        'whether a covert extraction or a direct action rescue is appropriate.<br><br>' +
+        'Continue intelligence collection to reveal <strong>ASSET CONDITION &amp; STATUS</strong> before approving response.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
+  // STATE_ACTOR: require ACTIVITY_TYPE intel before allowing move to ops
+  if (threat.type === 'STATE_ACTOR' && !threat.activityType) {
+    var actField = null;
+    for (var sf = 0; sf < threat.intelFields.length; sf++) {
+      if (threat.intelFields[sf].key === 'ACTIVITY_TYPE') { actField = threat.intelFields[sf]; break; }
+    }
+    if (actField && !actField.revealed) {
+      dismissUrgentAlert();
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'Activity classification has not been determined. Vigil requires this field to assess ' +
+        'whether this is espionage, proxy military action, or sabotage — the response differs significantly.<br><br>' +
+        'Continue intelligence collection to reveal <strong>ACTIVITY CLASSIFICATION</strong> before approving direct action.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
   dismissUrgentAlert();
   showResponseSelectionModal(threat);
 }
 
 // --- Response Selection Modal ---
 
-function showResponseSelectionModal(threat) {
+// Branch groups: ops that share a parent category in the selection menu
+var RESPONSE_BRANCHES = [
+  { id: 'SURVEILLANCE', label: 'Surveillance', shortLabel: 'SURV', description: 'Deploy assets to monitor and collect intelligence. Non-kinetic — no direct engagement.',
+    children: ['SURVEILLANCE', 'INTEL_COLLECTION'] },
+  { id: 'STRIKE', label: 'Strike', shortLabel: 'STRIKE', description: 'Destroy the target from a distance using stand-off weapons. No boots on the ground.',
+    children: ['MILITARY_STRIKE', 'DRONE_STRIKE'] },
+  { id: 'ELIMINATE', label: 'Eliminate', shortLabel: 'ELIM', description: 'Neutralize a high-value target. Choose between a close-quarters assault or a covert stand-off method.',
+    children: ['HVT_ELIMINATION', 'TARGETED_KILLING'] },
+  { id: 'TAKEDOWN', label: 'Takedown', shortLabel: 'ASSAULT', description: 'Direct assault on target location(s). Ground forces breach, clear, and secure the objective.',
+    children: ['SOF_RAID', 'COUNTER_TERROR'], minChildren: 1 },
+];
+
+// Cache: which threatId we're currently selecting for
+var _responseSelectThreatId = null;
+var _responseSelectOpTypes = null;
+
+function getEligibleOpTypes(threat) {
   var opTypes;
   if (threat.domestic && typeof DOMESTIC_THREAT_TO_OP_TYPE !== 'undefined') {
     opTypes = DOMESTIC_THREAT_TO_OP_TYPE[threat.type] || THREAT_TO_OP_TYPE[threat.type] || ['INVESTIGATION'];
   } else {
     opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
+  }
+
+  // Maritime threats: NAVAL_INTERDICTION only; non-maritime: strip it out
+  if (threat.maritime) {
+    if (opTypes.indexOf('NAVAL_INTERDICTION') >= 0) opTypes = ['NAVAL_INTERDICTION'];
+  } else {
+    opTypes = opTypes.filter(function(t) { return t !== 'NAVAL_INTERDICTION'; });
+  }
+
+  // PROLIFERATOR: filter ops by program type
+  if (threat.type === 'PROLIFERATOR' && threat.programType) {
+    if (threat.programType === 'FACILITY') {
+      // Facility: strike it or raid it — no surveillance as an end-goal op
+      opTypes = opTypes.filter(function(t) {
+        return t === 'MILITARY_STRIKE' || t === 'DRONE_STRIKE' || t === 'SOF_RAID';
+      });
+    } else if (threat.programType === 'NETWORK') {
+      // Network: surveil it, infiltrate it, or raid the transfer point
+      opTypes = opTypes.filter(function(t) {
+        return t === 'SURVEILLANCE' || t === 'INTEL_COLLECTION' || t === 'SOF_RAID';
+      });
+    }
+  }
+
+  // ASSET_COMPROMISED: filter ops by asset status
+  if (threat.type === 'ASSET_COMPROMISED' && threat.assetStatus) {
+    if (threat.assetStatus === 'FREE') {
+      opTypes = ['ASSET_EXTRACTION'];
+    } else if (threat.assetStatus === 'DETAINED') {
+      opTypes = ['SOF_RAID'];
+    }
+  }
+
+  // STATE_ACTOR: filter ops by activity type
+  if (threat.type === 'STATE_ACTOR' && threat.activityType) {
+    if (threat.activityType === 'ESPIONAGE') {
+      opTypes = opTypes.filter(function(t) {
+        return t === 'SURVEILLANCE' || t === 'INTEL_COLLECTION' || t === 'CYBER_OP' || t === 'DIPLOMATIC_RESPONSE';
+      });
+    } else if (threat.activityType === 'PROXY') {
+      opTypes = opTypes.filter(function(t) {
+        return t === 'MILITARY_STRIKE' || t === 'DRONE_STRIKE' || t === 'SURVEILLANCE' || t === 'INTEL_COLLECTION' || t === 'DIPLOMATIC_RESPONSE';
+      });
+    } else if (threat.activityType === 'SABOTAGE') {
+      opTypes = opTypes.filter(function(t) {
+        return t === 'SOF_RAID' || t === 'SURVEILLANCE' || t === 'INTEL_COLLECTION' || t === 'CYBER_OP';
+      });
+    }
   }
 
   // AT_WAR: strip DIPLOMATIC_RESPONSE
@@ -670,6 +879,59 @@ function showResponseSelectionModal(threat) {
       if (opTypes.length === 0) opTypes = ['MILITARY_STRIKE'];
     }
   }
+  return opTypes;
+}
+
+function renderResponseCard(otId, threatId, isDomestic) {
+  var ot = OPERATION_TYPES[otId];
+  if (!ot) return '';
+  var successCls = ot.baseSuccessRate >= 75 ? 'high' : ot.baseSuccessRate >= 60 ? 'med' : 'low';
+  var execLabel = ot.execHoursRange[0] + '-' + ot.execHoursRange[1] + 'h';
+
+  var html = '<div class="response-card" onclick="confirmResponseType(\'' + threatId + '\',\'' + otId + '\')">' +
+    '<div class="response-card-header">' +
+      '<span class="response-card-name">' + ot.label + '</span>' +
+      '<span class="response-card-short">' + ot.shortLabel + '</span>' +
+    '</div>' +
+    '<div class="response-card-desc">' + (ot.description || '') + '</div>' +
+    '<div class="response-card-stats">' +
+      '<span class="response-stat"><span class="response-stat-label">SUCCESS</span><span class="response-stat-value ' + successCls + '">' + ot.baseSuccessRate + '%</span></span>' +
+      '<span class="response-stat"><span class="response-stat-label">EXEC TIME</span><span class="response-stat-value">' + execLabel + '</span></span>' +
+      '<span class="response-stat"><span class="response-stat-label">REQUIRES</span><span class="response-stat-value">' + ot.requiredCapabilities.join(', ') + '</span></span>' +
+    '</div>';
+
+  if (ot.pros && ot.pros.length > 0) {
+    html += '<div class="response-card-pros">';
+    for (var p = 0; p < ot.pros.length; p++) html += '<div class="response-pro">+ ' + ot.pros[p] + '</div>';
+    html += '</div>';
+  }
+  if (ot.cons && ot.cons.length > 0) {
+    html += '<div class="response-card-cons">';
+    for (var c = 0; c < ot.cons.length; c++) html += '<div class="response-con">- ' + ot.cons[c] + '</div>';
+    html += '</div>';
+  }
+  if (ot.illegalDomestic && isDomestic) {
+    html += '<div class="response-card-warning">ILLEGAL ON US SOIL</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function showResponseSelectionModal(threat) {
+  _responseSelectThreatId = threat.id;
+  _responseSelectOpTypes = getEligibleOpTypes(threat);
+
+  // Open the modal first, then populate
+  showModal('SELECT RESPONSE TYPE', '', { pause: true });
+  var box = document.querySelector('.modal-box');
+  if (box) box.classList.add('modal-wide');
+
+  renderResponseMainMenu(threat);
+}
+
+function renderResponseMainMenu(threat) {
+  var opTypes = _responseSelectOpTypes;
+  var consumed = {}; // Track op types consumed by branches
 
   var html = '<div class="response-select-context">' +
     '<span class="response-select-tag">' + threat.typeLabel + '</span>' +
@@ -679,58 +941,139 @@ function showResponseSelectionModal(threat) {
   '<div class="response-select-instruction">Select an operational response. Vigil will generate deployment options based on your choice.</div>' +
   '<div class="response-select-grid">';
 
-  for (var i = 0; i < opTypes.length; i++) {
-    var otId = opTypes[i];
-    var ot = OPERATION_TYPES[otId];
-    if (!ot) continue;
+  // Determine which branches apply
+  // Standard branches need 2+ children; branches with minChildren:1 activate with 1+
+  var activeBranches = [];
+  for (var b = 0; b < RESPONSE_BRANCHES.length; b++) {
+    var branch = RESPONSE_BRANCHES[b];
+    var presentChildren = [];
+    for (var ch = 0; ch < branch.children.length; ch++) {
+      if (opTypes.indexOf(branch.children[ch]) >= 0) presentChildren.push(branch.children[ch]);
+    }
+    var minReq = branch.minChildren || 2;
+    if (presentChildren.length >= minReq) {
+      activeBranches.push({ branch: branch, children: presentChildren });
+      for (var pc = 0; pc < presentChildren.length; pc++) consumed[presentChildren[pc]] = true;
+    }
+  }
 
-    var successCls = ot.baseSuccessRate >= 75 ? 'high' : ot.baseSuccessRate >= 60 ? 'med' : 'low';
-    var execLabel = ot.execHoursRange[0] + '-' + ot.execHoursRange[1] + 'h';
+  // Render branch cards first
+  for (var ab = 0; ab < activeBranches.length; ab++) {
+    var br = activeBranches[ab].branch;
+    var brChildren = activeBranches[ab].children;
 
-    html += '<div class="response-card" onclick="confirmResponseType(\'' + threat.id + '\',\'' + otId + '\')">' +
-      '<div class="response-card-header">' +
-        '<span class="response-card-name">' + ot.label + '</span>' +
-        '<span class="response-card-short">' + ot.shortLabel + '</span>' +
-      '</div>' +
-      '<div class="response-card-desc">' + (ot.description || '') + '</div>' +
-      '<div class="response-card-stats">' +
-        '<span class="response-stat"><span class="response-stat-label">SUCCESS</span><span class="response-stat-value ' + successCls + '">' + ot.baseSuccessRate + '%</span></span>' +
-        '<span class="response-stat"><span class="response-stat-label">EXEC TIME</span><span class="response-stat-value">' + execLabel + '</span></span>' +
-        '<span class="response-stat"><span class="response-stat-label">REQUIRES</span><span class="response-stat-value">' + ot.requiredCapabilities.join(', ') + '</span></span>' +
+    // TAKEDOWN branch with 2+ children (TERROR_CELL): requires cellType intel
+    if (br.id === 'TAKEDOWN' && brChildren.length >= 2 && !threat.cellType) {
+      html += '<div class="response-card response-branch" style="opacity:0.4;cursor:not-allowed;pointer-events:none;">' +
+        '<div class="response-card-header">' +
+          '<span class="response-card-name">' + br.label + '</span>' +
+          '<span class="response-card-short">LOCKED</span>' +
+        '</div>' +
+        '<div class="response-card-desc">' + br.description + '</div>' +
+        '<div class="response-card-warning">REQUIRES CELL STRUCTURE INTEL</div>' +
       '</div>';
-
-    // Pros
-    if (ot.pros && ot.pros.length > 0) {
-      html += '<div class="response-card-pros">';
-      for (var p = 0; p < ot.pros.length; p++) {
-        html += '<div class="response-pro">+ ' + ot.pros[p] + '</div>';
-      }
-      html += '</div>';
+      continue;
     }
 
-    // Cons
-    if (ot.cons && ot.cons.length > 0) {
-      html += '<div class="response-card-cons">';
-      for (var c = 0; c < ot.cons.length; c++) {
-        html += '<div class="response-con">- ' + ot.cons[c] + '</div>';
-      }
-      html += '</div>';
+    // TAKEDOWN with resolved cellType: show which op will be selected
+    if (br.id === 'TAKEDOWN' && brChildren.length >= 2 && threat.cellType) {
+      var resolvedOpId = threat.cellType === 'MULTI' ? 'COUNTER_TERROR' : 'SOF_RAID';
+      var resolvedOt = OPERATION_TYPES[resolvedOpId];
+      var resolvedLabel = resolvedOt ? resolvedOt.label : resolvedOpId;
+      html += '<div class="response-card response-branch" onclick="showResponseBranch(\'' + br.id + '\')">' +
+        '<div class="response-card-header">' +
+          '<span class="response-card-name">' + br.label + '</span>' +
+          '<span class="response-card-short">' + br.shortLabel + ' &#9654;</span>' +
+        '</div>' +
+        '<div class="response-card-desc">' + br.description + '</div>' +
+        '<div class="response-branch-children">' +
+          '<span class="response-branch-child">' + resolvedLabel + '</span>' +
+          '<span class="response-branch-child">' + (threat.cellType === 'MULTI' ? 'MULTI-SITE' : 'SINGLE-SITE') + '</span>' +
+        '</div></div>';
+      continue;
     }
 
-    // Warnings
-    if (ot.illegalDomestic && threat.domestic) {
-      html += '<div class="response-card-warning">ILLEGAL ON US SOIL</div>';
+    // Standard branch card (including single-child TAKEDOWN)
+    html += '<div class="response-card response-branch" onclick="showResponseBranch(\'' + br.id + '\')">' +
+      '<div class="response-card-header">' +
+        '<span class="response-card-name">' + br.label + '</span>' +
+        '<span class="response-card-short">' + br.shortLabel + ' &#9654;</span>' +
+      '</div>' +
+      '<div class="response-card-desc">' + br.description + '</div>' +
+      '<div class="response-branch-children">';
+    for (var bc = 0; bc < brChildren.length; bc++) {
+      var childOt = OPERATION_TYPES[brChildren[bc]];
+      if (childOt) html += '<span class="response-branch-child">' + childOt.label + '</span>';
     }
+    html += '</div></div>';
+  }
 
-    html += '</div>';
+  // Render standalone cards (not consumed by branches)
+  for (var i = 0; i < opTypes.length; i++) {
+    if (consumed[opTypes[i]]) continue;
+    html += renderResponseCard(opTypes[i], threat.id, threat.domestic);
   }
 
   html += '</div>';
 
-  showModal('SELECT RESPONSE TYPE', html, { pause: true });
-  // Widen the modal for this content
-  var box = document.querySelector('.modal-box');
-  if (box) box.classList.add('modal-wide');
+  // Update body content (modal already open)
+  $('modal-body').innerHTML = html;
+}
+
+function showResponseBranch(branchId) {
+  var threat = getThreat(_responseSelectThreatId);
+  if (!threat) return;
+
+  var branch = null;
+  for (var b = 0; b < RESPONSE_BRANCHES.length; b++) {
+    if (RESPONSE_BRANCHES[b].id === branchId) { branch = RESPONSE_BRANCHES[b]; break; }
+  }
+  if (!branch) return;
+
+  // TAKEDOWN branch: auto-resolve based on available children
+  if (branchId === 'TAKEDOWN') {
+    var tkChildren = [];
+    for (var tc = 0; tc < branch.children.length; tc++) {
+      if (_responseSelectOpTypes.indexOf(branch.children[tc]) >= 0) tkChildren.push(branch.children[tc]);
+    }
+    // Single child (e.g. CRIMINAL_ORG has only SOF_RAID) — confirm directly
+    if (tkChildren.length === 1) {
+      confirmResponseType(threat.id, tkChildren[0]);
+      return;
+    }
+    // Multiple children (TERROR_CELL) — resolve via cellType intel
+    if (tkChildren.length >= 2 && threat.cellType) {
+      var resolvedOp = threat.cellType === 'MULTI' ? 'COUNTER_TERROR' : 'SOF_RAID';
+      confirmResponseType(threat.id, resolvedOp);
+      return;
+    }
+  }
+
+  var opTypes = _responseSelectOpTypes;
+  var children = [];
+  for (var ch = 0; ch < branch.children.length; ch++) {
+    if (opTypes.indexOf(branch.children[ch]) >= 0) children.push(branch.children[ch]);
+  }
+
+  var html = '<div class="response-select-context">' +
+    '<span class="response-select-tag">' + threat.typeLabel + '</span>' +
+    '<span class="response-select-loc">' + threat.location.city + ', ' + threat.location.country + '</span>' +
+    '<span class="response-select-org">' + threat.orgName + '</span>' +
+  '</div>' +
+  '<div class="response-branch-back" onclick="renderResponseMainMenu(getThreat(\'' + _responseSelectThreatId + '\'))">' +
+    '&#9664; BACK TO ALL OPTIONS' +
+  '</div>' +
+  '<div class="response-branch-title">' + branch.label.toUpperCase() + '</div>' +
+  '<div class="response-select-instruction">' + branch.description + '</div>' +
+  '<div class="response-select-grid">';
+
+  for (var i = 0; i < children.length; i++) {
+    html += renderResponseCard(children[i], threat.id, threat.domestic);
+  }
+
+  html += '</div>';
+
+  $('modal-body').innerHTML = html;
 }
 
 function confirmResponseType(threatId, opTypeId) {

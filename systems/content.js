@@ -350,10 +350,12 @@ var INTEL_VALUE_POOLS = {
 
   // Counter-Terror
   CELL_STRUCTURE: [
-    'Flat hierarchy — 4-5 members, single leader. Self-radicalized.',
-    'Layered cell — operational arm (3), logistics (4), leadership (2). External handler.',
-    'Lone actor with remote facilitation from overseas network.',
-    'Multi-cell structure — at least 3 cells in theater, coordinated by single handler.',
+    'SINGLE|Flat hierarchy — 4-5 members, single leader. Self-radicalized. Operating from single safehouse.',
+    'SINGLE|Small autonomous cell — 3 operatives sharing one apartment. No external support structure.',
+    'SINGLE|Lone actor with remote facilitation from overseas network. Single known address.',
+    'MULTI|Layered cell — operational arm (3), logistics (4), leadership (2). Multiple safehouses. External handler.',
+    'MULTI|Multi-cell structure — at least 3 cells in theater, coordinated by single handler. Dispersed across {city}.',
+    'MULTI|Distributed network — bombmaker at separate location from operational planners. At least 4 sites under surveillance.',
   ],
   ATTACK_PLANNING: [
     'SIGINT indicates target selection phase. Surveillance of 3 soft targets detected.',
@@ -520,12 +522,21 @@ INTEL_VALUE_POOLS.TARGET_INTENT = [
   'Assessment: hostage operation planned targeting diplomatic compound in {targetCity}, {targetCountry}. Multiple teams being coordinated.',
 ];
 
+INTEL_VALUE_POOLS.ACTIVITY_TYPE = [
+  'ESPIONAGE|Intelligence collection operation. Operatives running agents, recruiting sources, and exfiltrating classified information. Tradecraft indicates professional state intelligence service.',
+  'ESPIONAGE|Technical espionage operation targeting defense and technology sectors. Personnel operating under diplomatic or commercial cover. Data exfiltration via encrypted channels confirmed.',
+  'PROXY|Proxy military operation. State sponsor directing, equipping, and advising armed groups to advance strategic objectives while maintaining deniability.',
+  'PROXY|Military advisory mission with proxy forces. State personnel observed providing training, weapons, and tactical direction to allied militia. Direct combat participation possible.',
+  'SABOTAGE|Covert sabotage operation targeting critical infrastructure. Operatives trained in demolition, cyberattack, and physical disruption. Objective: degrade US-aligned capabilities without attribution.',
+  'SABOTAGE|Directed action cell conducting targeted destruction and assassination. State-trained operatives with specialized equipment. Operations designed to appear as accidents or criminal activity.',
+];
+
 INTEL_VALUE_POOLS.ACTOR_ID = [
-  'State actor confirmed: {country} military intelligence directorate. Operating through proxy networks to maintain deniability.',
-  'Attribution HIGH: {country} Ministry of State Security cyber unit. Infrastructure overlaps with 3 previous campaigns.',
-  'Probable state actor: {country} special operations command. Uniformed advisors observed alongside proxy militia.',
-  'State-affiliated threat actor operating from {city}. Government direction confirmed via intercepted communications with defense ministry.',
-  'Hybrid actor: state-owned enterprise fronting for intelligence operations. Personnel are active-duty military with civilian cover.',
+  'State actor confirmed: {sponsor} military intelligence directorate. Operating through proxy networks in {country} to maintain deniability.',
+  'Attribution HIGH: {sponsor} Ministry of State Security. Infrastructure overlaps with 3 previous campaigns attributed to {sponsor}.',
+  'Probable state actor: {sponsor} special operations command. Personnel identified via biometric match with known {sponsor} intelligence officers.',
+  'State-affiliated threat actor directed from {sponsor}. Government direction confirmed via intercepted communications with {sponsor} defense ministry.',
+  'Hybrid actor: {sponsor} state-owned enterprise fronting for intelligence operations. Personnel are active-duty {sponsor} military with civilian cover.',
 ];
 
 INTEL_VALUE_POOLS.FORCE_DISPOSITION = [
@@ -553,12 +564,31 @@ INTEL_VALUE_POOLS.COMMAND_STRUCTURE = [
   'Decentralized structure: regional commanders operate autonomously with strategic guidance. Makes targeting complex but response slower.',
 ];
 
+INTEL_VALUE_POOLS.OPERATIONAL_METHOD = [
+  'Operatives using diplomatic cover at {sponsor} embassy in {city}. Dead drops, brush passes, and encrypted messaging apps for agent communication.',
+  'Front company registered in {city} as import/export firm. Actual function: logistics hub for covert operations. 6 employees identified as intelligence officers.',
+  'Proxy forces receiving arms shipments via third-country intermediaries. Training camps located 40km outside {city}. {sponsor} military advisors embedded at battalion level.',
+  'Sabotage team operating under commercial cover. Technical equipment consistent with infrastructure targeting — signal jammers, industrial malware delivery devices, demolition materials.',
+  'Classic intelligence tradecraft: recruitment of local nationals with access to US military and diplomatic facilities. At least 2 recruited agents identified via counter-intelligence.',
+  'Cyber-enabled operations run from {sponsor} territory with forward operatives in {city} for physical access requirements. Blended HUMINT/CYBER methodology.',
+];
+
+INTEL_VALUE_POOLS.US_TARGET = [
+  'US embassy and diplomatic personnel in {city}. Communications of 3 State Department officials intercepted. Classified reporting channels may be compromised.',
+  'US military forward operating base in {country}. Force protection assessments, patrol routes, and personnel rotations being collected.',
+  'US defense contractor facility developing advanced weapons systems. Technical data theft confirmed — schematics for classified program exfiltrated.',
+  'US intelligence community operations in the {theater} theater. Counter-intelligence activity suggests attempt to identify and recruit Vigil sources.',
+  'US-aligned government institutions in {country}. Objective: destabilize pro-American leadership and undermine bilateral relationship.',
+  'US critical infrastructure — energy grid, communications networks, or financial systems. Pre-positioned cyber access for potential future disruption.',
+];
+
 INTEL_VALUE_POOLS.STRATEGIC_INTENT = [
   'Intent assessed: territorial expansion into disputed zone. Timing aligned with domestic political calendar.',
   'Posture is coercive, not offensive. Likely seeking concessions through threat of force. Escalation possible if deterrence fails.',
   'Strategic aim: establish fait accompli before international community can respond. 48-72h window for decisive action.',
-  'Dual objectives: demonstrate military capability to domestic audience and deter neighboring states from alliance with US.',
-  'Intelligence indicates preparation for limited punitive strike. Targets are symbolic rather than militarily significant.',
+  'Intelligence collection objective: map US force disposition and decision-making processes in the {theater} theater for future contingency planning.',
+  'Objective: undermine US alliance structure in {theater} by demonstrating that American security guarantees are unreliable.',
+  'Sabotage intent: degrade US operational capability in {country} ahead of anticipated diplomatic confrontation. Plausible deniability is paramount.',
 ];
 
 INTEL_VALUE_POOLS.ESCALATION_POSTURE = [
@@ -585,6 +615,15 @@ INTEL_VALUE_POOLS.FINANCIAL_FLOWS = [
   'State sponsor providing $15M annually through diplomatic channels. Supplemented by extortion rackets in controlled territory.',
   'Narcotics trafficking primary revenue source. Estimated $20-40M annually. Money laundered through real estate in {city}.',
   'Funding traced to diaspora donations, hawala transfers, and a sophisticated invoice fraud scheme targeting European companies.',
+];
+
+INTEL_VALUE_POOLS.PROGRAM_TYPE = [
+  'FACILITY|Fixed-site production facility. Overhead imagery confirms industrial-scale equipment, security perimeter, and dedicated power infrastructure. Assessed as active weapons program.',
+  'FACILITY|Underground research complex. Thermal signatures and ventilation patterns consistent with enrichment or chemical synthesis. Hardened against aerial strike.',
+  'FACILITY|Dual-use facility operating under civilian cover. Clandestine wing detected via electromagnetic anomalies. IAEA inspectors denied access.',
+  'NETWORK|Procurement network spanning 4 countries. Shell companies purchasing dual-use components — centrifuge parts, maraging steel, specialized valves. Coordinated by state intelligence service.',
+  'NETWORK|Proliferation ring run by former weapons scientists. Selling designs, technical expertise, and components to state clients. Transactions via intermediaries in {city}.',
+  'NETWORK|Clandestine supply chain trafficking chemical precursors and delivery system components. Front companies in 3 countries. End user: assessed as state weapons program.',
 ];
 
 INTEL_VALUE_POOLS.FACILITY_ID = [
@@ -693,9 +732,12 @@ INTEL_VALUE_POOLS.EXFIL_ROUTES = [
 ];
 
 INTEL_VALUE_POOLS.ASSET_CONDITION = [
-  'Last report: asset is mobile but wounded. Minor injuries sustained during initial compromise. Sheltering with local contact. Has emergency funds and backup identity documents.',
-  'Asset condition unknown. Radio silence for 72 hours. Vigil unable to determine if asset is evading, captured, or deceased.',
-  'Asset alive and evading. Last dead-drop indicates subject is sheltering in {city} outskirts. Hostile CI is searching systematically. Window for extraction narrowing.',
+  'FREE|Asset is mobile but wounded. Minor injuries sustained during initial compromise. Sheltering with local contact. Has emergency funds and backup identity documents.',
+  'FREE|Asset alive and evading. Last dead-drop indicates subject is sheltering in {city} outskirts. Hostile CI is searching systematically. Window for extraction narrowing.',
+  'FREE|Asset has gone dark but emergency beacon activated 6 hours ago. Assessed as evading on foot. Cover identity still partially intact — has not been publicly identified.',
+  'DETAINED|Asset confirmed in custody of hostile counter-intelligence. Detained at facility in {city}. Interrogation likely underway. Every hour increases damage to Vigil network.',
+  'DETAINED|Asset seized at checkpoint 48 hours ago. Currently held at undisclosed security facility. Source reporting indicates formal interrogation has begun. Extraction requires direct action.',
+  'DETAINED|Asset arrested by state security services. Being held in military intelligence detention. Vigil communications intercepts confirm hostile CI is aware of asset\'s affiliation.',
 ];
 
 INTEL_VALUE_POOLS.COVER_STATUS = [
@@ -712,7 +754,7 @@ INTEL_VALUE_POOLS.SAFE_HOUSE_NETWORK = [
 // Called per field when building threat intel. Picks from appropriate pool
 // and parametrizes with location/org data.
 
-function generateIntelValue(fieldKey, location, orgName, targetInfo) {
+function generateIntelValue(fieldKey, location, orgName, targetInfo, sponsorCountry) {
   var pool = INTEL_VALUE_POOLS[fieldKey];
   if (!pool || pool.length === 0) return 'Collection in progress — data insufficient.';
 
@@ -729,6 +771,7 @@ function generateIntelValue(fieldKey, location, orgName, targetInfo) {
     val = val.replace(/\{targetCountry\}/g, targetInfo.country || '?');
   }
   val = val.replace(/\{orgName\}/g, orgName || 'unknown organization');
+  val = val.replace(/\{sponsor\}/g, sponsorCountry || 'unknown state');
   val = val.replace(/\{cve\}/g, function() {
     return 'CVE-' + (2025 + Math.floor(Math.random() * 4)) + '-' + (10000 + Math.floor(Math.random() * 89999));
   });

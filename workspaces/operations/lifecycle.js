@@ -196,10 +196,12 @@
     // Apply viability impact
     var viabilityDelta = assessOptionOutcome(op, success);
 
-    // Intel gain on success
+    // Intel gain on success — varies by op type (surveillance >> takedown >> strikes)
     var intelGain = 0;
     if (success) {
-      intelGain = randInt(5, 15);
+      var otDef = OPERATION_TYPES[op.type];
+      var reward = (otDef && otDef.intelReward) ? otDef.intelReward : [5, 15];
+      intelGain = randInt(reward[0], reward[1]);
       V.resources.intel += intelGain;
     }
 

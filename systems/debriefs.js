@@ -257,6 +257,26 @@ var THREAT_CONTEXT = {
     assessmentSuccess: 'Counter-proliferation raid on {org}\'s facility in {city} secured WMD-related materials and key personnel. The seizure significantly degrades {org}\'s program timeline. Materials are en route to national laboratory for full analysis.',
     assessmentFailure: 'Counter-proliferation raid failed to secure {org}\'s primary materials. Evidence of program activity was confirmed but the bulk of materials and equipment has been relocated. {org}\'s proliferation timeline is delayed but not stopped.',
   },
+  PROLIFERATOR_NETWORK: {
+    targetDesc: 'transfer site',
+    objective: 'counter-proliferation interdiction',
+    preMission: [
+      '{org} proliferation network operating a transfer point in {city}. Intelligence indicates dual-use components staged for handoff to end-user state program. Priority: seize all materials, detain facilitators, and map the upstream supply chain.',
+      'counter-proliferation interdiction targeting {org}\'s logistics node in {city}. Network has been moving centrifuge parts, precursor chemicals, and technical documents through this location. CBRN-qualified operators assigned for materials assessment.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Transfer site secured. Found: shipping containers packed with dual-use equipment — maraging steel tubes, specialized valves, vacuum pumps. Procurement documents in three languages recovered. Two facilitators detained.',
+      '"JACKPOT." Network node disrupted. {org}\'s logistics coordinator captured alive with encrypted communications devices. Warehouse contained crated centrifuge components, falsified end-user certificates, and payment records linking to state sponsors.',
+    ],
+    jackpotFailure: [
+      'Transfer site was partially cleared before the team arrived. Loading dock showed evidence of recent vehicle departure. Some secondary materials recovered but the primary shipment is gone. {org}\'s network has been tipped off.',
+      'Facilitators fled via a pre-planned escape route minutes before breach. Site contained empty crates with CBRN residue and shredded documents. Network is intact and will reconstitute at an alternate location.',
+    ],
+    sseSuccess: 'SSE team recovered procurement records, shipping manifests, communication devices, and sample materials. Chain of custody established for all evidence. Financial records will map the broader network.',
+    sseFailure: 'Limited exploitation. Most documents destroyed. Materials recovered insufficient to prove weapons-grade intent. Network disrupted but not dismantled.',
+    assessmentSuccess: 'Counter-proliferation interdiction against {org}\'s network in {city} successful. Key facilitators detained and supply chain disrupted. Recovered materials and documents will enable follow-on targeting of upstream suppliers and end-user programs.',
+    assessmentFailure: 'Interdiction of {org}\'s network in {city} did not achieve primary objectives. The proliferation pipeline has been disrupted but key personnel and materials escaped. {org} will likely establish alternate routes within weeks.',
+  },
   ASSET_COMPROMISED: {
     targetDesc: 'detention site',
     objective: 'asset recovery',
@@ -317,26 +337,6 @@ var THREAT_CONTEXT = {
     assessmentSuccess: 'Strategic strike on {org}\'s facility in {city} achieved destruction of critical infrastructure. Enemy strategic capability in the {theater} theater significantly degraded.',
     assessmentFailure: 'Strike on {org}\'s strategic facility in {city} achieved only partial damage. The facility may be restored. Follow-up action required to complete the mission.',
   },
-  INSURGENCY: {
-    targetDesc: 'stronghold',
-    objective: 'counter-insurgency raid',
-    preMission: [
-      '{org} insurgent stronghold in {city}. Intelligence indicates a fortified position serving as a local command node. Weapons caches, IED-making materials, and leadership presence confirmed.',
-      'insurgent network {org} operating from this location. Target doubles as a community organizing point — civilian proximity is a concern. Precision assault required to minimize collateral impact.',
-    ],
-    jackpotSuccess: [
-      '"JACKPOT." Insurgent leadership identified and detained during the assault. Weapons cache secured: RPGs, small arms, IED components, and detonators. Propaganda materials and recruitment lists recovered.',
-      '"JACKPOT." Stronghold cleared. {org}\'s local cell leader captured alive after a brief firefight. Maps showing IED placement plans for the next month recovered from the command room.',
-    ],
-    jackpotFailure: [
-      'Stronghold was defended with prepared positions and IEDs. Team penetrated the outer perimeter but insurgent fighters fell back through pre-planned escape routes. Leadership escaped into the civilian population.',
-      'Insurgent fighters triggered multiple IEDs during the assault, channeling the team into a kill zone. Emergency withdrawal called after casualties exceeded acceptable threshold. Stronghold not secured.',
-    ],
-    sseSuccess: 'Weapons cache documented and destroyed in place. IED-making materials rendered safe. Propaganda materials and communications equipment seized for intelligence exploitation.',
-    sseFailure: 'Limited exploitation before withdrawal. IED threat prevented thorough search. Demolition charges placed on identified weapons cache.',
-    assessmentSuccess: 'Counter-insurgency raid on {org}\'s stronghold in {city} disrupted their local command structure. Leadership detained and weapons cache destroyed. Insurgent operations in the area expected to degrade.',
-    assessmentFailure: 'Raid on {org}\'s stronghold in {city} did not achieve objectives. Insurgent defenses and IED preparations exceeded estimates. {org} maintains operational capability in the area. Alternative approach recommended.',
-  },
   HVT_TARGET: {
     targetDesc: 'compound',
     objective: 'HVT operation',
@@ -374,6 +374,66 @@ var THREAT_CONTEXT = {
     sseFailure: null,
     assessmentSuccess: null,
     assessmentFailure: null,
+  },
+  STATE_ACTOR_ESPIONAGE: {
+    targetDesc: 'intelligence station',
+    objective: 'counter-espionage operation',
+    preMission: [
+      '{sponsor}-directed espionage cell operating under {org} cover in {city}. Intelligence confirms active collection against US diplomatic and military targets. Counter-intelligence operation aims to identify handlers, map the network, and neutralize collection capability.',
+      '{org} identified as a {sponsor} intelligence front in {city}. SIGINT intercepts confirm tasking from {sponsor} intelligence services. The operation has been penetrating US classified programs. Immediate disruption required to stop the hemorrhaging of sensitive information.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Espionage cell rolled up. Lead intelligence officer identified and detained with encrypted communications equipment, dead-drop schedules, and intelligence reports prepared for transmission to {sponsor}. Network fully mapped.',
+      '"JACKPOT." {org}\'s intelligence station neutralized. Found: SIGINT collection equipment targeting US embassy communications, handler contact protocols, and payment records. {sponsor}\'s espionage infrastructure in {city} is dismantled.',
+    ],
+    jackpotFailure: [
+      'Primary intelligence officer evaded detention — likely warned by counter-surveillance. Safe house was sanitized before entry. {sponsor}\'s espionage network in {city} is intact and now aware of US counter-intelligence interest.',
+      'Cell members scattered before the operation could close the net. Communications equipment found destroyed. {org}\'s handlers have gone dark. {sponsor} will reconstitute the network under new cover.',
+    ],
+    sseSuccess: 'Counter-intelligence exploitation recovered encrypted devices, intelligence reports, contact schedules, and financial transaction records. Damage assessment initiated — scope of compromised information being determined.',
+    sseFailure: 'Minimal exploitation value. Communications devices wiped. The damage assessment will rely on previously collected signals intelligence to determine what information was compromised.',
+    assessmentSuccess: 'Counter-espionage operation {codename} in {city} successfully dismantled {sponsor}\'s intelligence collection network operating under {org} cover. Key personnel detained, collection equipment seized, and damage assessment underway. {sponsor}\'s intelligence capability in the region is significantly degraded.',
+    assessmentFailure: 'Counter-espionage operation {codename} in {city} failed to neutralize {sponsor}\'s intelligence network. {org}\'s operatives evaded capture. The espionage operation against US interests continues. {sponsor} will implement enhanced security measures making future counter-intelligence operations more difficult.',
+  },
+  STATE_ACTOR_PROXY: {
+    targetDesc: 'proxy force staging area',
+    objective: 'strike against state-sponsored proxy force',
+    preMission: [
+      '{sponsor}-backed proxy force {org} staging in {city}. Intelligence confirms weapons shipments from {sponsor}, military advisors embedded with the force, and operational planning for attacks against US-aligned interests. Strike aims to destroy staging capability and demonstrate resolve.',
+      '{org} — a {sponsor} proxy — massing personnel and equipment near {city}. Satellite imagery shows vehicle concentrations, ammunition staging, and communications infrastructure linked to {sponsor} military command. Strike authorized to degrade combat capability.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Proxy staging area destroyed. BDA confirms: vehicle park eliminated, ammunition stores detonated (secondary explosions for 40 minutes), communications equipment destroyed. {sponsor} military advisors confirmed among casualties.',
+      '"JACKPOT." Strike achieved full effect on {org}\'s staging area in {city}. Pre-positioned weapons shipments from {sponsor} destroyed before distribution. Proxy force combat effectiveness severely degraded.',
+    ],
+    jackpotFailure: [
+      'Strike achieved only partial effect. {org}\'s forces had dispersed from the primary staging area — likely warned by {sponsor} intelligence. Secondary positions struck but the proxy force retains most of its combat capability.',
+      'Target area was reinforced with air defenses not previously identified. Strike package diverted to suppress defenses — limited ordnance on primary target. {org}\'s proxy force staging area partially damaged but operational.',
+    ],
+    sseSuccess: 'Battle damage assessment confirms destruction of primary staging infrastructure. {sponsor}\'s investment in proxy capability in this area has been set back significantly. Intel recovered from the site will map the supply chain.',
+    sseFailure: 'BDA inconclusive. Cloud cover and secondary fires obscure damage extent. {org}\'s proxy force may retain significant capability. Follow-up ISR tasked.',
+    assessmentSuccess: 'Strike on {sponsor}\'s proxy force {org} in {city} achieved strategic objectives. Staging capability destroyed, supply chain disrupted, and {sponsor}\'s ability to project force through proxies in the region degraded. Diplomatic messaging to {sponsor} reinforced through back channels.',
+    assessmentFailure: 'Strike on {org}\'s proxy staging area in {city} did not achieve primary objectives. {sponsor}\'s proxy force retains combat capability and will likely reconstitute. {sponsor} may escalate support in response. Recommend follow-up action or diplomatic engagement.',
+  },
+  STATE_ACTOR_SABOTAGE: {
+    targetDesc: 'sabotage cell safe house',
+    objective: 'counter-sabotage raid',
+    preMission: [
+      '{sponsor}-directed sabotage cell operating as {org} in {city}. Intelligence confirms planning or execution of attacks against US critical infrastructure — energy, communications, or military systems. Raid objective: neutralize the cell, seize sabotage materials, and identify the target list.',
+      '{org} identified as a {sponsor} sabotage operation targeting US interests in {city}. Cell members have been conducting reconnaissance on critical infrastructure. Explosive materials or cyber attack tools may be on-site. CBRN precautions advised.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Sabotage cell neutralized. Cell leader detained. Found: detailed reconnaissance files on US infrastructure targets, sabotage equipment (explosives/devices), and direct communications with {sponsor} handlers. Attack timeline recovered — strikes were imminent.',
+      '"JACKPOT." {org}\'s safe house secured. Cell members captured. Evidence includes target packages for US military installations, pre-positioned sabotage materials, and encrypted links to {sponsor}\'s intelligence directorate. The planned attack has been prevented.',
+    ],
+    jackpotFailure: [
+      'Safe house was rigged. Entry triggered a booby trap that delayed the assault team. By the time the building was cleared, key cell members had evacuated through a prepared escape route. Sabotage materials and target lists not recovered.',
+      'Cell had already dispersed from the safe house. Evidence of recent occupation but operational materials removed. {sponsor}\'s sabotage operation is still active and the target list is unknown. The threat persists.',
+    ],
+    sseSuccess: 'Exploitation recovered sabotage materials, target reconnaissance files, communication devices, and {sponsor} handler contact protocols. The full scope of planned attacks can now be assessed. Counter-measures being deployed to identified targets.',
+    sseFailure: 'Limited exploitation. Cell members destroyed critical materials during the raid. Target list not fully recovered. Defensive measures must be applied broadly across potential targets.',
+    assessmentSuccess: 'Counter-sabotage raid {codename} in {city} neutralized {sponsor}\'s sabotage cell operating as {org}. Planned attacks against US critical infrastructure prevented. Recovered materials will enable counter-intelligence operations against {sponsor}\'s sabotage directorate.',
+    assessmentFailure: 'Counter-sabotage raid {codename} in {city} failed to neutralize {sponsor}\'s cell. {org}\'s sabotage capability remains intact and target list is unknown. All US installations in the {theater} theater should increase security posture. Follow-up intelligence collection is critical.',
   },
 };
 
@@ -432,6 +492,11 @@ function generateDebrief(op, success) {
       v.threatType = _threat.type;
       v.threatLabel = _threat.typeLabel || _threat.type;
       v.threatUrgent = _threat.urgent || false;
+      if (_threat.programType) v.programType = _threat.programType;
+      if (_threat.cellType) v.cellType = _threat.cellType;
+      if (_threat.assetStatus) v.assetStatus = _threat.assetStatus;
+      if (_threat.activityType) v.activityType = _threat.activityType;
+      if (_threat.sponsorCountry) v.sponsor = _threat.sponsorCountry;
     }
   }
 
@@ -805,7 +870,8 @@ DEBRIEF_GENERATORS.MILITARY_STRIKE = function(op, v, success) {
   // Threat-context adaptation
   var isWMD = v.threatType === 'PROLIFERATOR';
   var isMilitary = v.threatType === 'MILITARY_TARGET' || v.threatType === 'STRATEGIC_TARGET';
-  var targetLabel = isWMD ? 'WMD-related facility' : isMilitary ? 'military installation' : 'command-and-control infrastructure';
+  var isProxy = v.threatType === 'STATE_ACTOR' && v.activityType === 'PROXY';
+  var targetLabel = isWMD ? (v.programType === 'NETWORK' ? 'proliferation logistics site' : 'WMD-related facility') : isMilitary ? 'military installation' : isProxy ? (v.sponsor || 'state') + '-backed proxy staging area' : 'command-and-control infrastructure';
 
   // Pull real intel
   var airDefenseIntel = getIntel(v, 'AIR_DEFENSE_POSTURE');
@@ -872,7 +938,11 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
   var entries = [];
 
   // --- Threat-context adaptation ---
-  var tc = (v.threatType && THREAT_CONTEXT[v.threatType]) ? THREAT_CONTEXT[v.threatType] : null;
+  // Use program-type-specific context for PROLIFERATOR network raids
+  var tcKey = v.threatType;
+  if (v.threatType === 'PROLIFERATOR' && v.programType === 'NETWORK') tcKey = 'PROLIFERATOR_NETWORK';
+  if (v.threatType === 'STATE_ACTOR' && v.activityType) tcKey = 'STATE_ACTOR_' + v.activityType;
+  var tc = (tcKey && THREAT_CONTEXT[tcKey]) ? THREAT_CONTEXT[tcKey] : null;
   var targetDesc = (tc && tc.targetDesc) || 'compound';
   var objectiveDesc = (tc && tc.objective) || 'direct action';
 
@@ -894,6 +964,7 @@ DEBRIEF_GENERATORS.SOF_RAID = function(op, v, success) {
   var tcVars = {
     org: v.orgName, city: v.city, country: v.country, theater: v.theater,
     codename: v.codename, threatLabel: v.threatLabel || '',
+    sponsor: v.sponsor || '',
     loc: pick(['second floor, east wing', 'ground floor, rear room', 'basement level', 'reinforced interior room']),
     count: randInt(2, 6), evidence: pick(DEBRIEF_EVIDENCE),
   };
@@ -1415,9 +1486,10 @@ DEBRIEF_GENERATORS.DRONE_STRIKE = function(op, v, success) {
   var munitionType = assetMunitions.length > 0 ? pick(assetMunitions) : pick(['AGM-114R Hellfire', 'GBU-39 Small Diameter Bomb', 'AGM-179 JAGM', 'GBU-12 Paveway II']);
 
   // Threat-context adaptation
-  var isFacility = v.threatType === 'MILITARY_TARGET' || v.threatType === 'STRATEGIC_TARGET' || v.threatType === 'PROLIFERATOR';
+  var isFacility = v.threatType === 'MILITARY_TARGET' || v.threatType === 'STRATEGIC_TARGET' || (v.threatType === 'PROLIFERATOR' && v.programType !== 'NETWORK');
   var isWMD = v.threatType === 'PROLIFERATOR';
-  var targetLabel = isFacility ? (isWMD ? 'WMD-related facility' : 'military installation') : 'leadership';
+  var isProxy = v.threatType === 'STATE_ACTOR' && v.activityType === 'PROXY';
+  var targetLabel = isFacility ? (isWMD ? 'WMD-related facility' : 'military installation') : isWMD ? 'proliferation logistics site' : isProxy ? (v.sponsor || 'state') + '-backed proxy staging area' : 'leadership';
 
   // Pull real intel
   var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
@@ -1589,7 +1661,7 @@ DEBRIEF_GENERATORS.HVT_CAPTURE = function(op, v, success) {
 
 DEBRIEF_GENERATORS.TARGETED_KILLING = function(op, v, success) {
   var entries = [];
-  var method = pick(['precision air strike', 'vehicle-borne IED on target route', 'sniper team at overwatch position', 'armed drone loiter-and-strike']);
+  var method = pick(['vehicle-borne IED on target route', 'sniper team at overwatch position', 'command-detonated device at chokepoint', 'covert close-range engagement']);
 
   // Pull real intel
   var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'LEADERSHIP_ID') || getIntel(v, 'SUBJECT_ID');
@@ -1604,7 +1676,7 @@ DEBRIEF_GENERATORS.TARGETED_KILLING = function(op, v, success) {
   entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'PID confirmed. ' + (v.targetAlias || 'HVT') + ' observed at anticipated location. ' + collateralStr + '. Awaiting final authorization. Intel coverage: ' + v.intelCoverage + '%.' });
 
   if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Authorization received. Action executed. ' + (v.targetAlias || 'HVT') + ' ' + pick(['struck by precision munition — no time to react', 'engaged by sniper team — two rounds, both hits, target down immediately', 'vehicle destroyed by directed charge — no survivors']) + '. Confirmed EKIA.' });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: 'Authorization received. Action executed. ' + (v.targetAlias || 'HVT') + ' ' + pick(['engaged by sniper team — two rounds, both hits, target down immediately', 'vehicle destroyed by directed charge — no survivors', 'neutralized by covert operative at close range — suppressed weapon, single shot', 'eliminated by command-detonated device as vehicle passed through chokepoint']) + '. Confirmed EKIA.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(0) + '+10min', type: 'normal', text: 'Post-action surveillance confirms target eliminated. ' + pick(['Local emergency services responding — cover story holding', 'Area secured by allied local forces', 'Clean operation — no witnesses to the action itself']) + '. Collateral damage: none.' });
     entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Assets exfiltrated from area without detection. Attribution assessment: ' + pick(['impossible to attribute — appears accidental', 'low — could be attributed to rival faction', 'moderate — forensics may indicate state actor']) + '.' });
   } else {

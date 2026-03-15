@@ -411,3 +411,54 @@
   border-radius: var(--radius-sm);
   display: inline-block;
 }
+
+/* --- Branch cards --- */
+.response-card.response-branch {
+  border-color: var(--border-light);
+  background: var(--bg-2);
+}
+
+.response-card.response-branch:hover {
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+
+.response-branch-children {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.response-branch-child {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.response-branch-back {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  margin-bottom: var(--sp-3);
+  transition: color var(--transition-fast);
+}
+
+.response-branch-back:hover {
+  color: var(--text-hi);
+}
+
+.response-branch-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--text-hi);
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-2);
+}
