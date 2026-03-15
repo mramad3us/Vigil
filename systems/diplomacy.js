@@ -38,7 +38,6 @@ function getStancePermissions(level, theaterId) {
 
   return {
     covertOps: true,
-    station: level >= 6,
     overtOps: level >= 6,
     covertRisk: covertRisk,
     defconCovertAuth: defconCovertOverride,

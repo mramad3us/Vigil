@@ -451,7 +451,7 @@ function spawnThreat(theaterId, forcedTypeId) {
       var defcon = theater.defcon || 5;
       var defconMod = (typeof DEFCON_SPAWN_MOD !== 'undefined') ? (DEFCON_SPAWN_MOD[defcon] || 1.0) : 1.0;
       var conflictMod = (typeof getConflictSpawnMultiplier === 'function') ? getConflictSpawnMultiplier(tid) : 1.0;
-      var prob = theater.volatility * 0.5 * defconMod * conflictMod;
+      var prob = theater.volatility * 0.05 * defconMod * conflictMod;
       if (Math.random() < prob) {
         // At DEFCON 1 with AT_WAR countries, spawn military targets
         if (defcon <= 1) {

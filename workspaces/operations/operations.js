@@ -585,8 +585,11 @@
     });
 
     // Filter out NAVY assets that can't reach the target
+    var isOpsMaritimeOp = op.maritime || (opType && opType.maritime);
     eligibleAvailable = eligibleAvailable.filter(function(a) {
       if (a.category !== 'NAVY') return true;
+      // Maritime ops: navy goes directly to target, no station point needed
+      if (isOpsMaritimeOp) { a._stationPoint = null; return true; }
       var rangeKm = a.effectiveRangeKm || 1000;
       if (typeof findNavalStationPoint !== 'function') return true;
       var station = findNavalStationPoint(a.currentLat, a.currentLon, op.geo.lat, op.geo.lon, rangeKm);

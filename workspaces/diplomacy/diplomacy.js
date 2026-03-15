@@ -331,7 +331,6 @@
     html += '<div class="diplo-section"><div class="diplo-section-title">PERMISSIONS</div>';
     html += '<div class="diplo-perm-grid">';
     html += renderPermRow('COVERT OPS', true, 'Risk: ' + Math.round(perms.covertRisk * 100) + '%', perms.covertRisk > 0.5 ? 'risky' : 'authorized');
-    html += renderPermRow('STATION', perms.station);
     html += renderPermRow('OVERT OPS', perms.overtOps || (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED'));
     html += '</div></div>';
 

@@ -72,6 +72,11 @@ function generateVigilOptions(op) {
   // Pre-compute naval station points; exclude unreachable naval assets
   eligible = eligible.filter(function(a) {
     if (a.category !== 'NAVY') return true;
+    // Maritime ops: navy goes directly to target, no station point needed
+    if (isMaritimeOp) {
+      a._stationPoint = null;
+      return true;
+    }
     var rangeKm = a.effectiveRangeKm || 1000;
     var station = typeof findNavalStationPoint === 'function'
       ? findNavalStationPoint(a.currentLat, a.currentLon, destLat, destLon, rangeKm)
@@ -524,11 +529,17 @@ function recalcCustomOption(op, assetIds) {
   var destLon = op.geo.lon;
 
   // Pre-compute station points for NAVY assets in custom selection
+  var isCustomMaritime = op.maritime || (opType && opType.maritime);
   for (var n = 0; n < assets.length; n++) {
     if (assets[n].category === 'NAVY' && !assets[n]._stationPoint) {
-      var rangeKm = assets[n].effectiveRangeKm || 1000;
-      if (typeof findNavalStationPoint === 'function') {
-        assets[n]._stationPoint = findNavalStationPoint(assets[n].currentLat, assets[n].currentLon, destLat, destLon, rangeKm);
+      if (isCustomMaritime) {
+        // Maritime ops: navy goes directly to target
+        assets[n]._stationPoint = null;
+      } else {
+        var rangeKm = assets[n].effectiveRangeKm || 1000;
+        if (typeof findNavalStationPoint === 'function') {
+          assets[n]._stationPoint = findNavalStationPoint(assets[n].currentLat, assets[n].currentLon, destLat, destLon, rangeKm);
+        }
       }
     }
   }
