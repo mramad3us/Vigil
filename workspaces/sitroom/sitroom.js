@@ -80,7 +80,98 @@
         'Days: ' + V.time.day +
       '</div>';
 
+    // --- Global Force Distribution ---
+    html += renderForceDistribution();
+
     el.innerHTML = html;
+  }
+
+  // --- Global Force Distribution ---
+
+  function renderForceDistribution() {
+    // Count all assets per theater (active ones — STATIONED, DEPLOYED, COLLECTING, IN_TRANSIT)
+    var theaterCounts = {};
+    var totalAssets = 0;
+
+    for (var tid in THEATERS) {
+      theaterCounts[tid] = { total: 0, byCategory: {} };
+    }
+    theaterCounts['_IN_TRANSIT'] = { total: 0 };
+    theaterCounts['_UNASSIGNED'] = { total: 0 };
+
+    for (var i = 0; i < V.assets.length; i++) {
+      var asset = V.assets[i];
+      totalAssets++;
+
+      if (asset.status === 'IN_TRANSIT') {
+        theaterCounts['_IN_TRANSIT'].total++;
+        continue;
+      }
+
+      var theaterId = typeof getAssetTheaterId === 'function' ? getAssetTheaterId(asset) : null;
+      if (theaterId && theaterCounts[theaterId]) {
+        theaterCounts[theaterId].total++;
+        theaterCounts[theaterId].byCategory[asset.category] = (theaterCounts[theaterId].byCategory[asset.category] || 0) + 1;
+      } else {
+        theaterCounts['_UNASSIGNED'].total++;
+      }
+    }
+
+    if (totalAssets === 0) return '';
+
+    var html = '<div class="gauge-section-title" style="margin-top:var(--sp-4)">FORCE DISTRIBUTION</div>';
+    html += '<div class="force-dist-panel">';
+
+    // Stacked bar showing all theaters
+    html += '<div class="force-dist-bar">';
+    var theaterOrder = [];
+    for (var t in THEATERS) theaterOrder.push(t);
+    // Sort by count descending
+    theaterOrder.sort(function(a, b) { return theaterCounts[b].total - theaterCounts[a].total; });
+
+    for (var ti = 0; ti < theaterOrder.length; ti++) {
+      var tId = theaterOrder[ti];
+      var count = theaterCounts[tId].total;
+      if (count === 0) continue;
+      var pct = (count / totalAssets) * 100;
+      var theaterColor = THEATERS[tId].color || 'var(--text-dim)';
+      html += '<div class="force-dist-segment" style="width:' + pct + '%;background:' + theaterColor + '" data-tip="' + THEATERS[tId].shortName + ': ' + count + ' units (' + Math.round(pct) + '%)' + '" data-tip-align="bottom"></div>';
+    }
+    // In-transit segment
+    if (theaterCounts['_IN_TRANSIT'].total > 0) {
+      var transitPct = (theaterCounts['_IN_TRANSIT'].total / totalAssets) * 100;
+      html += '<div class="force-dist-segment force-dist-transit" style="width:' + transitPct + '%" data-tip="In Transit: ' + theaterCounts['_IN_TRANSIT'].total + '" data-tip-align="bottom"></div>';
+    }
+    html += '</div>';
+
+    // Legend rows
+    html += '<div class="force-dist-legend">';
+    for (var li = 0; li < theaterOrder.length; li++) {
+      var lId = theaterOrder[li];
+      var lCount = theaterCounts[lId].total;
+      if (lCount === 0) continue;
+      var lPct = Math.round((lCount / totalAssets) * 100);
+      var lColor = THEATERS[lId].color || 'var(--text-dim)';
+      html += '<div class="force-dist-row">' +
+        '<span class="force-dist-swatch" style="background:' + lColor + '"></span>' +
+        '<span class="force-dist-name">' + THEATERS[lId].shortName + '</span>' +
+        '<span class="force-dist-count">' + lCount + '</span>' +
+        '<span class="force-dist-pct">' + lPct + '%</span>' +
+      '</div>';
+    }
+    if (theaterCounts['_IN_TRANSIT'].total > 0) {
+      html += '<div class="force-dist-row">' +
+        '<span class="force-dist-swatch force-dist-transit-swatch"></span>' +
+        '<span class="force-dist-name">IN TRANSIT</span>' +
+        '<span class="force-dist-count">' + theaterCounts['_IN_TRANSIT'].total + '</span>' +
+        '<span class="force-dist-pct">' + Math.round((theaterCounts['_IN_TRANSIT'].total / totalAssets) * 100) + '%</span>' +
+      '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="force-dist-total">' + totalAssets + ' TOTAL ASSETS</div>';
+    html += '</div>';
+    return html;
   }
 
   // --- Center Column: DEFCON Theater Cards ---
@@ -200,31 +291,85 @@
     var isCovert = migration.scope === 'covert';
     var headerText = isCovert ? 'COVERT ASSET RELOCATION PROPOSAL' : 'FORCE MIGRATION PROPOSAL';
     var borderColor = isCovert ? 'var(--amber)' : 'var(--severity-high)';
+
+    // Count selected
+    var selectedCount = 0;
+    for (var si = 0; si < migration.assets.length; si++) {
+      if (migration.assets[si].selected) selectedCount++;
+    }
+
     var html = '<div class="migration-panel" style="border-color:' + borderColor + '">' +
-      '<div class="migration-header" style="color:' + borderColor + '">' + headerText + '</div>' +
+      '<div class="migration-header" style="color:' + borderColor + '">' + headerText +
+        '<span class="migration-selected-count">' + selectedCount + ' / ' + migration.assets.length + ' selected</span>' +
+      '</div>' +
       '<div class="migration-assets">';
 
+    // Group assets by source theater
+    var byTheater = {};
     for (var i = 0; i < migration.assets.length; i++) {
       var entry = migration.assets[i];
-      var catInfo = typeof ASSET_CATEGORIES !== 'undefined' ? ASSET_CATEGORIES[entry.category] : null;
-      var catColor = catInfo ? catInfo.color : 'var(--text)';
+      var src = entry.fromTheaterName || 'UNKNOWN';
+      if (!byTheater[src]) byTheater[src] = [];
+      byTheater[src].push(entry);
+    }
 
-      html += '<div class="migration-asset-row">' +
-        '<span style="color:' + catColor + ';font-weight:600">' + entry.name + '</span>' +
-        '<span class="migration-dest">' + (entry.toStation || entry.toBaseName || '—') + '</span>' +
-        '<span class="migration-eta">' + formatTransitTime(entry.transitMinutes) + '</span>' +
-        '<button class="migration-remove" onclick="removeMigrationAsset(\'' + theaterId + '\',\'' + entry.id + '\')">✕</button>' +
-      '</div>';
+    for (var theaterName in byTheater) {
+      var group = byTheater[theaterName];
+      html += '<div class="migration-group-header">FROM: ' + theaterName + '</div>';
+
+      for (var gi = 0; gi < group.length; gi++) {
+        var e = group[gi];
+        var catInfo = typeof ASSET_CATEGORIES !== 'undefined' ? ASSET_CATEGORIES[e.category] : null;
+        var catColor = catInfo ? catInfo.color : 'var(--text)';
+        var catLabel = catInfo ? catInfo.shortLabel : e.category;
+        var selectedCls = e.selected ? ' migration-row-selected' : '';
+        var dest = e.destinations[e.selectedDestIdx];
+        var destName = dest ? dest.name : '—';
+        var eta = dest ? formatTransitTime(dest.transitMinutes) : '—';
+        var hasMultipleDests = e.destinations.length > 1;
+
+        html += '<div class="migration-asset-row' + selectedCls + '">' +
+          '<div class="migration-row-check" onclick="toggleMigrationAsset(\'' + theaterId + '\',\'' + e.id + '\');renderSitroom()">' +
+            '<span class="migration-checkbox">' + (e.selected ? '■' : '□') + '</span>' +
+          '</div>' +
+          '<div class="migration-row-info">' +
+            '<div class="migration-row-name" style="color:' + catColor + '">' +
+              '<span class="migration-cat-badge" style="background:' + catColor + '">' + catLabel + '</span>' +
+              e.name +
+              (e.deniability === 'COVERT' ? ' <span class="migration-covert-tag">COV</span>' : '') +
+            '</div>' +
+            '<div class="migration-row-route">' +
+              '<span class="migration-from">' + e.fromBaseName + '</span>' +
+              '<span class="migration-arrow">&rarr;</span>' +
+              '<span class="migration-to">' + destName + '</span>' +
+              (hasMultipleDests ? '<span class="migration-dest-nav">' +
+                '<button class="migration-dest-btn" onclick="cycleMigrationDest(\'' + theaterId + '\',\'' + e.id + '\',-1);renderSitroom()">&lsaquo;</button>' +
+                '<span class="migration-dest-idx">' + (e.selectedDestIdx + 1) + '/' + e.destinations.length + '</span>' +
+                '<button class="migration-dest-btn" onclick="cycleMigrationDest(\'' + theaterId + '\',\'' + e.id + '\',1);renderSitroom()">&rsaquo;</button>' +
+              '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="migration-row-eta">' + eta + '</div>' +
+          '<button class="migration-remove" onclick="removeMigrationAsset(\'' + theaterId + '\',\'' + e.id + '\');renderSitroom()">✕</button>' +
+        '</div>';
+      }
     }
 
     html += '</div>';
     html += '<div class="migration-actions">' +
-      '<button class="op-action-btn execute" onclick="approveMigration(\'' + theaterId + '\')">APPROVE MIGRATION</button>' +
-      '<button class="op-action-btn cancel" onclick="dismissMigration(\'' + theaterId + '\')">DISMISS</button>' +
+      '<button class="op-action-btn execute' + (selectedCount === 0 ? ' disabled" disabled' : '"') + ' onclick="approveMigration(\'' + theaterId + '\')">APPROVE (' + selectedCount + ')</button>' +
+      '<button class="op-action-btn cancel" onclick="dismissMigration(\'' + theaterId + '\');renderSitroom()">DISMISS</button>' +
     '</div>';
     html += '</div>';
     return html;
   }
+
+  // Expose render for inline onclick calls
+  window.renderSitroom = function() {
+    renderSitroomGauges();
+    renderDefconPanel();
+    renderSitroomCrises();
+  };
 
   // --- Right Column: Crises ---
 

@@ -49,7 +49,6 @@ function getStancePermissions(level, theaterId) {
 
 var INITIAL_RELATIONS = {
   // ALLIED_FULL (90%)
-  'United States': { relations: 90 },
   'Canada': { relations: 90 },
   'United Kingdom': { relations: 90 },
   'Japan': { relations: 90 },
