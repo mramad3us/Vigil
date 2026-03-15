@@ -65,6 +65,7 @@
     EXECUTING: 'EXECUTING',
     SUCCESS: 'SUCCESS',
     FAILURE: 'FAILURE',
+    EXPIRED: 'EXPIRED',
     ARCHIVED: 'CANCELLED',
   };
 
@@ -77,6 +78,7 @@
     EXECUTING: 'executing',
     SUCCESS: 'success',
     FAILURE: 'failure',
+    EXPIRED: 'expired',
     ARCHIVED: 'failure',
   };
 

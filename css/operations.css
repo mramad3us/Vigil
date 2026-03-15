@@ -51,6 +51,7 @@
 .op-status-dot.executing { background: var(--green); animation: pulse-ring 1.5s ease infinite; }
 .op-status-dot.success { background: var(--green); }
 .op-status-dot.failure { background: var(--red); }
+.op-status-dot.expired { background: var(--text-dim); }
 
 /* --- Op Card Content --- */
 .op-card-content {
@@ -100,6 +101,7 @@
 .op-status-chip.executing { color: var(--green); background: var(--green-dim); }
 .op-status-chip.success { color: var(--green); background: var(--green-dim); }
 .op-status-chip.failure { color: var(--red); background: var(--red-dim); }
+.op-status-chip.expired { color: var(--text-dim); background: rgba(255,255,255,0.05); }
 
 .op-timer {
   font-family: var(--font-mono);

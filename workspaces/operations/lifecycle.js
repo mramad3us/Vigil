@@ -90,39 +90,8 @@
     }
 
     if (allUnreachable) {
-      addLog('OP ' + op.codename + ': All deployment options exceed operational window. Auto-failing.', 'log-warn');
-      op.status = 'FAILURE';
-      V.playStats.opsFailed++;
-      V.playStats.opsCompleted++;
-      V.resources.viability = clamp(V.resources.viability - randInt(1, 3), 0, 100);
-
-      if (op.assignedAssetIds && op.assignedAssetIds.length > 0) {
-        returnAssetsToBase(op.assignedAssetIds);
-      }
-
-      // Mark linked threat
-      if (op.relatedThreatId) {
-        var linkedThreat = getThreat(op.relatedThreatId);
-        if (linkedThreat) {
-          linkedThreat.phase = 'MANIFESTED';
-          linkedThreat.status = 'FAILED';
-        }
-      }
-
-      pushFeedItem({
-        id: uid('FI'),
-        type: 'OPERATION',
-        severity: 'HIGH',
-        header: 'OPERATION FAILED: ' + op.codename + ' (UNREACHABLE)',
-        body: 'Operation ' + op.codename + ' has been automatically failed — no deployment option could reach ' +
-          op.location.city + ', ' + op.location.country + ' within the operational window of ' + op.urgencyHours + ' hours.',
-        timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
-        read: false,
-        opId: op.id,
-        geo: op.geo,
-      });
-
-      fire('operation:resolved', { operation: op });
+      addLog('OP ' + op.codename + ': All deployment options exceed operational window. Expiring.', 'log-warn');
+      expireOperation(op);
       return;
     }
 

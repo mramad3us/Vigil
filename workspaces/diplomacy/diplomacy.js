@@ -95,7 +95,19 @@
     }
   };
 
+  window.showDeclareWarConfirm = function(country) {
+    var esc = country.replace(/'/g, "\\'");
+    var bodyHtml =
+      '<p style="color:var(--text);line-height:1.7;margin-bottom:var(--sp-4)">Declare war on <strong>' + country + '</strong>? This will sever all diplomatic ties and set relations to 0%.</p>' +
+      '<div style="display:flex;gap:var(--sp-2);justify-content:flex-end">' +
+        '<button class="modal-btn" onclick="hideModal()" style="min-width:100px">ABORT</button>' +
+        '<button class="modal-btn modal-btn-primary" onclick="doDeclareWar(\'' + esc + '\')" style="min-width:100px;background:var(--red);border-color:var(--red)">CONFIRM</button>' +
+      '</div>';
+    showModal('DECLARATION OF WAR', bodyHtml, { pause: true });
+  };
+
   window.doDeclareWar = function(country) {
+    hideModal();
     declareWar(country);
     _activeAction = null;
     renderCountryDetail(country);
@@ -602,7 +614,7 @@
 
     var esc = country.replace(/'/g, "\\'");
     var html = '<div class="diplo-action-card' + (disabled ? ' disabled' : '') + '" style="' + (!disabled ? 'border-color:var(--red)' : '') + '"' +
-      (!disabled ? ' onclick="if(confirm(\'Declare war on ' + esc + '? This will sever all diplomatic ties and set relations to 0%.\')) doDeclareWar(\'' + esc + '\')"' : '') + '>' +
+      (!disabled ? ' onclick="showDeclareWarConfirm(\'' + esc + '\')"' : '') + '>' +
       '<div class="diplo-action-header">' +
         '<span class="diplo-action-name" style="color:var(--red)">DECLARE WAR</span>' +
         '<span class="diplo-action-cost">FREE</span>' +
