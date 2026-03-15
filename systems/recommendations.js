@@ -309,7 +309,7 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
   var transitHours = transitMinutes / 60;
 
   var riskLevel = calcOptionRisk(selected, transitHours, op.threatLevel, allCovered);
-  var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered);
+  var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered, op);
   var description = buildOptionDescription(selected, op, transitHours, strategy);
   var consequences = buildConsequences(op, strategy, riskLevel);
 
@@ -368,7 +368,7 @@ function calcOptionRisk(assets, transitHours, threatLevel, allCovered) {
 
 var READINESS_BONUS = { TIER_1: 8, TIER_2: 4, TIER_3: 2 };
 
-function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCovered) {
+function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCovered, op) {
   var base = opType.baseSuccessRate;
 
   // Per-asset readiness bonus (elite units contribute more than generic ones)
@@ -387,7 +387,23 @@ function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCove
   // Threat level adjustment
   var threatAdj = (3 - threatLevel) * 3;
 
-  var total = base + assetBonus - transitPenalty + capBonus + threatAdj;
+  // Intel quality bonus — revealed fields weighted by difficulty (ticksToReveal)
+  var intelBonus = 0;
+  var fields = op ? op.intelFields : null;
+  if (fields && fields.length > 0) {
+    var totalWeight = 0;
+    var revealedWeight = 0;
+    for (var f = 0; f < fields.length; f++) {
+      var w = fields[f].ticksToReveal || 1;
+      totalWeight += w;
+      if (fields[f].revealed) revealedWeight += w;
+    }
+    // 0-100% intel quality → 0-20 point bonus
+    var intelPct = totalWeight > 0 ? revealedWeight / totalWeight : 0;
+    intelBonus = Math.round(intelPct * 20);
+  }
+
+  var total = base + assetBonus - transitPenalty + capBonus + threatAdj + intelBonus;
   return clamp(Math.round(total), 15, 95);
 }
 
@@ -519,7 +535,7 @@ function recalcCustomOption(op, assetIds) {
   }
 
   var riskLevel = calcOptionRisk(assets, transitHours, op.threatLevel, allCovered);
-  var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered);
+  var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered, op);
 
   return {
     confidencePercent: confidencePercent,
