@@ -134,7 +134,9 @@
     'Witnesses in {city} describe scenes of chaos following what appears to be a premeditated attack. {country} security forces have locked down the area. The US State Department has issued a travel advisory for the region.',
   ];
 
-  var OVERT_OP_SUCCESS_HEADLINES = [
+  // --- Foreign Military Op Templates ---
+
+  var FOREIGN_OP_SUCCESS_HEADLINES = [
     'US military operation in {country} targets security threat',
     'Pentagon confirms successful operation near {city}',
     'US forces neutralize threat in {country}; no civilian casualties reported',
@@ -142,21 +144,68 @@
     'US special operations in {country}: Pentagon reports mission success',
   ];
 
-  var OVERT_OP_SUCCESS_BODIES = [
-    'The US Department of Defense has confirmed a military operation in {city}, {country}. A Pentagon spokesperson stated that the operation targeted a credible threat to national security and was carried out successfully. Details remain classified but sources indicate precision assets were employed to minimize collateral damage.',
-    'US forces conducted an operation near {city} in what officials describe as a response to an imminent security threat. The operation involved multiple military assets and was coordinated with allied intelligence. The {country} government has not yet commented publicly.',
+  var FOREIGN_OP_SUCCESS_BODIES = [
+    'The US Department of Defense has confirmed a military operation in {city}, {country}. A Pentagon spokesperson stated that the operation targeted a credible threat to national security and was carried out successfully. {assetContext}',
+    'US forces conducted an operation near {city}, {country} in what officials describe as a response to an imminent security threat. {assetContext} The {country} government has not yet commented publicly.',
   ];
 
-  var OVERT_OP_FAILURE_HEADLINES = [
+  var FOREIGN_OP_FAILURE_HEADLINES = [
     'US military operation in {country} reportedly fails to achieve objectives',
     'Questions raised after botched US operation near {city}',
     'Failed US operation in {country} sparks diplomatic tensions',
     '{country} condemns unauthorized US military action near {city}',
   ];
 
-  var OVERT_OP_FAILURE_BODIES = [
-    'A US military operation in {city}, {country} has reportedly failed to achieve its stated objectives. Details are scarce but sources indicate the operation encountered unexpected resistance. The incident is likely to strain diplomatic relations between Washington and {country}.',
-    'The Pentagon has acknowledged an operation near {city} that did not go as planned. Congressional leaders are demanding a briefing on the incident. The {country} government has summoned the US ambassador for consultations.',
+  var FOREIGN_OP_FAILURE_BODIES = [
+    'A US military operation in {city}, {country} has reportedly failed to achieve its stated objectives. {assetContext} The incident is likely to strain diplomatic relations between Washington and {country}.',
+    'The Pentagon has acknowledged an operation near {city} that did not go as planned. {assetContext} Congressional leaders are demanding a briefing on the incident.',
+  ];
+
+  // --- Domestic Sanctioned Op Templates ---
+
+  var DOMESTIC_SUCCESS_HEADLINES = [
+    '{agency} operation in {city} results in multiple arrests',
+    'Federal authorities announce successful operation near {city}',
+    '{agency} neutralizes security threat in {city}',
+    'Law enforcement action in {city}: {agency} confirms suspects in custody',
+    '{agency} disrupts plot in {city}; press conference scheduled',
+  ];
+
+  var DOMESTIC_SUCCESS_BODIES = [
+    'The {agency} has announced the successful conclusion of a law enforcement operation in {city}. {assetContext} A spokesperson confirmed that the operation targeted a credible domestic security threat and resulted in arrests. Further details are expected at a press briefing later today.',
+    'Federal authorities in {city} have concluded a major operation targeting a domestic security threat. {assetContext} The {agency} stated that all objectives were met and there were no civilian casualties. The investigation is ongoing.',
+  ];
+
+  var DOMESTIC_FAILURE_HEADLINES = [
+    'Federal operation in {city} ends without arrests; questions mount',
+    '{agency} operation near {city} falls short of objectives',
+    'Suspects evade authorities in botched {city} raid',
+    '{agency} acknowledges setback in {city} operation',
+  ];
+
+  var DOMESTIC_FAILURE_BODIES = [
+    'A federal law enforcement operation in {city} has failed to achieve its objectives according to sources familiar with the matter. {assetContext} The {agency} has declined to comment on specifics but acknowledged the operation did not proceed as planned. Congressional oversight committees have been notified.',
+    'An operation led by the {agency} near {city} has reportedly ended without the intended outcome. {assetContext} Officials are reviewing what went wrong. Civil liberties groups are demanding transparency regarding the scope of the operation.',
+  ];
+
+  // --- Domestic Covert Military Op Templates (Posse Comitatus violation) ---
+
+  var DOMESTIC_COVERT_SUCCESS_HEADLINES = [
+    'Sources report classified federal operation near {city}',
+    'Unexplained security activity in {city} draws speculation',
+  ];
+
+  var DOMESTIC_COVERT_SUCCESS_BODIES = [
+    'Residents near {city} reported unusual security activity in the area. Federal authorities have declined to comment. Unconfirmed reports suggest a classified operation may have been conducted, though no agency has claimed responsibility.',
+  ];
+
+  var DOMESTIC_COVERT_FAILURE_HEADLINES = [
+    'Mysterious federal activity near {city} raises questions',
+    'Unidentified operation in {city} reportedly goes wrong',
+  ];
+
+  var DOMESTIC_COVERT_FAILURE_BODIES = [
+    'Reports of an unidentified security operation near {city} have raised questions after witnesses described a chaotic scene. No federal agency has claimed responsibility. Local law enforcement says they were not informed in advance.',
   ];
 
   var DIPLOMATIC_HEADLINES = [
@@ -207,7 +256,7 @@
     }
   }, 12);
 
-  // Operation resolved — only if overt assets were actually deployed
+  // Operation resolved — generate context-appropriate media coverage
   hook('operation:resolved', function(data) {
     var op = data.operation;
     if (!op || !op.location) return;
@@ -215,36 +264,109 @@
     // No assets deployed — op never happened operationally, no media coverage
     if (!op.assignedAssetIds || op.assignedAssetIds.length === 0) return;
 
-    // Check for overt assets
+    // Classify deployed assets
     var hasOvert = false;
+    var hasDomesticAuth = false;
+    var assetNames = [];
+    var agencies = {};
     for (var i = 0; i < op.assignedAssetIds.length; i++) {
       var asset = getAsset(op.assignedAssetIds[i]);
-      if (asset && asset.deniability === 'OVERT') { hasOvert = true; break; }
+      if (!asset) continue;
+      if (asset.deniability === 'OVERT') hasOvert = true;
+      if (asset.domesticAuthority) hasDomesticAuth = true;
+      assetNames.push(asset.name);
+      // Extract agency from asset name (e.g. "FBI HRT" → "FBI")
+      var agencyMatch = asset.name.match(/^(FBI|DEA|ATF|DHS|USCG|USMS|CBP|Secret Service|Treasury)/i);
+      if (agencyMatch) agencies[agencyMatch[1].toUpperCase()] = true;
     }
 
-    if (!hasOvert) return; // Covert ops stay hidden
+    // Covert ops with no overt footprint — no media coverage
+    if (!hasOvert) return;
+
+    var isDomestic = op.domestic;
+    var agencyList = Object.keys(agencies);
+    var primaryAgency = agencyList.length > 0 ? agencyList[0] : 'FBI';
 
     var vars = {
       city: op.location.city,
       country: op.location.country,
       theater: op.location.theater ? op.location.theater.name : '?',
+      agency: primaryAgency,
+      assetContext: '',
     };
 
-    if (op.status === 'SUCCESS') {
-      generateMediaStory({
-        headline: fillTemplate(pick(OVERT_OP_SUCCESS_HEADLINES), vars),
-        body: fillTemplate(pick(OVERT_OP_SUCCESS_BODIES), vars),
-        opId: op.id,
-        sentiment: 'NEUTRAL',
-      });
+    // Build asset context string for body templates
+    if (isDomestic && hasDomesticAuth) {
+      // Sanctioned domestic — agencies are public about it
+      if (assetNames.length === 1) {
+        vars.assetContext = 'The operation was conducted by ' + assetNames[0] + '.';
+      } else {
+        vars.assetContext = 'The operation involved ' + assetNames.join(', ') + ' in a coordinated response.';
+      }
+    } else if (isDomestic) {
+      // Unsanctioned domestic (covert military on US soil) — vague coverage
+      vars.assetContext = 'Details about the forces involved remain unclear. No federal agency has claimed the operation.';
     } else {
-      generateMediaStory({
-        headline: fillTemplate(pick(OVERT_OP_FAILURE_HEADLINES), vars),
-        body: fillTemplate(pick(OVERT_OP_FAILURE_BODIES), vars),
-        opId: op.id,
-        sentiment: 'NEGATIVE',
-      });
+      // Foreign military — Pentagon framing, assets described generically
+      var catCounts = {};
+      for (var j = 0; j < op.assignedAssetIds.length; j++) {
+        var a = getAsset(op.assignedAssetIds[j]);
+        if (a) catCounts[a.category] = (catCounts[a.category] || 0) + 1;
+      }
+      var catDescs = [];
+      if (catCounts.SOF) catDescs.push('special operations forces');
+      if (catCounts.AIR) catDescs.push('air assets');
+      if (catCounts.NAVY) catDescs.push('naval forces');
+      if (catCounts.ISR) catDescs.push('intelligence platforms');
+      if (catCounts.GROUND) catDescs.push('ground forces');
+      vars.assetContext = catDescs.length > 0
+        ? 'The operation reportedly involved ' + catDescs.join(' and ') + '.'
+        : 'Details of the forces involved remain classified.';
     }
+
+    var headlines, bodies, sentiment;
+
+    if (isDomestic && hasDomesticAuth) {
+      // Sanctioned domestic law enforcement op
+      if (op.status === 'SUCCESS') {
+        headlines = DOMESTIC_SUCCESS_HEADLINES;
+        bodies = DOMESTIC_SUCCESS_BODIES;
+        sentiment = 'NEUTRAL';
+      } else {
+        headlines = DOMESTIC_FAILURE_HEADLINES;
+        bodies = DOMESTIC_FAILURE_BODIES;
+        sentiment = 'NEGATIVE';
+      }
+    } else if (isDomestic) {
+      // Unsanctioned covert military on US soil — minimal, vague coverage
+      if (op.status === 'SUCCESS') {
+        headlines = DOMESTIC_COVERT_SUCCESS_HEADLINES;
+        bodies = DOMESTIC_COVERT_SUCCESS_BODIES;
+        sentiment = 'NEUTRAL';
+      } else {
+        headlines = DOMESTIC_COVERT_FAILURE_HEADLINES;
+        bodies = DOMESTIC_COVERT_FAILURE_BODIES;
+        sentiment = 'NEGATIVE';
+      }
+    } else {
+      // Foreign military operation
+      if (op.status === 'SUCCESS') {
+        headlines = FOREIGN_OP_SUCCESS_HEADLINES;
+        bodies = FOREIGN_OP_SUCCESS_BODIES;
+        sentiment = 'NEUTRAL';
+      } else {
+        headlines = FOREIGN_OP_FAILURE_HEADLINES;
+        bodies = FOREIGN_OP_FAILURE_BODIES;
+        sentiment = 'NEGATIVE';
+      }
+    }
+
+    generateMediaStory({
+      headline: fillTemplate(pick(headlines), vars),
+      body: fillTemplate(pick(bodies), vars),
+      opId: op.id,
+      sentiment: sentiment,
+    });
   });
 
   // Diplomatic incidents
