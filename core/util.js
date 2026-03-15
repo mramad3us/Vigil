@@ -105,7 +105,7 @@ const MONTH_FULL = [
 const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 function dayToDate(day, startYear, startMonth) {
-  var y = startYear || 2052;
+  var y = startYear || 2029;
   var m = (startMonth || 1) - 1;
   var d = day;
   while (d > DAYS_IN_MONTH[m]) {

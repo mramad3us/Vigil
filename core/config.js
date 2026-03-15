@@ -1,7 +1,7 @@
 /* ============================================================
    VIGIL — core/config.js
    Game constants: theaters, departments, content pools.
-   Year 2052 setting.
+   Year 2029 setting.
    ============================================================ */
 
 // --- Operation Types ---

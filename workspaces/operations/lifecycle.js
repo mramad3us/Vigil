@@ -390,11 +390,23 @@
   window.cancelOperation = function(opId) {
     var op = getOp(opId);
     if (!op) return;
-    if (op.status === 'EXECUTING' || op.status === 'ASSETS_IN_TRANSIT') return; // Can't cancel in-flight
+    if (op.status === 'EXECUTING' || op.status === 'ASSETS_IN_TRANSIT') return;
+
+    if (!confirm('CANCEL OPERATION ' + op.codename + '?\n\nThis will permanently archive the operation. The underlying threat will remain active. Viability will decrease by 1%.')) return;
 
     op.status = 'ARCHIVED';
     V.resources.viability = clamp(V.resources.viability - 1, 0, 100);
     addLog('OP ' + op.codename + ' cancelled by operator.', 'log-info');
+    fire('op:cancelled', { op: op });
+    if (typeof renderWorkspace === 'function') renderWorkspace('operations');
+  };
+
+  window.reevaluateOptions = function(opId) {
+    var op = getOp(opId);
+    if (!op || op.status !== 'OPTIONS_PRESENTED') return;
+    op.options = generateVigilOptions(op);
+    addLog('OP ' + op.codename + ': Vigil re-evaluating available assets.', 'log-info');
+    if (typeof renderWorkspace === 'function') renderWorkspace('operations');
   };
 
   // --- Build Fill Variables for Debrief Parametrization ---

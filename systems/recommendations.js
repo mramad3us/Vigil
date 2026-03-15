@@ -138,13 +138,13 @@ function generateVigilOptions(op) {
         }
       }
 
-      // Option C: Light sanctioned if we have a sanctioned option
+      // Option C: Rapid sanctioned if we have a sanctioned option
       if (sanctionedPool.length > 0) {
-        var optLight = buildOption(sanctionedPool, destLat, destLon, op, opType, 'light');
-        if (optLight && !sameAssets(options[0], optLight)) {
-          optLight.label = 'RAPID SANCTIONED RESPONSE';
-          optLight.isRecommended = false;
-          options.push(optLight);
+        var optRapid = buildOption(sanctionedPool, destLat, destLon, op, opType, 'rapid');
+        if (optRapid && !sameAssets(options[0], optRapid)) {
+          optRapid.label = 'RAPID SANCTIONED RESPONSE';
+          optRapid.isRecommended = false;
+          options.push(optRapid);
         }
       }
     } else {
@@ -162,7 +162,7 @@ function generateVigilOptions(op) {
       }
 
       if (covertOnlyPool.length > 0) {
-        var optIllegalB = buildOption(covertOnlyPool, destLat, destLon, op, opType, 'light');
+        var optIllegalB = buildOption(covertOnlyPool, destLat, destLon, op, opType, 'rapid');
         if (optIllegalB && !sameAssets(options[0], optIllegalB)) {
           optIllegalB.label = 'MINIMAL FOOTPRINT';
           optIllegalB.isRecommended = false;
@@ -174,7 +174,7 @@ function generateVigilOptions(op) {
   } else {
     // --- Foreign ops: standard option generation ---
 
-    // --- Option A: RECOMMENDED — optimal mix ---
+    // --- Option A: RECOMMENDED — best confidence-per-asset ratio ---
     var optA = buildOption(scored, destLat, destLon, op, opType, 'optimal');
     if (optA) {
       optA.label = 'VIGIL RECOMMENDATION';
@@ -182,18 +182,18 @@ function generateVigilOptions(op) {
       options.push(optA);
     }
 
-    // --- Option B: LIGHT — fewer/faster assets ---
-    var optB = buildOption(scored, destLat, destLon, op, opType, 'light');
+    // --- Option B: OVERWHELMING FORCE — maximum confidence ---
+    var optB = buildOption(scored, destLat, destLon, op, opType, 'overwhelming');
     if (optB && !sameAssets(optA, optB)) {
-      optB.label = 'RAPID DEPLOYMENT';
+      optB.label = 'OVERWHELMING FORCE';
       optB.isRecommended = false;
       options.push(optB);
     }
 
-    // --- Option C: HEAVY — more force ---
-    var optC = buildOption(scored, destLat, destLon, op, opType, 'heavy');
+    // --- Option C: RAPID DEPLOYMENT — recommended minus slowest units ---
+    var optC = buildOption(scored, destLat, destLon, op, opType, 'rapid');
     if (optC && !sameAssets(optA, optC) && !sameAssets(optB, optC)) {
-      optC.label = 'OVERWHELMING FORCE';
+      optC.label = 'RAPID DEPLOYMENT';
       optC.isRecommended = false;
       options.push(optC);
     }
@@ -225,22 +225,44 @@ function generateVigilOptions(op) {
 function buildOption(scored, destLat, destLon, op, opType, strategy) {
   var selected = [];
   var usedIds = {};
-  var maxAssets = strategy === 'light' ? 2 : strategy === 'heavy' ? 5 : 3;
-  var minAssets = strategy === 'light' ? 1 : strategy === 'heavy' ? 3 : 2;
 
-  // Filter by strategy
+  // Strategy-specific asset limits and sorting
+  var maxAssets, minAssets;
   var pool = scored.slice();
-  if (strategy === 'light') {
-    // Prefer closest
+
+  if (strategy === 'optimal') {
+    // Balanced: sort by readiness-weighted score, pick best value assets
+    maxAssets = 3;
+    minAssets = 2;
+    pool.sort(function(a, b) {
+      var ra = READINESS_BONUS[a.asset.readiness] || 2;
+      var rb = READINESS_BONUS[b.asset.readiness] || 2;
+      return (b.score + rb) - (a.score + ra);
+    });
+  } else if (strategy === 'rapid') {
+    // Quick action: take the optimal set concept but drop slowest, prefer close + fast
+    maxAssets = 2;
+    minAssets = 1;
     pool.sort(function(a, b) { return a.dist - b.dist; });
-  } else if (strategy === 'heavy') {
-    // Prefer highest score regardless of distance
-    pool.sort(function(a, b) { return b.score - a.score; });
+  } else if (strategy === 'overwhelming') {
+    // Maximum confidence: throw everything capable at it
+    maxAssets = 6;
+    minAssets = 3;
+    pool.sort(function(a, b) {
+      var ra = READINESS_BONUS[a.asset.readiness] || 2;
+      var rb = READINESS_BONUS[b.asset.readiness] || 2;
+      return (b.score + rb) - (a.score + ra);
+    });
   } else if (strategy === 'unconventional') {
-    // Only ISR/INTEL/CYBER assets
+    maxAssets = 3;
+    minAssets = 1;
     pool = pool.filter(function(s) {
       return s.asset.category === 'ISR' || s.asset.category === 'INTEL';
     });
+  } else {
+    // Legacy fallback
+    maxAssets = 3;
+    minAssets = 2;
   }
 
   // Select assets ensuring we have required capabilities covered
@@ -277,20 +299,7 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
   if (selected.length === 0) return null;
 
   // Check all required capabilities are covered by the force package
-  var allCovered = true;
-  for (var r = 0; r < opType.requiredCapabilities.length; r++) {
-    if (!coveredRequired[opType.requiredCapabilities[r]]) {
-      // Try to find in selected anyway (some assets have multiple caps)
-      var found = false;
-      for (var s = 0; s < selected.length; s++) {
-        if (selected[s].capabilities.indexOf(opType.requiredCapabilities[r]) >= 0) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) allCovered = false;
-    }
-  }
+  var allCovered = checkCapsCovered(selected, opType);
 
   // Reject option entirely if required capabilities aren't covered
   if (!allCovered) return null;
@@ -299,16 +308,9 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
   var transitMinutes = calcGroupTransitMinutes(assetIds, destLat, destLon);
   var transitHours = transitMinutes / 60;
 
-  // Risk calculation
-  var riskLevel = calcOptionRisk(selected, transitHours, op.threatLevel, allCovered, strategy);
-
-  // Confidence percentage
-  var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered, strategy);
-
-  // Build parametrized description
+  var riskLevel = calcOptionRisk(selected, transitHours, op.threatLevel, allCovered);
+  var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered);
   var description = buildOptionDescription(selected, op, transitHours, strategy);
-
-  // Consequences string
   var consequences = buildConsequences(op, strategy, riskLevel);
 
   return {
@@ -324,17 +326,36 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
   };
 }
 
+function checkCapsCovered(assets, opType) {
+  for (var r = 0; r < opType.requiredCapabilities.length; r++) {
+    var found = false;
+    for (var s = 0; s < assets.length; s++) {
+      if (assets[s].capabilities.indexOf(opType.requiredCapabilities[r]) >= 0) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
 // --- Risk Calculation ---
 
-function calcOptionRisk(assets, transitHours, threatLevel, allCovered, strategy) {
+function calcOptionRisk(assets, transitHours, threatLevel, allCovered) {
   var risk = 2; // base
   risk += (threatLevel - 3) * 0.5;
-  if (transitHours > 12) risk += 1;
-  if (transitHours > 24) risk += 1;
+  if (transitHours > 12) risk += 0.5;
+  if (transitHours > 24) risk += 0.5;
   if (!allCovered) risk += 1;
-  if (strategy === 'light') risk += 0.5;
-  if (strategy === 'heavy') risk -= 0.5;
   if (assets.length <= 1) risk += 1;
+
+  // Readiness quality reduces risk
+  var tier1Count = 0;
+  for (var i = 0; i < assets.length; i++) {
+    if (assets[i].readiness === 'TIER_1') tier1Count++;
+  }
+  if (tier1Count >= 2) risk -= 0.5;
 
   if (risk <= 1.5) return 'LOW';
   if (risk <= 2.5) return 'MODERATE';
@@ -345,28 +366,28 @@ function calcOptionRisk(assets, transitHours, threatLevel, allCovered, strategy)
 
 // --- Confidence Calculation ---
 
-function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCovered, strategy) {
+var READINESS_BONUS = { TIER_1: 8, TIER_2: 4, TIER_3: 2 };
+
+function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCovered) {
   var base = opType.baseSuccessRate;
 
-  // Asset count bonus
-  var assetBonus = Math.min(assets.length * 3, 12);
+  // Per-asset readiness bonus (elite units contribute more than generic ones)
+  var assetBonus = 0;
+  for (var i = 0; i < assets.length; i++) {
+    assetBonus += READINESS_BONUS[assets[i].readiness] || 2;
+  }
+  assetBonus = Math.min(assetBonus, 30);
 
-  // Distance penalty
-  var transitPenalty = Math.min(Math.floor(transitHours / 6) * 2, 10);
+  // Transit penalty — minor; transit affects timing, not competence
+  var transitPenalty = Math.min(Math.floor(transitHours / 12), 5);
 
   // Capability coverage
   var capBonus = allCovered ? 5 : -10;
 
-  // Strategy modifier
-  var stratMod = 0;
-  if (strategy === 'light') stratMod = -5;
-  if (strategy === 'heavy') stratMod = 5;
-  if (strategy === 'unconventional') stratMod = -8;
-
   // Threat level adjustment
   var threatAdj = (3 - threatLevel) * 3;
 
-  var total = base + assetBonus - transitPenalty + capBonus + stratMod + threatAdj;
+  var total = base + assetBonus - transitPenalty + capBonus + threatAdj;
   return clamp(Math.round(total), 15, 95);
 }
 
@@ -393,14 +414,14 @@ function buildOptionDescription(assets, op, transitHours, strategy) {
   }
 
   var header = '';
-  if (strategy === 'light') {
-    header = 'Rapid deployment with minimal footprint. ';
-  } else if (strategy === 'heavy') {
+  if (strategy === 'rapid') {
+    header = 'Rapid deployment prioritizing speed over force projection. ';
+  } else if (strategy === 'overwhelming') {
     header = 'Maximum force projection to ensure decisive outcome. ';
   } else if (strategy === 'unconventional') {
     header = 'Intelligence-led approach minimizing kinetic action. ';
   } else {
-    header = 'Balanced deployment optimizing capability coverage and response time. ';
+    header = 'Balanced deployment optimizing confidence against operational cost. ';
   }
 
   header += 'Total transit: ' + formatTransitTime(Math.round(transitHours * 60)) + '.';
@@ -416,9 +437,9 @@ function buildConsequences(op, strategy, riskLevel) {
 
   var consequences = [];
 
-  if (strategy === 'heavy') {
+  if (strategy === 'overwhelming') {
     consequences.push('High visibility in ' + theaterName + '. Theater risk may increase.');
-  } else if (strategy === 'light') {
+  } else if (strategy === 'rapid') {
     consequences.push('Lower footprint. Reduced chance of collateral escalation.');
     consequences.push('Fewer assets committed — higher risk of operational failure.');
   } else if (strategy === 'unconventional') {
@@ -497,8 +518,8 @@ function recalcCustomOption(op, assetIds) {
     if (!found) { allCovered = false; break; }
   }
 
-  var riskLevel = calcOptionRisk(assets, transitHours, op.threatLevel, allCovered, 'optimal');
-  var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered, 'optimal');
+  var riskLevel = calcOptionRisk(assets, transitHours, op.threatLevel, allCovered);
+  var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered);
 
   return {
     confidencePercent: confidencePercent,

@@ -57,6 +57,7 @@
     EXECUTING: 'EXECUTING',
     SUCCESS: 'SUCCESS',
     FAILURE: 'FAILURE',
+    ARCHIVED: 'CANCELLED',
   };
 
   var STATUS_CSS = {
@@ -68,6 +69,7 @@
     EXECUTING: 'executing',
     SUCCESS: 'success',
     FAILURE: 'failure',
+    ARCHIVED: 'failure',
   };
 
   // Difficulty color coding
@@ -90,7 +92,7 @@
     });
 
     var completedOps = V.operations.filter(function(op) {
-      return op.status === 'SUCCESS' || op.status === 'FAILURE';
+      return op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'ARCHIVED';
     });
 
     if (countEl) countEl.textContent = activeOps.length + ' active';
@@ -289,6 +291,9 @@
     html += '<div class="op-actions">';
 
     if (op.status !== 'EXECUTING' && op.status !== 'ASSETS_IN_TRANSIT' && op.status !== 'SUCCESS' && op.status !== 'FAILURE' && op.status !== 'APPROVED') {
+      if (op.status === 'OPTIONS_PRESENTED') {
+        html += '<button class="op-action-btn" onclick="reevaluateOptions(\'' + op.id + '\')">RE-EVALUATE</button>';
+      }
       html += '<button class="op-action-btn cancel" onclick="cancelOperation(\'' + op.id + '\')">CANCEL</button>';
     }
 

@@ -275,10 +275,16 @@ var INTEL_VALUE_POOLS = {
     'Legacy network with minimal segmentation. Domain controller exposed.',
   ],
   VULNERABILITY_SCAN: [
-    'Critical: unpatched CVE-2051-34201 in perimeter firewall. Exploit available.',
-    'Moderate: default credentials on 3 IoT devices within target network.',
-    'Multiple vulnerabilities identified. Best approach: supply chain vector.',
-    'Hardened target. Zero-day required for initial access.',
+    'Critical: unpatched {cve} in perimeter firewall. Exploit kit available on dark web.',
+    'Critical: RCE vulnerability {cve} in edge router firmware. Active exploitation observed.',
+    'Moderate: default credentials on {smallNum} IoT devices within target network.',
+    'High: SQL injection in public-facing portal. Database exfiltration possible without authentication.',
+    'Multiple vulnerabilities identified. Best approach: supply chain vector via third-party vendor.',
+    'Hardened target. Zero-day required for initial access. NSA TAO tooling recommended.',
+    'Moderate: outdated SSL/TLS configuration exposes session tokens. MITM attack feasible.',
+    'Critical: exposed management interface on port {port}. No MFA enforced.',
+    'High: unpatched Apache Struts instance. Known exploit chain available since {cve}.',
+    'Low: target infrastructure fully air-gapped. Physical access or insider required.',
   ],
   ACCESS_VECTORS: [
     'Primary: spear-phishing campaign targeting IT administrators.',
@@ -723,6 +729,15 @@ function generateIntelValue(fieldKey, location, orgName, targetInfo) {
     val = val.replace(/\{targetCountry\}/g, targetInfo.country || '?');
   }
   val = val.replace(/\{orgName\}/g, orgName || 'unknown organization');
+  val = val.replace(/\{cve\}/g, function() {
+    return 'CVE-' + (2025 + Math.floor(Math.random() * 4)) + '-' + (10000 + Math.floor(Math.random() * 89999));
+  });
+  val = val.replace(/\{port\}/g, function() {
+    return pick([8443, 9090, 4443, 8080, 2083, 3389, 5900, 6379, 27017]);
+  });
+  val = val.replace(/\{smallNum\}/g, function() {
+    return 2 + Math.floor(Math.random() * 6);
+  });
   return val;
 }
 

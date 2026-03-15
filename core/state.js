@@ -5,7 +5,7 @@
    ============================================================ */
 
 var V = {};
-V.version = '0.5.5';
+V.version = '0.5.7';
 
 function initState() {
 
@@ -15,7 +15,7 @@ function initState() {
     hour: 8,
     minutes: 0,
     totalMinutes: 0,
-    year: 2052,
+    year: 2029,
     month: 1,
   };
 
