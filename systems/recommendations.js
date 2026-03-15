@@ -310,6 +310,7 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
 
   var riskLevel = calcOptionRisk(selected, transitHours, op.threatLevel, allCovered);
   var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered, op);
+  var intelModifier = calcIntelModifier(op);
   var description = buildOptionDescription(selected, op, transitHours, strategy);
   var consequences = buildConsequences(op, strategy, riskLevel);
 
@@ -321,6 +322,7 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
     transitTimeMinutes: transitMinutes,
     riskLevel: riskLevel,
     confidencePercent: confidencePercent,
+    intelModifier: intelModifier,
     consequences: consequences,
     isRecommended: false,
   };
@@ -387,24 +389,36 @@ function calcOptionConfidence(opType, assets, transitHours, threatLevel, allCove
   // Threat level adjustment
   var threatAdj = (3 - threatLevel) * 3;
 
-  // Intel quality bonus — revealed fields weighted by difficulty (ticksToReveal)
-  var intelBonus = 0;
-  var fields = op ? op.intelFields : null;
-  if (fields && fields.length > 0) {
-    var totalWeight = 0;
-    var revealedWeight = 0;
-    for (var f = 0; f < fields.length; f++) {
-      var w = fields[f].ticksToReveal || 1;
-      totalWeight += w;
-      if (fields[f].revealed) revealedWeight += w;
-    }
-    // 0-100% intel quality → 0-20 point bonus
-    var intelPct = totalWeight > 0 ? revealedWeight / totalWeight : 0;
-    intelBonus = Math.round(intelPct * 20);
-  }
+  // Intel quality modifier — weighted by field difficulty (ticksToReveal)
+  // <40% revealed = penalty (up to -15), 40-60% = neutral, >60% = bonus (up to +15)
+  var intelModifier = calcIntelModifier(op);
 
-  var total = base + assetBonus - transitPenalty + capBonus + threatAdj + intelBonus;
+  var total = base + assetBonus - transitPenalty + capBonus + threatAdj + intelModifier;
   return clamp(Math.round(total), 15, 95);
+}
+
+function calcIntelModifier(op) {
+  var fields = op ? op.intelFields : null;
+  if (!fields || fields.length === 0) return 0;
+
+  var totalWeight = 0;
+  var revealedWeight = 0;
+  for (var f = 0; f < fields.length; f++) {
+    var w = fields[f].ticksToReveal || 1;
+    totalWeight += w;
+    if (fields[f].revealed) revealedWeight += w;
+  }
+  if (totalWeight === 0) return 0;
+
+  var pct = revealedWeight / totalWeight;
+  if (pct < 0.40) {
+    // 0% → -15, 40% → 0 (linear)
+    return Math.round((pct / 0.40) * 15 - 15);
+  } else if (pct > 0.60) {
+    // 60% → 0, 100% → +15 (linear)
+    return Math.round(((pct - 0.60) / 0.40) * 15);
+  }
+  return 0; // 40-60% neutral zone
 }
 
 // --- Parametrized Option Description ---
@@ -536,9 +550,11 @@ function recalcCustomOption(op, assetIds) {
 
   var riskLevel = calcOptionRisk(assets, transitHours, op.threatLevel, allCovered);
   var confidencePercent = calcOptionConfidence(opType, assets, transitHours, op.threatLevel, allCovered, op);
+  var intelModifier = calcIntelModifier(op);
 
   return {
     confidencePercent: confidencePercent,
+    intelModifier: intelModifier,
     riskLevel: riskLevel,
     transitMinutes: transitMinutes,
   };

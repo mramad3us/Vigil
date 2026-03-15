@@ -408,10 +408,18 @@
       }
 
       // Stats row
+      var intelMod = opt.intelModifier || 0;
+      var intelModStr = '';
+      if (intelMod !== 0) {
+        var intelModColor = intelMod > 0 ? 'var(--green)' : 'var(--red)';
+        intelModStr = ' <span style="font-size:var(--fs-xs);color:' + intelModColor + '">(' +
+          (intelMod > 0 ? '+' : '') + intelMod + ' INTEL)</span>';
+      }
+
       html += '<div class="vigil-option-stats">' +
         '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.confidence) + '">' +
           '<span class="vigil-stat-label">CONFIDENCE</span>' +
-          '<span class="vigil-stat-value" style="color:' + confColor(opt.confidencePercent) + '">' + opt.confidencePercent + '%</span>' +
+          '<span class="vigil-stat-value" style="color:' + confColor(opt.confidencePercent) + '">' + opt.confidencePercent + '%' + intelModStr + '</span>' +
         '</div>' +
         '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.risk) + '">' +
           '<span class="vigil-stat-label">RISK</span>' +
@@ -593,9 +601,17 @@
       '<div class="vigil-option-label">MODIFIED: ' + baseOption.label + '</div>';
 
     // Stats row
+    var cIntelMod = recalc.intelModifier || 0;
+    var cIntelStr = '';
+    if (cIntelMod !== 0) {
+      var cIntelColor = cIntelMod > 0 ? 'var(--green)' : 'var(--red)';
+      cIntelStr = ' <span style="font-size:var(--fs-xs);color:' + cIntelColor + '">(' +
+        (cIntelMod > 0 ? '+' : '') + cIntelMod + ' INTEL)</span>';
+    }
+
     html += '<div class="vigil-option-stats">' +
       '<div class="vigil-stat"><span class="vigil-stat-label">CONFIDENCE</span>' +
-      '<span class="vigil-stat-value" style="color:' + confColor(recalc.confidencePercent) + '">' + recalc.confidencePercent + '%</span></div>' +
+      '<span class="vigil-stat-value" style="color:' + confColor(recalc.confidencePercent) + '">' + recalc.confidencePercent + '%' + cIntelStr + '</span></div>' +
       '<div class="vigil-stat"><span class="vigil-stat-label">RISK</span>' +
       '<span class="vigil-stat-value ' + riskCls + '">' + recalc.riskLevel + '</span></div>' +
       '<div class="vigil-stat"><span class="vigil-stat-label">ETA</span>' +
@@ -916,6 +932,7 @@
       transitTimeMinutes: recalc.transitMinutes,
       riskLevel: recalc.riskLevel,
       confidencePercent: recalc.confidencePercent,
+      intelModifier: recalc.intelModifier || 0,
       consequences: 'Custom force configuration. Deviation from Vigil recommendation.',
       isRecommended: false,
     };
