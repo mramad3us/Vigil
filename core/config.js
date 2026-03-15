@@ -168,7 +168,7 @@ var OPERATION_TYPES = {
     pros: ['Deniable', 'No compound assault needed', 'Minimal operator exposure'],
     cons: ['Single chance — if missed, target goes underground', 'No intel recovery', 'Requires pattern-of-life intelligence'],
     requiredCapabilities: ['SOF'],
-    preferredCapabilities: ['SOF', 'ISR', 'INTEL'],
+    preferredCapabilities: ['SOF', 'INTEL'],
     execHoursRange: [1, 4],
     baseSuccessRate: 70,
     intelReward: [0, 2],
