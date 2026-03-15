@@ -27,6 +27,9 @@ function hideModal() {
   var overlay = $('modal-overlay');
   overlay.classList.add('hidden');
   $('modal-body').innerHTML = '';
+  // Remove any width overrides
+  var box = overlay.querySelector('.modal-box');
+  if (box) box.classList.remove('modal-wide');
   _modalStack.pop();
 }
 

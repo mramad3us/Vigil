@@ -647,14 +647,109 @@ function approveMoveThreatToOps(threatId) {
     return;
   }
 
-  threat.vigilRecommendsOps = false;
-  vigilMoveThreatToOps(threat);
   dismissUrgentAlert();
+  showResponseSelectionModal(threat);
+}
 
-  addLog('OPERATOR: Approved transition of ' + threat.orgName + ' to Operations.', 'log-info');
+// --- Response Selection Modal ---
 
-  // threat:moved:ops hook handles feed list re-render and detail panel clearing
-  // Force a full workspace re-render to ensure detail panel is cleared
+function showResponseSelectionModal(threat) {
+  var opTypes;
+  if (threat.domestic && typeof DOMESTIC_THREAT_TO_OP_TYPE !== 'undefined') {
+    opTypes = DOMESTIC_THREAT_TO_OP_TYPE[threat.type] || THREAT_TO_OP_TYPE[threat.type] || ['INVESTIGATION'];
+  } else {
+    opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
+  }
+
+  // AT_WAR: strip DIPLOMATIC_RESPONSE
+  if (threat.location && threat.location.country && typeof getCountryStance === 'function') {
+    var countryStance = getCountryStance(threat.location.country);
+    if (countryStance && countryStance.level === 0) {
+      opTypes = opTypes.filter(function(t) { return t !== 'DIPLOMATIC_RESPONSE'; });
+      if (opTypes.length === 0) opTypes = ['MILITARY_STRIKE'];
+    }
+  }
+
+  var html = '<div class="response-select-context">' +
+    '<span class="response-select-tag">' + threat.typeLabel + '</span>' +
+    '<span class="response-select-loc">' + threat.location.city + ', ' + threat.location.country + '</span>' +
+    '<span class="response-select-org">' + threat.orgName + '</span>' +
+  '</div>' +
+  '<div class="response-select-instruction">Select an operational response. Vigil will generate deployment options based on your choice.</div>' +
+  '<div class="response-select-grid">';
+
+  for (var i = 0; i < opTypes.length; i++) {
+    var otId = opTypes[i];
+    var ot = OPERATION_TYPES[otId];
+    if (!ot) continue;
+
+    var successCls = ot.baseSuccessRate >= 75 ? 'high' : ot.baseSuccessRate >= 60 ? 'med' : 'low';
+    var execLabel = ot.execHoursRange[0] + '-' + ot.execHoursRange[1] + 'h';
+
+    html += '<div class="response-card" onclick="confirmResponseType(\'' + threat.id + '\',\'' + otId + '\')">' +
+      '<div class="response-card-header">' +
+        '<span class="response-card-name">' + ot.label + '</span>' +
+        '<span class="response-card-short">' + ot.shortLabel + '</span>' +
+      '</div>' +
+      '<div class="response-card-desc">' + (ot.description || '') + '</div>' +
+      '<div class="response-card-stats">' +
+        '<span class="response-stat"><span class="response-stat-label">SUCCESS</span><span class="response-stat-value ' + successCls + '">' + ot.baseSuccessRate + '%</span></span>' +
+        '<span class="response-stat"><span class="response-stat-label">EXEC TIME</span><span class="response-stat-value">' + execLabel + '</span></span>' +
+        '<span class="response-stat"><span class="response-stat-label">REQUIRES</span><span class="response-stat-value">' + ot.requiredCapabilities.join(', ') + '</span></span>' +
+      '</div>';
+
+    // Pros
+    if (ot.pros && ot.pros.length > 0) {
+      html += '<div class="response-card-pros">';
+      for (var p = 0; p < ot.pros.length; p++) {
+        html += '<div class="response-pro">+ ' + ot.pros[p] + '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Cons
+    if (ot.cons && ot.cons.length > 0) {
+      html += '<div class="response-card-cons">';
+      for (var c = 0; c < ot.cons.length; c++) {
+        html += '<div class="response-con">- ' + ot.cons[c] + '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Warnings
+    if (ot.illegalDomestic && threat.domestic) {
+      html += '<div class="response-card-warning">ILLEGAL ON US SOIL</div>';
+    }
+
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  showModal('SELECT RESPONSE TYPE', html, { pause: true });
+  // Widen the modal for this content
+  var box = document.querySelector('.modal-box');
+  if (box) box.classList.add('modal-wide');
+}
+
+function confirmResponseType(threatId, opTypeId) {
+  var threat = getThreat(threatId);
+  if (!threat || threat.phase !== 'INTEL') {
+    hideModal();
+    return;
+  }
+
+  // Remove wide class before hiding
+  var box = document.querySelector('.modal-box');
+  if (box) box.classList.remove('modal-wide');
+  hideModal();
+
+  threat.vigilRecommendsOps = false;
+  threat._chosenOpType = opTypeId;
+  vigilMoveThreatToOps(threat);
+
+  addLog('OPERATOR: Approved ' + (OPERATION_TYPES[opTypeId] ? OPERATION_TYPES[opTypeId].label : opTypeId) + ' response against ' + threat.orgName + '.', 'log-info');
+
   if (V.ui.activeWorkspace === 'feed' && typeof renderWorkspace === 'function') {
     renderWorkspace('feed');
   }
@@ -874,23 +969,27 @@ function fireUrgencyAlert(threat, severity) {
 // The threat's intel fields MOVE to the operation. No duplicates.
 
 function spawnOperationFromThreat(threat) {
-  var opTypes;
-  if (threat.domestic && typeof DOMESTIC_THREAT_TO_OP_TYPE !== 'undefined') {
-    opTypes = DOMESTIC_THREAT_TO_OP_TYPE[threat.type] || THREAT_TO_OP_TYPE[threat.type] || ['INVESTIGATION'];
+  // Use operator's chosen response type if available, otherwise fallback to random
+  var opType;
+  if (threat._chosenOpType && OPERATION_TYPES[threat._chosenOpType]) {
+    opType = threat._chosenOpType;
+    delete threat._chosenOpType;
   } else {
-    opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
-  }
-
-  // AT_WAR: no diplomacy — strip DIPLOMATIC_RESPONSE and use direct action
-  if (threat.location && threat.location.country && typeof getCountryStance === 'function') {
-    var countryStance = getCountryStance(threat.location.country);
-    if (countryStance && countryStance.level === 0) {
-      opTypes = opTypes.filter(function(t) { return t !== 'DIPLOMATIC_RESPONSE'; });
-      if (opTypes.length === 0) opTypes = ['MILITARY_STRIKE'];
+    var opTypes;
+    if (threat.domestic && typeof DOMESTIC_THREAT_TO_OP_TYPE !== 'undefined') {
+      opTypes = DOMESTIC_THREAT_TO_OP_TYPE[threat.type] || THREAT_TO_OP_TYPE[threat.type] || ['INVESTIGATION'];
+    } else {
+      opTypes = THREAT_TO_OP_TYPE[threat.type] || ['SURVEILLANCE'];
     }
+    if (threat.location && threat.location.country && typeof getCountryStance === 'function') {
+      var countryStance = getCountryStance(threat.location.country);
+      if (countryStance && countryStance.level === 0) {
+        opTypes = opTypes.filter(function(t) { return t !== 'DIPLOMATIC_RESPONSE'; });
+        if (opTypes.length === 0) opTypes = ['MILITARY_STRIKE'];
+      }
+    }
+    opType = pick(opTypes);
   }
-
-  var opType = pick(opTypes);
 
   // If NAVAL_INTERDICTION was picked, force maritime flag for consistency
   if (opType === 'NAVAL_INTERDICTION' && !threat.maritime) {

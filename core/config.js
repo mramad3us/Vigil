@@ -13,6 +13,9 @@
 var OPERATION_TYPES = {
   MILITARY_STRIKE: {
     id: 'MILITARY_STRIKE', label: 'Military Strike', shortLabel: 'MIL STRIKE',
+    description: 'Conventional military strike using air or naval assets. High firepower, high visibility. Significant diplomatic consequences in non-allied territory.',
+    pros: ['High success rate against hardened targets', 'Overwhelming force projection'],
+    cons: ['Major diplomatic fallout', 'High collateral risk', 'Cannot be disavowed'],
     requiredCapabilities: ['STRIKE'],
     preferredCapabilities: ['STRIKE', 'ISR'],
     execHoursRange: [4, 12],
@@ -21,6 +24,9 @@ var OPERATION_TYPES = {
   },
   SOF_RAID: {
     id: 'SOF_RAID', label: 'Special Operations Raid', shortLabel: 'SOF RAID',
+    description: 'Ground assault by special operations forces. Surgical precision with boots on the ground. Can recover intelligence and confirm objectives.',
+    pros: ['Surgical precision', 'Can recover intel/materials', 'Confirm kill/capture'],
+    cons: ['Risk to operators', 'Requires nearby staging', 'Exposure risk if compromised'],
     requiredCapabilities: ['SOF'],
     preferredCapabilities: ['SOF', 'ISR', 'INTEL'],
     execHoursRange: [2, 8],
@@ -29,6 +35,9 @@ var OPERATION_TYPES = {
   },
   SURVEILLANCE: {
     id: 'SURVEILLANCE', label: 'Surveillance Operation', shortLabel: 'SURV',
+    description: 'Sustained intelligence, surveillance, and reconnaissance operation. Non-kinetic. Builds a comprehensive intelligence picture without direct engagement.',
+    pros: ['No diplomatic risk', 'Generates additional intel', 'High success rate'],
+    cons: ['Does not neutralize the threat directly', 'Slow execution'],
     requiredCapabilities: ['ISR'],
     preferredCapabilities: ['ISR', 'SIGINT', 'INTEL'],
     execHoursRange: [6, 24],
@@ -36,6 +45,9 @@ var OPERATION_TYPES = {
   },
   NAVAL_INTERDICTION: {
     id: 'NAVAL_INTERDICTION', label: 'Naval Interdiction', shortLabel: 'NAVAL INT',
+    description: 'Maritime interception and boarding operation. Deploys naval assets to intercept vessels, seize contraband, or disrupt maritime smuggling routes.',
+    pros: ['International waters — reduced sovereignty issues', 'Can seize evidence'],
+    cons: ['Requires naval assets in range', 'Long execution window'],
     requiredCapabilities: ['NAVAL'],
     preferredCapabilities: ['NAVAL', 'ISR', 'STRIKE'],
     execHoursRange: [8, 24],
@@ -44,6 +56,9 @@ var OPERATION_TYPES = {
   },
   CYBER_OP: {
     id: 'CYBER_OP', label: 'Cyber Operation', shortLabel: 'CYBER',
+    description: 'Offensive cyber operation targeting digital infrastructure. No physical footprint. Deniable if executed properly.',
+    pros: ['Fully deniable', 'No physical risk', 'Instant global reach'],
+    cons: ['Limited to digital targets', 'May not neutralize physical threats'],
     requiredCapabilities: ['CYBER'],
     preferredCapabilities: ['CYBER', 'SIGINT'],
     execHoursRange: [2, 12],
@@ -51,6 +66,9 @@ var OPERATION_TYPES = {
   },
   HOSTAGE_RESCUE: {
     id: 'HOSTAGE_RESCUE', label: 'Hostage Rescue', shortLabel: 'HRT',
+    description: 'Precision hostage rescue operation. Highest priority is civilian safety. Requires specialized HRT-trained operators.',
+    pros: ['Designed to minimize hostage casualties', 'Specialized breach tactics'],
+    cons: ['Low margin for error', 'Highest risk of failure', 'Requires HRT assets'],
     requiredCapabilities: ['HOSTAGE_RESCUE'],
     preferredCapabilities: ['HOSTAGE_RESCUE', 'SOF', 'ISR'],
     execHoursRange: [1, 6],
@@ -58,6 +76,9 @@ var OPERATION_TYPES = {
   },
   COUNTER_TERROR: {
     id: 'COUNTER_TERROR', label: 'Counter-Terrorism', shortLabel: 'CT',
+    description: 'Combined counter-terrorism operation integrating intelligence, law enforcement, and military elements. Designed to dismantle terror networks.',
+    pros: ['Comprehensive approach', 'Can disrupt entire networks', 'Adaptable to context'],
+    cons: ['Complex coordination', 'Moderate risk to operators'],
     requiredCapabilities: ['COUNTER_TERROR'],
     preferredCapabilities: ['COUNTER_TERROR', 'SOF', 'INTEL', 'ISR'],
     execHoursRange: [3, 12],
@@ -65,6 +86,9 @@ var OPERATION_TYPES = {
   },
   DIPLOMATIC_RESPONSE: {
     id: 'DIPLOMATIC_RESPONSE', label: 'Diplomatic Response', shortLabel: 'DIPLO',
+    description: 'Engage through diplomatic channels to pressure host nation into action. No direct US military involvement. Relies on partner nation cooperation.',
+    pros: ['No sovereignty violation', 'Strengthens diplomatic ties', 'Zero collateral risk'],
+    cons: ['Depends on host nation cooperation', 'Slow', 'Target may escape'],
     requiredCapabilities: ['DIPLOMATIC'],
     preferredCapabilities: ['DIPLOMATIC', 'INTEL', 'HUMINT'],
     execHoursRange: [4, 16],
@@ -72,6 +96,9 @@ var OPERATION_TYPES = {
   },
   INTEL_COLLECTION: {
     id: 'INTEL_COLLECTION', label: 'Intelligence Collection', shortLabel: 'INT COL',
+    description: 'Deploy dedicated collection assets for deep intelligence gathering. Non-kinetic. Builds the intelligence picture for future operations.',
+    pros: ['No diplomatic risk', 'Generates high-value intelligence', 'High success rate'],
+    cons: ['Does not neutralize the threat', 'Long execution window'],
     requiredCapabilities: ['INTEL'],
     preferredCapabilities: ['INTEL', 'HUMINT', 'SIGINT', 'ISR'],
     execHoursRange: [6, 24],
@@ -79,9 +106,12 @@ var OPERATION_TYPES = {
   },
   DRONE_STRIKE: {
     id: 'DRONE_STRIKE', label: 'Drone Strike', shortLabel: 'UAS STRIKE',
+    description: 'Unmanned aerial strike using armed ISR platforms. Precise, fast, and requires no operators on the ground. High visibility.',
+    pros: ['No risk to US personnel', 'Fast execution', 'Highest success rate'],
+    cons: ['Major diplomatic fallout', 'Collateral damage risk', 'Cannot be disavowed'],
     requiredCapabilities: ['ISR', 'STRIKE'],
-    assetMustHaveAll: ['ISR', 'STRIKE'],  // Each asset must be an armed ISR platform
-    restrictToCategories: ['ISR'],          // Only unmanned/ISR platforms, not manned fighters
+    assetMustHaveAll: ['ISR', 'STRIKE'],
+    restrictToCategories: ['ISR'],
     preferredCapabilities: ['ISR', 'STRIKE'],
     execHoursRange: [1, 4],
     baseSuccessRate: 85,
@@ -90,6 +120,9 @@ var OPERATION_TYPES = {
   // --- HVT / Hostage Operation Types ---
   HVT_ELIMINATION: {
     id: 'HVT_ELIMINATION', label: 'HVT Elimination', shortLabel: 'HVT ELIM',
+    description: 'Targeted elimination of a high-value target using special operations forces. Close-range, high-risk, definitive.',
+    pros: ['Confirms target neutralization', 'Can recover intel', 'Surgical'],
+    cons: ['High risk to operators', 'Sovereignty violation', 'Political fallout'],
     requiredCapabilities: ['SOF'],
     preferredCapabilities: ['SOF', 'STRIKE', 'ISR', 'INTEL'],
     execHoursRange: [1, 6],
@@ -98,6 +131,9 @@ var OPERATION_TYPES = {
   },
   HVT_CAPTURE: {
     id: 'HVT_CAPTURE', label: 'HVT Capture Operation', shortLabel: 'HVT CAP',
+    description: 'Capture a high-value target alive for interrogation. More complex than elimination but yields intelligence.',
+    pros: ['Target captured alive for interrogation', 'High intelligence value'],
+    cons: ['Harder than elimination', 'Risk of target escape', 'Requires extraction'],
     requiredCapabilities: ['SOF'],
     preferredCapabilities: ['SOF', 'ISR', 'INTEL', 'HOSTAGE_RESCUE'],
     execHoursRange: [2, 8],
@@ -105,6 +141,9 @@ var OPERATION_TYPES = {
   },
   DOMESTIC_HOSTAGE_RESCUE: {
     id: 'DOMESTIC_HOSTAGE_RESCUE', label: 'Domestic Hostage Rescue', shortLabel: 'DOM HRT',
+    description: 'Domestic hostage rescue operation coordinated with federal law enforcement. HRT leads with FBI/local support.',
+    pros: ['Legally authorized domestically', 'Specialized hostage protocols'],
+    cons: ['Low margin for error', 'Media exposure', 'Requires HRT assets'],
     requiredCapabilities: ['HOSTAGE_RESCUE'],
     preferredCapabilities: ['HOSTAGE_RESCUE', 'SOF', 'LAW_ENFORCEMENT', 'INTEL'],
     execHoursRange: [1, 6],
@@ -112,6 +151,9 @@ var OPERATION_TYPES = {
   },
   TARGETED_KILLING: {
     id: 'TARGETED_KILLING', label: 'Targeted Killing', shortLabel: 'TGT KILL',
+    description: 'Covert targeted killing operation. Designed for deniability. High political sensitivity.',
+    pros: ['Can be deniable', 'Precise', 'Fast execution'],
+    cons: ['Extreme political risk if exposed', 'Sovereignty violation', 'No intel recovery'],
     requiredCapabilities: ['STRIKE'],
     preferredCapabilities: ['STRIKE', 'SOF', 'ISR', 'INTEL'],
     execHoursRange: [1, 4],
@@ -120,6 +162,9 @@ var OPERATION_TYPES = {
   },
   ASSET_EXTRACTION: {
     id: 'ASSET_EXTRACTION', label: 'Asset Extraction', shortLabel: 'EXTRACT',
+    description: 'Extract a compromised intelligence asset from hostile territory. Time-critical — the asset\'s cover is blown.',
+    pros: ['Saves a valuable intelligence source', 'Can recover intel the asset carries'],
+    cons: ['High risk of ambush', 'Low success rate', 'May expose methods'],
     requiredCapabilities: ['SOF'],
     preferredCapabilities: ['SOF', 'INTEL', 'ISR'],
     execHoursRange: [2, 12],
@@ -128,6 +173,9 @@ var OPERATION_TYPES = {
   // --- Domestic Operation Types ---
   LAW_ENFORCEMENT: {
     id: 'LAW_ENFORCEMENT', label: 'Law Enforcement Operation', shortLabel: 'LE OP',
+    description: 'Federal law enforcement operation with arrest authority. Coordinated with DOJ and local agencies.',
+    pros: ['Full legal authority', 'Can prosecute', 'Minimal political risk'],
+    cons: ['Slower than military response', 'Requires strong evidence chain'],
     requiredCapabilities: ['LAW_ENFORCEMENT'],
     preferredCapabilities: ['LAW_ENFORCEMENT', 'COUNTER_TERROR', 'SOF', 'INTEL'],
     execHoursRange: [2, 8],
@@ -135,6 +183,9 @@ var OPERATION_TYPES = {
   },
   INVESTIGATION: {
     id: 'INVESTIGATION', label: 'Federal Investigation', shortLabel: 'FED INV',
+    description: 'Deep federal investigation leveraging intelligence and law enforcement resources. Builds prosecution-ready cases.',
+    pros: ['Builds legal case', 'No use of force', 'Can uncover full network'],
+    cons: ['Very slow', 'Target may flee during investigation'],
     requiredCapabilities: ['INTEL'],
     preferredCapabilities: ['INTEL', 'HUMINT', 'SIGINT', 'CYBER', 'OSINT'],
     execHoursRange: [12, 48],
@@ -142,6 +193,9 @@ var OPERATION_TYPES = {
   },
   DOMESTIC_SURVEILLANCE: {
     id: 'DOMESTIC_SURVEILLANCE', label: 'Domestic Surveillance', shortLabel: 'DOM SURV',
+    description: 'Domestic surveillance operation under FISA or other legal authority. Monitors communications and movements.',
+    pros: ['Legally authorized', 'No risk to personnel', 'High success rate'],
+    cons: ['Does not neutralize the threat', 'Requires legal authorization'],
     requiredCapabilities: ['INTEL'],
     preferredCapabilities: ['ISR', 'SIGINT', 'HUMINT', 'CYBER', 'OSINT'],
     execHoursRange: [6, 24],
@@ -149,6 +203,9 @@ var OPERATION_TYPES = {
   },
   ARREST_OPERATION: {
     id: 'ARREST_OPERATION', label: 'Arrest Operation', shortLabel: 'ARREST',
+    description: 'Coordinated arrest operation with federal warrants. Tactical teams execute simultaneous raids on suspect locations.',
+    pros: ['Suspects prosecuted through legal system', 'Seizure of evidence'],
+    cons: ['Requires probable cause', 'Risk of armed resistance'],
     requiredCapabilities: ['LAW_ENFORCEMENT'],
     preferredCapabilities: ['LAW_ENFORCEMENT', 'SOF', 'INTEL'],
     execHoursRange: [1, 6],
