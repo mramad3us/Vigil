@@ -1490,6 +1490,10 @@ function arriveAsset(asset) {
     // Check if this is a collection deployment (assigned to threat, not op)
     if (asset.assignedThreatId && !asset.assignedOpId) {
       asset.status = 'COLLECTING';
+    } else if (!asset.assignedOpId && !asset.assignedThreatId) {
+      // Migration/relocation — no op assignment, station at new home base
+      asset.status = 'STATIONED';
+      asset.currentBaseId = asset.homeBaseId;
     } else {
       asset.status = 'DEPLOYED';
     }
