@@ -41,8 +41,16 @@
     deactivate: function() {},
 
     render: function() {
+      // Preserve scroll position across re-renders
+      var detailEl = $('ops-detail');
+      var savedScroll = detailEl ? detailEl.scrollTop : 0;
+
       renderOpsList();
       if (_selectedOpId) renderOpsDetail(_selectedOpId);
+
+      // Restore scroll position
+      detailEl = $('ops-detail');
+      if (detailEl && savedScroll > 0) detailEl.scrollTop = savedScroll;
     },
   });
 

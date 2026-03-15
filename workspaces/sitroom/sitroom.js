@@ -26,9 +26,21 @@
     deactivate: function() {},
 
     render: function() {
+      // Save scroll positions before re-render
+      var centerEl = $('sitroom-defcon');
+      var savedCenterScroll = centerEl ? centerEl.scrollTop : 0;
+      var migrationEl = document.querySelector('.migration-assets');
+      var savedMigrationScroll = migrationEl ? migrationEl.scrollTop : 0;
+
       renderSitroomGauges();
       renderDefconPanel();
       renderSitroomCrises();
+
+      // Restore scroll positions
+      centerEl = $('sitroom-defcon');
+      if (centerEl && savedCenterScroll > 0) centerEl.scrollTop = savedCenterScroll;
+      migrationEl = document.querySelector('.migration-assets');
+      if (migrationEl && savedMigrationScroll > 0) migrationEl.scrollTop = savedMigrationScroll;
     },
   });
 
@@ -275,6 +287,16 @@
       }
       html += '</div>';
 
+      // Relocation buttons (DEFCON 3 or below) — always available to request more assets
+      if (defcon <= 3 && !(ts.pendingMigration && ts.pendingMigration.assets.length > 0)) {
+        html += '<div class="migration-request-btns">';
+        html += '<button class="migration-request-btn covert" onclick="requestRelocation(\'' + tid + '\',\'covert\')">+ COVERT ASSETS</button>';
+        if (defcon <= 2) {
+          html += '<button class="migration-request-btn full" onclick="requestRelocation(\'' + tid + '\',\'full\')">+ MILITARY FORCES</button>';
+        }
+        html += '</div>';
+      }
+
       // Pending migration
       if (ts.pendingMigration && ts.pendingMigration.assets.length > 0) {
         html += renderMigrationPanel(tid, ts.pendingMigration);
@@ -364,11 +386,23 @@
     return html;
   }
 
-  // Expose render for inline onclick calls
+  // Expose render for inline onclick calls — preserves scroll positions
   window.renderSitroom = function() {
+    // Save scroll positions before re-render
+    var centerEl = $('sitroom-defcon');
+    var savedCenterScroll = centerEl ? centerEl.scrollTop : 0;
+    var migrationEl = document.querySelector('.migration-assets');
+    var savedMigrationScroll = migrationEl ? migrationEl.scrollTop : 0;
+
     renderSitroomGauges();
     renderDefconPanel();
     renderSitroomCrises();
+
+    // Restore scroll positions
+    centerEl = $('sitroom-defcon');
+    if (centerEl && savedCenterScroll > 0) centerEl.scrollTop = savedCenterScroll;
+    migrationEl = document.querySelector('.migration-assets');
+    if (migrationEl && savedMigrationScroll > 0) migrationEl.scrollTop = savedMigrationScroll;
   };
 
   // --- Right Column: Crises ---
@@ -449,8 +483,12 @@
 
   hook('defcon:changed', function() {
     if (V.ui.activeWorkspace === 'sitroom') {
+      var centerEl = $('sitroom-defcon');
+      var savedScroll = centerEl ? centerEl.scrollTop : 0;
       renderDefconPanel();
       renderSitroomGauges();
+      centerEl = $('sitroom-defcon');
+      if (centerEl && savedScroll > 0) centerEl.scrollTop = savedScroll;
     }
   });
 

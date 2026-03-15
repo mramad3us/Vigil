@@ -120,11 +120,36 @@ function updateWorkspaceBadge(workspaceId, count) {
   }
 }
 
+// --- Interaction Guard ---
+// Suppress tick-based re-renders while the user is hovering over or clicking
+// interactive elements. Full innerHTML re-renders destroy DOM nodes mid-click
+// (swallowing the event) and reset :hover states (causing flicker).
+
+var _mouseOnInteractive = false;
+var _clickLockUntil = 0;
+var _interactiveSelector = 'button, [onclick], .defcon-level, .defcon-selector, select, input, .migration-row-check, .migration-dest-btn, .migration-remove, .feed-action-btn, .op-action-btn, .ops-card, .crisis-card';
+
+document.addEventListener('mouseover', function(e) {
+  _mouseOnInteractive = !!e.target.closest(_interactiveSelector);
+}, true);
+
+document.addEventListener('mouseout', function(e) {
+  if (e.target.closest(_interactiveSelector)) {
+    _mouseOnInteractive = false;
+  }
+}, true);
+
+document.addEventListener('mousedown', function() {
+  _clickLockUntil = Date.now() + 500;
+}, true);
+
 // --- Hooks ---
 
 hook('tick', function() {
   renderStatusBar();
-  renderWorkspace();
+  if (!_mouseOnInteractive && Date.now() > _clickLockUntil) {
+    renderWorkspace();
+  }
 }, 10);
 
 hook('speed:change', function() {

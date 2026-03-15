@@ -398,6 +398,45 @@
   letter-spacing: 0.5px;
 }
 
+/* --- Relocation Request Buttons --- */
+.migration-request-btns {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.migration-request-btn {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.migration-request-btn.covert {
+  background: none;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+}
+
+.migration-request-btn.covert:hover {
+  background: var(--amber-dim);
+}
+
+.migration-request-btn.full {
+  background: none;
+  border: 1px solid var(--severity-high);
+  color: var(--severity-high);
+}
+
+.migration-request-btn.full:hover {
+  background: rgba(224,112,48,0.1);
+}
+
 /* --- Migration Panel --- */
 .migration-panel {
   margin-top: var(--sp-3);

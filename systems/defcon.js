@@ -415,10 +415,24 @@ function dismissMigration(theaterId) {
 
 // --- Global window functions for UI ---
 
+// Request a relocation proposal manually (from UI buttons)
+function requestRelocation(theaterId, scope) {
+  if (!V.theaters[theaterId]) return;
+  // Clear any existing proposal before generating a new one
+  V.theaters[theaterId].pendingMigration = null;
+  generateMigrationProposal(theaterId, scope);
+  if (V.theaters[theaterId].pendingMigration) {
+    addLog('DEFCON: ' + (scope === 'covert' ? 'Covert asset' : 'Force') + ' relocation proposal generated for ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + '.', 'log-info');
+  } else {
+    addLog('DEFCON: No eligible assets available for relocation to ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + '.', 'log-warn');
+  }
+}
+
 window.setTheaterDefcon = setDefcon;
 window.approveMigration = approveMigration;
 window.toggleMigrationAsset = toggleMigrationAsset;
 window.cycleMigrationDest = cycleMigrationDest;
 window.removeMigrationAsset = removeMigrationAsset;
 window.dismissMigration = dismissMigration;
+window.requestRelocation = requestRelocation;
 window.getAssetTheaterId = getAssetTheaterId;
