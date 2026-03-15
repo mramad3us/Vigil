@@ -181,10 +181,8 @@ var INITIAL_STANCES = {
     if (authorized) {
       if (op.status === 'SUCCESS') {
         shiftStance(country, 1);
-      } else {
-        shiftStance(country, -1);
-        fireDiplomaticIncident(country, 'OVERT_AUTH_FAILURE', op);
       }
+      // Authorized failure: no meaningful diplomatic penalty — they knew the risks
     } else {
       // Unauthorized overt deployment
       if (op.status === 'SUCCESS') {
