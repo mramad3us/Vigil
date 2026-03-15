@@ -969,17 +969,20 @@ function renderResponseMainMenu(threat) {
 
   // Determine which branches apply
   // Standard branches need 2+ children; branches with minChildren:1 activate with 1+
+  // ASSET_COMPROMISED: skip branching — show ops as standalone cards (rescue context)
   var activeBranches = [];
-  for (var b = 0; b < RESPONSE_BRANCHES.length; b++) {
-    var branch = RESPONSE_BRANCHES[b];
-    var presentChildren = [];
-    for (var ch = 0; ch < branch.children.length; ch++) {
-      if (opTypes.indexOf(branch.children[ch]) >= 0) presentChildren.push(branch.children[ch]);
-    }
-    var minReq = branch.minChildren || 2;
-    if (presentChildren.length >= minReq) {
-      activeBranches.push({ branch: branch, children: presentChildren });
-      for (var pc = 0; pc < presentChildren.length; pc++) consumed[presentChildren[pc]] = true;
+  if (threat.type !== 'ASSET_COMPROMISED') {
+    for (var b = 0; b < RESPONSE_BRANCHES.length; b++) {
+      var branch = RESPONSE_BRANCHES[b];
+      var presentChildren = [];
+      for (var ch = 0; ch < branch.children.length; ch++) {
+        if (opTypes.indexOf(branch.children[ch]) >= 0) presentChildren.push(branch.children[ch]);
+      }
+      var minReq = branch.minChildren || 2;
+      if (presentChildren.length >= minReq) {
+        activeBranches.push({ branch: branch, children: presentChildren });
+        for (var pc = 0; pc < presentChildren.length; pc++) consumed[presentChildren[pc]] = true;
+      }
     }
   }
 

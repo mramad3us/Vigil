@@ -138,13 +138,24 @@ function tick() {
   fire('tick', { minutesElapsed: minutesToAdd, speed: _speed });
 
   // Fire periodic hooks when boundaries are crossed
-  if (V.time.hour !== prevHour || V.time.day !== prevDay) {
-    fire('tick:hour', { hour: V.time.hour, day: V.time.day });
+  // At high speeds, multiple hours pass per tick — fire tick:hour for each
+  var totalPrevHours = (prevDay - 1) * 24 + prevHour;
+  var totalCurHours = (V.time.day - 1) * 24 + V.time.hour;
+  var hoursElapsed = totalCurHours - totalPrevHours;
+
+  if (hoursElapsed > 0) {
+    for (var h = 0; h < hoursElapsed; h++) {
+      var absHour = totalPrevHours + h + 1;
+      fire('tick:hour', {
+        hour: absHour % 24,
+        day: Math.floor(absHour / 24) + 1,
+        isMultiHour: hoursElapsed > 1
+      });
+    }
   }
 
   // Day boundary — may fire multiple times at VERY FAST speed
   if (V.time.day !== prevDay) {
-    // At VERY FAST, fire tick:day for each day that passed
     var daysElapsed = V.time.day - prevDay;
     for (var d = 0; d < daysElapsed; d++) {
       fire('tick:day', {
