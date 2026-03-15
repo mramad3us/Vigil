@@ -292,7 +292,7 @@
 
     if (op.status !== 'EXECUTING' && op.status !== 'ASSETS_IN_TRANSIT' && op.status !== 'SUCCESS' && op.status !== 'FAILURE' && op.status !== 'APPROVED') {
       if (op.status === 'OPTIONS_PRESENTED') {
-        html += '<button class="op-action-btn" onclick="reevaluateOptions(\'' + op.id + '\')">RE-EVALUATE</button>';
+        html += '<button class="op-action-btn cancel" onclick="reevaluateOptions(\'' + op.id + '\')">RE-EVALUATE</button>';
       }
       html += '<button class="op-action-btn cancel" onclick="cancelOperation(\'' + op.id + '\')">CANCEL</button>';
     }
