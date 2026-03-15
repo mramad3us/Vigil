@@ -367,11 +367,11 @@ function discloseToCountry(threatId, disclosureType) {
   if (!threat || !threat.foreignTarget) return;
 
   var country = threat.foreignTarget.country;
-  threat.foreignTarget.disclosed = true;
-  threat.foreignTarget.disclosureType = disclosureType;
 
   if (disclosureType === 'OFFICIAL') {
     if (V.resources.intel < 10) return false;
+    threat.foreignTarget.disclosed = true;
+    threat.foreignTarget.disclosureType = disclosureType;
     V.resources.intel -= 10;
     shiftStance(country, 2);
     addLog('DIPLOMACY: Official disclosure to ' + country + ' regarding threat ' + threat.orgName + '. Stance +2.', 'log-info');
@@ -387,6 +387,8 @@ function discloseToCountry(threatId, disclosureType) {
       threatId: threatId,
     });
   } else if (disclosureType === 'ANONYMOUS') {
+    threat.foreignTarget.disclosed = true;
+    threat.foreignTarget.disclosureType = disclosureType;
     shiftStance(country, 0); // +0.5 rounded to 0, but we can give +1 for gameplay
     // Actually let's do a partial: track fractional internally
     var cd = V.diplomacy[country];

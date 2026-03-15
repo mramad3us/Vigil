@@ -351,7 +351,9 @@
           'Disclosing intelligence to the target country may improve diplomatic relations.' +
         '</div>' +
         '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">' +
-          '<button class="feed-action-btn primary" onclick="handleDisclosure(\'' + threat.id + '\',\'OFFICIAL\')">OFFICIAL DISCLOSURE (10 INTEL)</button>' +
+          '<button class="feed-action-btn primary" onclick="handleDisclosure(\'' + threat.id + '\',\'OFFICIAL\')"' +
+            (V.resources.intel < 10 ? ' disabled style="opacity:0.4;cursor:not-allowed" title="Requires 10 INTEL"' : '') +
+            '>OFFICIAL DISCLOSURE (10 INTEL)</button>' +
           '<button class="feed-action-btn" onclick="handleDisclosure(\'' + threat.id + '\',\'ANONYMOUS\')">ANONYMOUS LEAK</button>' +
           '<button class="feed-action-btn" onclick="handleDisclosure(\'' + threat.id + '\',\'NOTHING\')">DO NOTHING</button>' +
         '</div>' +

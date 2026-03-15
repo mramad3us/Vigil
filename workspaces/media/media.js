@@ -34,6 +34,7 @@
 
     render: function() {
       renderMediaList();
+      updateWorkspaceBadge('media', getUnreadMediaCount());
     },
   });
 
@@ -56,11 +57,15 @@
     for (var i = 0; i < V.media.length; i++) {
       var story = V.media[i];
       var sentimentCls = story.sentiment === 'NEGATIVE' ? 'negative' : story.sentiment === 'POSITIVE' ? 'positive' : 'neutral';
+      var readCls = story.read ? ' read' : '';
 
-      html += '<div class="media-story">' +
+      html += '<div class="media-story' + readCls + '">' +
         '<div class="media-story-header">' +
           '<span class="media-source">' + story.source + '</span>' +
-          '<span class="media-timestamp">' + formatTimestamp(story.timestamp) + '</span>' +
+          '<span class="media-story-header-right">' +
+            (story.read ? '' : '<button class="media-read-btn" onclick="markMediaRead(\'' + story.id + '\')">DISMISS</button>') +
+            '<span class="media-timestamp">' + formatTimestamp(story.timestamp) + '</span>' +
+          '</span>' +
         '</div>' +
         '<div class="media-headline ' + sentimentCls + '">' + story.headline + '</div>' +
         '<div class="media-body">' + story.body + '</div>' +
@@ -88,22 +93,29 @@
     if (V.media.length > 100) V.media.length = 100;
 
     // Badge the media tab
-    updateWorkspaceBadge('media', getNewMediaCount());
+    updateWorkspaceBadge('media', getUnreadMediaCount());
 
     return story;
   }
 
-  function getNewMediaCount() {
-    // Show count of stories from last 24 game-hours
-    var cutoff = V.time.totalMinutes - 1440;
+  function getUnreadMediaCount() {
     var count = 0;
     for (var i = 0; i < V.media.length; i++) {
-      var ts = V.media[i].timestamp;
-      // Approximate — check day
-      if (ts.day >= V.time.day - 1) count++;
+      if (!V.media[i].read) count++;
     }
     return count;
   }
+
+  window.markMediaRead = function(storyId) {
+    for (var i = 0; i < V.media.length; i++) {
+      if (V.media[i].id === storyId) {
+        V.media[i].read = true;
+        break;
+      }
+    }
+    updateWorkspaceBadge('media', getUnreadMediaCount());
+    renderMediaList();
+  };
 
   // --- Story Templates ---
 

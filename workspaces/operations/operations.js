@@ -11,6 +11,7 @@
   var _showArchive = false;
   var _expandedAssets = {}; // track which asset rows are expanded in option cards
   var _customConfig = null; // { opId, baseOptionIdx, assetIds: [...] }
+  var _customFilter = 'ALL'; // 'ALL', 'SANCTIONED', 'COVERT'
 
   registerWorkspace({
     id: 'operations',
@@ -525,8 +526,16 @@
     var restrictCats = opType ? opType.restrictToCategories : null;
     var eligibleAvailable = allAvailable.filter(function(a) {
       if (cfg.assetIds.indexOf(a.id) >= 0) return false; // already selected
+      // Domestic agencies only available for domestic ops
       if (a.domesticAuthority && !op.domestic) return false;
-      if (op.domestic && (a.category === 'NAVY' || a.category === 'AIR')) return false;
+      // Domestic ops: exclude NAVY/AIR, require domestic authority or COVERT deniability
+      if (op.domestic) {
+        if (a.category === 'NAVY' || a.category === 'AIR') return false;
+        if (!a.domesticAuthority && a.deniability !== 'COVERT') return false;
+      }
+      // User filter: SANCTIONED or COVERT
+      if (_customFilter === 'SANCTIONED' && !a.domesticAuthority) return false;
+      if (_customFilter === 'COVERT' && (a.domesticAuthority || a.deniability !== 'COVERT')) return false;
       if (!opType) return true;
       // Category restriction (e.g. DRONE_STRIKE only ISR-category)
       if (restrictCats && restrictCats.indexOf(a.category) < 0) return false;
@@ -593,8 +602,15 @@
     }
     html += '</div>';
 
-    // Available assets to add
-    html += '<div class="op-detail-section-title" style="margin-top:var(--sp-3)">AVAILABLE TO ADD</div>';
+    // Available assets to add — with filter toggles
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:var(--sp-3)">' +
+      '<span class="op-detail-section-title" style="margin:0">AVAILABLE TO ADD</span>' +
+      '<div style="display:flex;gap:var(--sp-1)">' +
+        '<button class="custom-filter-btn' + (_customFilter === 'ALL' ? ' active' : '') + '" onclick="setCustomFilter(\'ALL\')">ALL</button>' +
+        '<button class="custom-filter-btn' + (_customFilter === 'SANCTIONED' ? ' active' : '') + '" onclick="setCustomFilter(\'SANCTIONED\')">SANCTIONED</button>' +
+        '<button class="custom-filter-btn' + (_customFilter === 'COVERT' ? ' active' : '') + '" onclick="setCustomFilter(\'COVERT\')">COVERT</button>' +
+      '</div>' +
+    '</div>';
     html += '<div class="vigil-option-assets" style="max-height:240px;overflow-y:auto">';
     for (var u = 0; u < eligibleAvailable.length; u++) {
       html += renderCustomAssetRow(eligibleAvailable[u], false);
@@ -845,6 +861,7 @@
 
   window.cancelCustomConfig = function() {
     _customConfig = null;
+    _customFilter = 'ALL';
     if (_selectedOpId) renderOpsDetail(_selectedOpId);
   };
 
@@ -860,6 +877,11 @@
     if (!_customConfig) return;
     var idx = _customConfig.assetIds.indexOf(assetId);
     if (idx >= 0) _customConfig.assetIds.splice(idx, 1);
+    if (_selectedOpId) renderOpsDetail(_selectedOpId);
+  };
+
+  window.setCustomFilter = function(filter) {
+    _customFilter = filter;
     if (_selectedOpId) renderOpsDetail(_selectedOpId);
   };
 

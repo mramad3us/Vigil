@@ -64,6 +64,41 @@
   color: var(--green);
 }
 
+/* --- Read state --- */
+.media-story.read {
+  opacity: 0.5;
+  border-color: transparent;
+}
+
+.media-story.read:hover {
+  opacity: 0.7;
+}
+
+.media-story-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.media-read-btn {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.media-read-btn:hover {
+  color: var(--text-hi);
+  border-color: var(--text-muted);
+}
+
 /* --- Body --- */
 .media-body {
   font-size: var(--fs-sm);
