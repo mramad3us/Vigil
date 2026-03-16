@@ -88,7 +88,7 @@ function renderStatusBar() {
 
   // Intel
   var intelEl = $('sb-intel');
-  if (intelEl) intelEl.textContent = V.resources.intel;
+  if (intelEl) intelEl.textContent = (Math.round(V.resources.intel * 10) / 10).toFixed(1);
 
   // Workload
   var wlEl = $('sb-workload');
