@@ -10,53 +10,158 @@
 // ===================================================================
 // Cover names by region — culturally appropriate aliases.
 
-var ILLEGAL_COVER_NAMES = {
-  RUSSIAN: [
-    'Andrei Volkov', 'Sergei Petrov', 'Dmitri Kozlov', 'Nikolai Ivanov', 'Viktor Orlov',
-    'Alexei Fedorov', 'Pavel Morozov', 'Ivan Sokolov', 'Oleg Kuznetsov', 'Yuri Popov',
-    'Tatiana Novikova', 'Ekaterina Smirnova', 'Anna Lebedeva', 'Marina Zakharova', 'Irina Pavlova',
-  ],
-  CHINESE: [
-    'Li Wei', 'Zhang Yong', 'Wang Jun', 'Chen Ming', 'Liu Yang',
-    'Zhao Peng', 'Sun Hao', 'Wu Lei', 'Zhou Jian', 'Xu Lin',
-    'Li Mei', 'Zhang Hua', 'Wang Xiu', 'Chen Lan', 'Liu Fang',
-  ],
-  MIDDLE_EASTERN: [
-    'Khalid al-Rashid', 'Omar Haddad', 'Yusuf al-Bakri', 'Hassan Nazari', 'Tariq al-Mansur',
-    'Samir Hosseini', 'Reza Karimi', 'Farhad Amiri', 'Nasser al-Fayed', 'Jamal Khoury',
-    'Fatima al-Hassan', 'Layla Nazari', 'Aisha Karimi', 'Noor al-Rashid', 'Zahra Hosseini',
-  ],
-  EUROPEAN: [
-    'Jean-Pierre Moreau', 'Hans Becker', 'Marco Rossi', 'Pierre Dubois', 'Karl Fischer',
-    'Stefan Müller', 'Luca Conti', 'François Leroy', 'Jan Kowalski', 'Tomás García',
-    'Sophie Laurent', 'Maria Schneider', 'Anna Kowalska', 'Elena Vasquez', 'Claire Bernard',
-  ],
-  LATIN_AMERICAN: [
-    'Carlos Mendoza', 'Diego Herrera', 'Miguel Torres', 'Fernando Castillo', 'Alejandro Ríos',
-    'Ricardo Fuentes', 'Pablo Guzmán', 'Luis Vargas', 'Andrés Delgado', 'Javier Morales',
-    'Isabella Vargas', 'Valentina Cruz', 'Camila Reyes', 'Sofía Herrera', 'Lucia Delgado',
-  ],
-  SOUTH_ASIAN: [
-    'Rajesh Kumar', 'Amir Khan', 'Vikram Singh', 'Arjun Patel', 'Mohammed Aziz',
-    'Farhan Ahmed', 'Ravi Sharma', 'Imran Hussain', 'Sanjay Gupta', 'Naveed Malik',
-    'Priya Sharma', 'Ayesha Khan', 'Sunita Devi', 'Fatima Begum', 'Meera Patel',
-  ],
-  EAST_ASIAN: [
-    'Takeshi Yamamoto', 'Hiroshi Tanaka', 'Park Joon-ho', 'Kim Sung-min', 'Kenji Watanabe',
-    'Lee Dong-wook', 'Sato Haruki', 'Choi Min-jun', 'Tanaka Ryota', 'Kim Tae-hyun',
-    'Yuki Nakamura', 'Hana Kim', 'Sakura Yoshida', 'Soo-jin Park', 'Mei Suzuki',
-  ],
-  AFRICAN: [
-    'Ibrahim Diallo', 'Moussa Keita', 'Abdoulaye Traoré', 'Omar Sylla', 'Kwame Asante',
-    'Chukwu Okafor', 'Aminu Bello', 'Samuel Osei', 'Jelani Mwangi', 'Tendai Moyo',
-    'Amina Diallo', 'Fatou Keita', 'Blessing Okafor', 'Wanjiku Mwangi', 'Adia Traoré',
-  ],
-  GENERIC: [
-    'Daniel Fischer', 'Michael Ross', 'Alexander Novak', 'David Lin', 'Thomas Martin',
-    'Robert Chen', 'James Wilson', 'Peter Novak', 'Andrew Blake', 'Mark Sullivan',
-    'Sarah Mitchell', 'Elizabeth Harper', 'Catherine Reid', 'Jennifer Walsh', 'Amanda Stone',
-  ],
+// First and last name pools by region — composed at runtime for deep combinatorial variety.
+// East Asian naming: family name comes first (handled by generateName).
+
+var ILLEGAL_NAME_POOLS = {
+  RUSSIAN: {
+    first: [
+      'Aleksandr', 'Aleksei', 'Andrei', 'Anton', 'Arkady', 'Boris', 'Denis', 'Dmitri', 'Eduard', 'Evgeni',
+      'Fyodor', 'Gennady', 'Igor', 'Ivan', 'Kirill', 'Konstantin', 'Leonid', 'Maksim', 'Mikhail', 'Nikolai',
+      'Oleg', 'Pavel', 'Roman', 'Sergei', 'Stanislav', 'Timofei', 'Vadim', 'Valentin', 'Viktor', 'Vladislav',
+      'Yuri', 'Anatoly', 'Vasily', 'Grigory', 'Semyon',
+      'Anna', 'Darya', 'Ekaterina', 'Elena', 'Galina', 'Irina', 'Kseniya', 'Larisa', 'Lyudmila', 'Marina',
+      'Natalya', 'Olga', 'Svetlana', 'Tatiana', 'Valentina', 'Vera', 'Yelena', 'Yulia', 'Zoya', 'Polina',
+    ],
+    last: [
+      'Volkov', 'Petrov', 'Kozlov', 'Ivanov', 'Orlov', 'Fedorov', 'Morozov', 'Sokolov', 'Kuznetsov', 'Popov',
+      'Novikov', 'Smirnov', 'Lebedev', 'Zakharov', 'Pavlov', 'Vasiliev', 'Golubev', 'Vinogradov', 'Bogdanov', 'Voronov',
+      'Gusev', 'Kovalev', 'Makarov', 'Nikitin', 'Romanov', 'Sidorov', 'Tarasov', 'Filatov', 'Zhukov', 'Belov',
+      'Danilov', 'Klimov', 'Medvedev', 'Stepanov', 'Frolov',
+    ],
+  },
+  CHINESE: {
+    // Chinese: family name + given name (1-2 syllables)
+    first: [
+      'Wei', 'Yong', 'Jun', 'Ming', 'Yang', 'Peng', 'Hao', 'Lei', 'Jian', 'Lin',
+      'Mei', 'Hua', 'Xiu', 'Lan', 'Fang', 'Qiang', 'Bo', 'Tao', 'Gang', 'Chao',
+      'Xin', 'Rui', 'Yi', 'Zhi', 'Feng', 'Guang', 'Hai', 'Jie', 'Kai', 'Nan',
+      'Yan', 'Hong', 'Ping', 'Yue', 'Shan', 'Ting', 'Xia', 'Qian', 'Wen', 'Zhen',
+    ],
+    last: [
+      'Li', 'Wang', 'Zhang', 'Liu', 'Chen', 'Yang', 'Zhao', 'Huang', 'Zhou', 'Wu',
+      'Xu', 'Sun', 'Ma', 'Hu', 'Guo', 'He', 'Lin', 'Luo', 'Zheng', 'Liang',
+      'Song', 'Tang', 'Deng', 'Han', 'Feng', 'Cao', 'Peng', 'Xie', 'Lu', 'Jiang',
+      'Shen', 'Ye', 'Ren', 'Pan', 'Du',
+    ],
+    familyFirst: true,
+  },
+  MIDDLE_EASTERN: {
+    first: [
+      'Khalid', 'Omar', 'Yusuf', 'Hassan', 'Tariq', 'Samir', 'Reza', 'Farhad', 'Nasser', 'Jamal',
+      'Ibrahim', 'Ahmed', 'Mustafa', 'Ali', 'Mohammed', 'Hamid', 'Karim', 'Rashid', 'Amir', 'Bilal',
+      'Farid', 'Majid', 'Walid', 'Ziad', 'Adnan', 'Bassam', 'Hani', 'Imad', 'Marwan', 'Nawaf',
+      'Fatima', 'Layla', 'Aisha', 'Noor', 'Zahra', 'Maryam', 'Hana', 'Rania', 'Sara', 'Dina',
+      'Leila', 'Amira', 'Yasmin', 'Samira', 'Farida',
+    ],
+    last: [
+      'al-Rashid', 'Haddad', 'al-Bakri', 'Nazari', 'al-Mansur', 'Hosseini', 'Karimi', 'Amiri', 'al-Fayed', 'Khoury',
+      'al-Hassan', 'Abboud', 'Bahrami', 'Dehghani', 'al-Fahad', 'Ghannam', 'Hashemi', 'Jabbari', 'al-Khalil', 'Masoud',
+      'al-Nouri', 'Osman', 'Qasemi', 'Rahmani', 'al-Saadi', 'Tahan', 'al-Umar', 'Vaziri', 'al-Wahab', 'Zamani',
+      'al-Rawi', 'Darwish', 'Ezzati', 'Farahani', 'al-Ghazi',
+    ],
+  },
+  EUROPEAN: {
+    first: [
+      'Jean-Pierre', 'Hans', 'Marco', 'Pierre', 'Karl', 'Stefan', 'Luca', 'François', 'Jan', 'Tomás',
+      'Anton', 'Dieter', 'Emile', 'Friedrich', 'Giuseppe', 'Henrik', 'Jacques', 'Klaus', 'Lorenzo', 'Matteo',
+      'Nikolaus', 'Olivier', 'Patrick', 'René', 'Sven', 'Thierry', 'Ulrich', 'Werner', 'Xavier', 'Yves',
+      'Sophie', 'Maria', 'Anna', 'Elena', 'Claire', 'Ingrid', 'Katarina', 'Margaux', 'Nina', 'Petra',
+      'Renata', 'Silvia', 'Tatjana', 'Ursula', 'Valentina',
+    ],
+    last: [
+      'Moreau', 'Becker', 'Rossi', 'Dubois', 'Fischer', 'Müller', 'Conti', 'Leroy', 'Kowalski', 'García',
+      'Laurent', 'Schneider', 'Vasquez', 'Bernard', 'Andersen', 'Brandt', 'Colombo', 'De Vries', 'Eriksson', 'Fontaine',
+      'Gruber', 'Horváth', 'Janssen', 'Kristiansen', 'Lindberg', 'Morel', 'Nielsen', 'Olsen', 'Pereira', 'Ritter',
+      'Schmidt', 'Tóth', 'Wagner', 'Zimmermann', 'Novák',
+    ],
+  },
+  LATIN_AMERICAN: {
+    first: [
+      'Carlos', 'Diego', 'Miguel', 'Fernando', 'Alejandro', 'Ricardo', 'Pablo', 'Luis', 'Andrés', 'Javier',
+      'Antonio', 'Bruno', 'César', 'Daniel', 'Eduardo', 'Francisco', 'Gabriel', 'Héctor', 'Ignacio', 'Jorge',
+      'Leonardo', 'Manuel', 'Nicolás', 'Oscar', 'Rafael', 'Santiago', 'Tomás', 'Valentín', 'Xavier', 'Raúl',
+      'Isabella', 'Valentina', 'Camila', 'Sofía', 'Lucia', 'Mariana', 'Carolina', 'Daniela', 'Gabriela', 'Laura',
+      'Natalia', 'Paola', 'Regina', 'Ximena', 'Adriana',
+    ],
+    last: [
+      'Mendoza', 'Herrera', 'Torres', 'Castillo', 'Ríos', 'Fuentes', 'Guzmán', 'Vargas', 'Delgado', 'Morales',
+      'Aguilar', 'Bravo', 'Cardenas', 'Dominguez', 'Espinoza', 'Flores', 'González', 'Hernández', 'Ibarra', 'Jiménez',
+      'Lara', 'Maldonado', 'Navarro', 'Ortega', 'Pacheco', 'Quintero', 'Ramírez', 'Salazar', 'Trujillo', 'Vega',
+      'Acosta', 'Bustamante', 'Coronado', 'Duarte', 'Escobar',
+    ],
+  },
+  SOUTH_ASIAN: {
+    first: [
+      'Rajesh', 'Amir', 'Vikram', 'Arjun', 'Mohammed', 'Farhan', 'Ravi', 'Imran', 'Sanjay', 'Naveed',
+      'Ashok', 'Deepak', 'Gaurav', 'Harish', 'Irfan', 'Kabir', 'Lakshman', 'Nikhil', 'Pranav', 'Rohit',
+      'Suresh', 'Tariq', 'Usman', 'Venkat', 'Wasim', 'Yash', 'Zaheer', 'Anand', 'Dinesh', 'Gopal',
+      'Priya', 'Ayesha', 'Sunita', 'Fatima', 'Meera', 'Anjali', 'Deepa', 'Hina', 'Kavita', 'Lakshmi',
+      'Nadia', 'Pooja', 'Rashida', 'Sana', 'Tanvi',
+    ],
+    last: [
+      'Kumar', 'Khan', 'Singh', 'Patel', 'Aziz', 'Ahmed', 'Sharma', 'Hussain', 'Gupta', 'Malik',
+      'Bhat', 'Chandra', 'Das', 'Ghosh', 'Iyer', 'Joshi', 'Kapoor', 'Menon', 'Nair', 'Prasad',
+      'Qureshi', 'Rao', 'Siddiqui', 'Thakur', 'Verma', 'Yadav', 'Banerjee', 'Desai', 'Gill', 'Mishra',
+      'Naqvi', 'Pillai', 'Reddy', 'Shah', 'Trivedi',
+    ],
+  },
+  EAST_ASIAN: {
+    // Japanese and Korean names — family name first
+    first: [
+      'Takeshi', 'Hiroshi', 'Kenji', 'Haruki', 'Ryota', 'Akira', 'Daichi', 'Fumio', 'Hayato', 'Isamu',
+      'Kazuki', 'Masaru', 'Noboru', 'Ren', 'Shota', 'Tatsuo', 'Yuto', 'Kenichi', 'Makoto', 'Shinji',
+      'Joon-ho', 'Sung-min', 'Dong-wook', 'Min-jun', 'Tae-hyun', 'Byung-ho', 'Chan-woo', 'Dae-jung', 'Gi-hun', 'Hyun-woo',
+      'Yuki', 'Hana', 'Sakura', 'Mei', 'Aiko', 'Emi', 'Kaori', 'Mika', 'Riko', 'Satsuki',
+      'Soo-jin', 'Min-ji', 'Hye-won', 'Ji-yeon', 'Yeon-hee',
+    ],
+    last: [
+      'Yamamoto', 'Tanaka', 'Watanabe', 'Sato', 'Nakamura', 'Yoshida', 'Suzuki', 'Takahashi', 'Kobayashi', 'Ito',
+      'Shimizu', 'Hayashi', 'Mori', 'Ikeda', 'Fujita', 'Ogawa', 'Matsuda', 'Endo', 'Aoki', 'Ueda',
+      'Kim', 'Park', 'Lee', 'Choi', 'Jung', 'Kang', 'Yoon', 'Jang', 'Lim', 'Han',
+      'Shin', 'Kwon', 'Oh', 'Seo', 'Song',
+    ],
+    familyFirst: true,
+  },
+  AFRICAN: {
+    first: [
+      'Ibrahim', 'Moussa', 'Abdoulaye', 'Omar', 'Kwame', 'Chukwu', 'Aminu', 'Samuel', 'Jelani', 'Tendai',
+      'Adebayo', 'Bakari', 'Chijioke', 'Dakarai', 'Emeka', 'Folarin', 'Gideon', 'Hamza', 'Idris', 'Jabari',
+      'Kofi', 'Lamine', 'Mamadou', 'Nnamdi', 'Olumide', 'Sekou', 'Thierno', 'Uche', 'Yaw', 'Zuberi',
+      'Amina', 'Fatou', 'Blessing', 'Wanjiku', 'Adia', 'Chiamaka', 'Djeneba', 'Esther', 'Fatoumata', 'Grace',
+      'Halima', 'Ife', 'Joy', 'Keza', 'Liya',
+    ],
+    last: [
+      'Diallo', 'Keita', 'Traoré', 'Sylla', 'Asante', 'Okafor', 'Bello', 'Osei', 'Mwangi', 'Moyo',
+      'Adeyemi', 'Bah', 'Camara', 'Diouf', 'Eze', 'Fofana', 'Gbadamosi', 'Haidara', 'Igwe', 'Jalloh',
+      'Kamara', 'Mensah', 'Ndiaye', 'Okonkwo', 'Sow', 'Toure', 'Wekesa', 'Yeboah', 'Conteh', 'Mutombo',
+      'Adesanya', 'Banda', 'Chege', 'Dlamini', 'Ekwueme',
+    ],
+  },
+  GENERIC: {
+    first: [
+      'Daniel', 'Michael', 'Alexander', 'David', 'Thomas', 'Robert', 'James', 'Peter', 'Andrew', 'Mark',
+      'William', 'Christopher', 'Jonathan', 'Stephen', 'Richard', 'Edward', 'Charles', 'George', 'Henry', 'Philip',
+      'Sarah', 'Elizabeth', 'Catherine', 'Jennifer', 'Amanda', 'Victoria', 'Margaret', 'Rebecca', 'Charlotte', 'Emily',
+      'Rachel', 'Laura', 'Susan', 'Patricia', 'Natalie',
+    ],
+    last: [
+      'Fischer', 'Ross', 'Novak', 'Lin', 'Martin', 'Chen', 'Wilson', 'Blake', 'Sullivan', 'Mitchell',
+      'Harper', 'Reid', 'Walsh', 'Stone', 'Campbell', 'Douglas', 'Ellison', 'Grant', 'Hayes', 'Jordan',
+      'Keller', 'Lawson', 'Monroe', 'Palmer', 'Quinn', 'Reeves', 'Sinclair', 'Tate', 'Vance', 'Ward',
+      'Abbott', 'Barrett', 'Chambers', 'Drake', 'Emerson',
+    ],
+  },
 };
+
+// Compose a full name from first + last pools for a given region.
+function generateCoverName(region) {
+  var pool = ILLEGAL_NAME_POOLS[region] || ILLEGAL_NAME_POOLS.GENERIC;
+  var first = pick(pool.first);
+  var last = pick(pool.last);
+  if (pool.familyFirst) return last + ' ' + first;
+  return first + ' ' + last;
+}
 
 // Map countries to name regions
 var COUNTRY_TO_NAME_REGION = {
@@ -274,8 +379,7 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, c
   // --- COVER_IDENTITY: dynamically generated ---
   if (fieldKey === 'COVER_IDENTITY') {
     var nameRegion = getCoverNameRegion(agencyCountry);
-    var namePool = ILLEGAL_COVER_NAMES[nameRegion] || ILLEGAL_COVER_NAMES.GENERIC;
-    var coverName = pick(namePool);
+    var coverName = generateCoverName(nameRegion);
     ctx.coverName = coverName;
     var occPool = COVER_OCCUPATIONS[tierId] || COVER_OCCUPATIONS.RECRUITED_AGENT;
     var occupation = pick(occPool);
@@ -329,7 +433,6 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, c
   // --- REAL_IDENTITY: dynamically generated ---
   if (fieldKey === 'REAL_IDENTITY') {
     var realNameRegion = getCoverNameRegion(agencyCountry);
-    var realNamePool = ILLEGAL_COVER_NAMES[realNameRegion] || ILLEGAL_COVER_NAMES.GENERIC;
     var rankPool = [
       'Captain', 'Major', 'Lieutenant Colonel', 'Colonel',
       'Senior Officer', 'First Secretary', 'Operations Officer',
@@ -337,19 +440,13 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, c
 
     if (tierId === 'RECRUITED_AGENT') {
       // Recruited agents use their own identity — real name IS the cover name
-      var recruitedName = ctx.coverName || pick(realNamePool);
+      var recruitedName = ctx.coverName || generateCoverName(realNameRegion);
       return 'True identity confirmed: ' + recruitedName + ' — a ' + agencyCountry + ' national recruited by ' + agencyShort + '. ' +
         'Subject is operating under their own identity with no alias. Limited biographical data available. Cooperating at a minimal level.';
     }
 
-    // DEEP_COVER and MISSION_SPECIFIC: real name differs from cover
-    var realName = pick(realNamePool);
-    // Avoid collision with cover name
-    if (ctx.coverName && realName === ctx.coverName && realNamePool.length > 1) {
-      for (var ri = 0; ri < realNamePool.length; ri++) {
-        if (realNamePool[ri] !== ctx.coverName) { realName = realNamePool[ri]; break; }
-      }
-    }
+    // DEEP_COVER and MISSION_SPECIFIC: real name differs from cover (composable pools make collisions near-impossible)
+    var realName = generateCoverName(realNameRegion);
     var rank = pick(rankPool);
     return 'True identity: ' + rank + ' ' + realName + ', ' + agencyLabel + '. ' +
       'Biographical intelligence file being compiled. Fingerprint and biometric data collected upon detention. ' +
