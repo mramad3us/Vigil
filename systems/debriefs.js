@@ -2121,6 +2121,127 @@ DEBRIEF_GENERATORS.CAPTURE_OP = function(op, v, success) {
 };
 
 // =====================================================================
+//  COVERT_SNATCH — Quiet street abduction (domestic HVT / foreign HVT)
+// =====================================================================
+
+DEBRIEF_GENERATORS.COVERT_SNATCH = function(op, v, success) {
+  var callsign = pick(DEBRIEF_CALLSIGNS);
+  var weather = pick(DEBRIEF_WEATHER);
+  var entries = [];
+
+  // Pull intel
+  var hvtIdIntel = getIntel(v, 'HVT_IDENTITY') || getIntel(v, 'SUBJECT_ID') || getIntel(v, 'LEADERSHIP_ID');
+  var movementIntel = getIntel(v, 'MOVEMENT_PATTERNS');
+  var guardIntel = getIntel(v, 'PERSONAL_SECURITY') || getIntel(v, 'GUARD_FORCE');
+  var isolationIntel = getIntel(v, 'ISOLATION_WINDOWS');
+  var residenceIntel = getIntel(v, 'RESIDENCE') || getIntel(v, 'CELL_LOCATION');
+  var csIntel = getIntel(v, 'COUNTERSURVEILLANCE');
+  var networkIntel = getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'HVT_NETWORK');
+
+  var isDomestic = v.domestic;
+  var targetName = v.targetAlias || v.orgName || 'HVT';
+
+  // --- Abduction method variations ---
+  var SNATCH_METHODS = [
+    {
+      setup: 'Snatch method: vehicle intercept. Team will box subject\'s car at a traffic chokepoint. Secondary vehicle pulls alongside, operatives dismount, subject extracted to transfer van. Total exposure: under 20 seconds.',
+      exec_success: '"GO GO GO." Subject\'s vehicle boxed at the intersection of ' + pick(['5th and Main', 'the underpass near the rail yard', 'an industrial access road', 'the parking ramp exit']) + '. Two operatives dismounted from a panel van — passenger door opened, subject pulled from driver seat. Flex-cuffs on, hood on, into the van. Door shut. Vehicle convoy moving. Total time from stop to departure: 14 seconds.',
+      exec_fail: 'Vehicle intercept initiated but subject ' + pick(['rammed through the blocking car and fled at high speed — pursuit through residential streets aborted to avoid civilian casualties', 'saw the approach in his mirror and bailed on foot into a crowded market — team could not pursue without exposure', 'was not in the vehicle — a decoy was driving. Subject\'s countersurveillance detected the tail']),
+    },
+    {
+      setup: 'Snatch method: parking structure grab. Team will position in subject\'s parking garage on sublevel ' + pick(['2', '3', 'B1']) + '. When subject exits vehicle, operatives close from 2 directions. Needle sedation, into the trunk of a staged vehicle. Camera blind spots mapped.',
+      exec_success: 'Subject parked on sublevel ' + pick(['2', '3', 'B1']) + ' as expected. Two operatives approached from the stairwell as subject locked his car. Brief struggle — subject reached for a weapon but was restrained before he could draw. Sedative administered via auto-injector to the neck. Subject went limp in 8 seconds. Loaded into a staged minivan. Drove out the south exit at normal speed. Garage cameras confirmed: no coverage of the grab point.',
+      exec_fail: 'Subject entered the garage but ' + pick(['was accompanied by an unknown associate — two targets instead of one, team not configured for a double grab. Operation aborted', 'spotted the staged vehicle and reversed out of the garage at speed. Team could not pursue without blowing cover', 'parked on a different level than expected. By the time the team repositioned, subject had entered the elevator with two other civilians']),
+    },
+    {
+      setup: 'Snatch method: sidewalk grab. Team in a van with sliding door. Subject walks a predictable route between ' + pick(['his apartment and a coffee shop', 'the subway station and his office', 'a gym and his residence', 'a mosque and his residence']) + '. Van pulls up, door opens, subject pulled in. Approach timed to a camera dead zone.',
+      exec_success: 'Van pulled alongside subject on ' + pick(['a tree-lined residential street', 'a side road behind the strip mall', 'the walkway under the overpass', 'a quiet stretch near the canal']) + '. Sliding door opened — two operatives grabbed the subject by both arms and hauled him inside. Subject attempted to shout but a hand was over his mouth before any sound carried. Door shut, van moving. Hood and flex-cuffs applied in the vehicle. A jogger passed 30 meters behind — did not appear to notice.',
+      exec_fail: 'Van approached but ' + pick(['subject was walking with a companion — civilian witness made the grab impossible. Operation waved off', 'subject suddenly changed his route — walked into a convenience store instead of continuing on the expected path. Team circled the block but subject exited from a different door', 'a police cruiser was parked at the next intersection. Team aborted to avoid law enforcement contact']),
+    },
+    {
+      setup: 'Snatch method: apartment entry. Team will enter subject\'s residence during predicted absence, wait inside, and take the subject when he returns. Lock bypass kit prepared. Sedation protocol: auto-injector within 5 seconds of entry.',
+      exec_success: 'Team entered the apartment via ' + pick(['a picked deadbolt — 40 seconds, no damage', 'a copied key obtained from the building superintendent through a cover story', 'an unlocked window on the fire escape']) + '. Three operatives waited in the dark for ' + randInt(1, 4) + ' hours. Subject entered at ' + pick(['2247', '0118', '2315', '1956']) + ' local, locked the door behind him, set down his keys. Operative stepped from behind the door — auto-injector to the neck. Subject collapsed in the hallway. Wrapped in a moving blanket, carried to the van via the service elevator. Building quiet. No witnesses.',
+      exec_fail: 'Team entered and held position. Subject ' + pick(['did not return to the apartment — stayed at an unknown location overnight. Team exfiltrated at dawn to avoid detection', 'returned with 2 associates. Team could not engage 3 targets. Remained concealed in a closet until all subjects left, then withdrew', 'appeared to detect something wrong — paused at the door, then left without entering. May have spotted a telltale sign or received a warning']),
+    },
+    {
+      setup: 'Snatch method: vehicle entry. Subject drives a ' + pick(['late-model sedan', 'dark SUV', 'silver hatchback', 'rental car']) + ' and parks in ' + pick(['a residential street', 'an unmonitored lot behind a restaurant', 'his building\'s rear lot']) + '. Operative will enter the rear seat during a window when the car is unlocked but unattended. When subject returns and begins driving, operative applies sedation from behind.',
+      exec_success: 'Operative entered rear seat of subject\'s vehicle during a ' + pick(['grocery store visit', 'gym session', 'meeting at a restaurant']) + '. Lay flat under a blanket across the back seat for ' + randInt(20, 45) + ' minutes. Subject returned, started the engine, pulled onto the road. At the first stoplight, operative sat up — auto-injector to the side of the neck. Subject slumped. Operative leaned forward, engaged parking brake, and steered to the curb. Backup vehicle pulled alongside within 30 seconds. Subject transferred. Both vehicles departed in opposite directions.',
+      exec_fail: 'Operative entered the vehicle but ' + pick(['subject returned earlier than expected with a companion — operative had to abort and exit the car before being seen', 'subject opened the rear door to load bags and discovered the operative. Subject fled on foot shouting for help — operative withdrew', 'a parking attendant noticed movement in the vehicle and approached. Operative exited and walked away. Cover intact but operation burned']),
+    },
+    {
+      setup: 'Snatch method: restaurant approach. Subject eats alone at a regular establishment in ' + v.city + '. Operative team will stage as customers. When subject exits, team converges at the vehicle — door block, sedation, transfer to waiting van in the adjacent lot.',
+      exec_success: 'Team in position at the restaurant. Subject arrived alone at ' + pick(['1915', '2030', '1245', '1830']) + ' local and took his usual table. Two operatives inside, two at the exit. Subject finished his meal and walked to his car in the side lot. First operative reached the car simultaneously — "Excuse me, do you have the time?" Subject turned. Second operative applied the auto-injector from behind. Subject sagged. Caught him before he hit the ground. Into the van. Door shut. 11 seconds total. Restaurant noise covered everything.',
+      exec_fail: 'Subject arrived at the restaurant but ' + pick(['sat with an unknown woman — potential witness made the grab at the vehicle untenable. Team observed but did not act', 'left through the kitchen exit instead of the main door — an alternate route not previously observed. Team scrambled but lost visual in the alley', 'appeared agitated and was on the phone throughout the meal. Left quickly, drove erratically — possible warning received. Operation aborted']),
+    },
+  ];
+
+  var method = pick(SNATCH_METHODS);
+
+  // --- Timeline ---
+  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Vigil authorized covert snatch of ' + targetName + ' in ' + v.city + (v.country ? ', ' + v.country : '') + '. Priority: ALIVE. ' + v.primaryAsset + ' tasked. ' + callsign + ' team assembled — ' + randInt(3, 6) + ' operators.' + (hvtIdIntel ? ' Target ID: ' + hvtIdIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-6), type: 'normal', text: 'Close target reconnaissance in progress. Weather: ' + weather + '. ' + (residenceIntel ? 'Residence intel: ' + residenceIntel + ' ' : '') + (movementIntel ? 'Pattern of life: ' + movementIntel : 'Pattern of life under development from Vigil surveillance feeds.') });
+
+  if (guardIntel) {
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(-2), type: 'normal', text: 'Security assessment: ' + guardIntel });
+  }
+
+  if (csIntel) {
+    entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Countersurveillance profile: ' + csIntel });
+  }
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: method.setup + (isolationIntel ? ' Isolation window per Vigil collection: ' + isolationIntel : '') });
+
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: callsign + ' team in final position. Vehicles staged. Comms check complete. Counter-surveillance screen reports area clean — no law enforcement, no hostile watchers. Standing by for execute.' });
+
+  if (success) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: method.exec_success });
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(15, 30)), type: 'success', text: 'Subject conscious but disoriented. ' + pick([
+      'Flex-cuffs, hood, and noise-canceling headphones applied. Subject attempted to speak — told to remain silent.',
+      'Subject regained awareness in the vehicle. Calm — almost resigned. Said nothing.',
+      'Subject woke agitated, tested the restraints, then went still. No words exchanged.',
+      'Subject came around during the drive. Tried to memorize turns. Operatives took a deliberately circuitous route to disorient.',
+    ]) + ' Transfer vehicle switched at a prearranged point ' + randInt(8, 25) + ' minutes from the grab site.' });
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Subject delivered to ' + pick([
+      'a secure facility via underground parking entrance. No exterior exposure.',
+      'an Agency safehouse on the outskirts of ' + v.city + '. Property is clean — used once, burned after.',
+      'a federal black site. Subject processed: biometrics, photographs, personal effects catalogued and sealed.',
+      'a secondary staging point. From there, transferred by unmarked aircraft to a secure interrogation facility.',
+    ]) + (v.prisonerName ? ' Prisoner designated: ' + v.prisonerName + '.' : '') + ' Interrogation team standing by.' });
+
+    if (networkIntel) {
+      entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'Preliminary exploitation of subject\'s personal effects: encrypted phone, ' + pick(['3 SIM cards', '2 passport-quality IDs under different names', 'a notebook with coded entries', 'a USB drive — encrypted, sent to forensics']) + '. Network intelligence: ' + networkIntel });
+    }
+
+  } else {
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'failure', text: method.exec_fail + '.' });
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, randInt(5, 15)), type: 'failure', text: callsign + ' team withdrawing from area. ' + pick([
+      'Subject is now aware of hostile intent — will alter all patterns and possibly flee ' + v.city + '.',
+      'No compromise of team identity. However, subject will assume surveillance and take countermeasures.',
+      'Team vehicles clear of the area. No law enforcement contact. But the window is closed — subject will not be this exposed again.',
+      'Abort was clean — no witnesses, no evidence. But subject\'s routine has been disrupted. Will need to rebuild pattern-of-life from scratch.',
+    ]) });
+
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Vigil assessing whether subject has fled or gone to ground. ' + pick([
+      'SIGINT shows a burst of encrypted communications from subject\'s phone — likely contacting handlers or associates.',
+      'Subject\'s vehicle has not returned to known locations. Mobile device powered off.',
+      'Subject seen returning to his residence 2 hours later. May not realize the attempt was directed — could attribute it to street crime.',
+      'Subject booked a flight out of ' + v.city + ' within 90 minutes of the failed grab. Currently airborne.',
+    ]) });
+  }
+
+  var assessment = success ?
+    'Covert snatch operation ' + v.codename + ' in ' + v.city + ' successful. ' + targetName + ' captured alive without gunfire, witnesses, or law enforcement involvement. Subject is in custody and available for interrogation.' + (isDomestic ? ' Operation was conducted without legal authorization on US soil — classification: EYES ONLY.' : '') :
+    'Covert snatch operation ' + v.codename + ' failed to acquire ' + targetName + '. Subject evaded capture and is now likely aware of hostile intent. All previously collected pattern-of-life intelligence should be considered burned. ' + (isDomestic ? 'Risk of subject contacting media or law enforcement is elevated.' : 'Subject may flee ' + v.city + ' or seek protection from allies.');
+
+  return [buildTimeline(entries), buildAssessment(assessment)];
+};
+
+// =====================================================================
 //  BURN_NOTICE — Diplomatic exposure of foreign illegal
 // =====================================================================
 

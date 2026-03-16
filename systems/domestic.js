@@ -21,7 +21,7 @@ var DOMESTIC_THREAT_TYPES = [
   { id: 'NARCOTICS_NETWORK', label: 'Narcotics Network', weight: 3, threatRange: [2, 4] },
   { id: 'DOMESTIC_TERROR', label: 'Domestic Terror', weight: 1, threatRange: [4, 5] },
   { id: 'HOSTAGE_DOMESTIC', label: 'Hostage Situation', weight: 1, threatRange: [4, 5] },
-  { id: 'ASSASSINATION_TARGET', label: 'Targeted Elimination', weight: 1, threatRange: [3, 5] },
+  { id: 'DOMESTIC_HVT', label: 'Domestic HVT', weight: 1, threatRange: [3, 5] },
   { id: 'DOMESTIC_CAPTURE_TARGET', label: 'High-Priority Fugitive', weight: 2, threatRange: [3, 4] },
   { id: 'ILLEGAL_AGENT_DOMESTIC', label: 'Foreign Illegal Agent', weight: 2, threatRange: [3, 5] },
 ];
@@ -40,7 +40,7 @@ var DOMESTIC_THREAT_TO_OP_TYPE = {
   NARCOTICS_NETWORK: ['LAW_ENFORCEMENT', 'ARREST_OPERATION', 'INVESTIGATION', 'DOMESTIC_SURVEILLANCE'],
   DOMESTIC_TERROR: ['COUNTER_TERROR'],
   HOSTAGE_DOMESTIC: ['DOMESTIC_HOSTAGE_RESCUE'],
-  ASSASSINATION_TARGET: ['ARREST_OPERATION', 'LAW_ENFORCEMENT', 'INVESTIGATION'],
+  DOMESTIC_HVT: ['TARGETED_KILLING', 'COVERT_SNATCH', 'ARREST_OPERATION'],
   DOMESTIC_CAPTURE_TARGET: ['ARREST_OPERATION', 'LAW_ENFORCEMENT', 'INVESTIGATION', 'DOMESTIC_SURVEILLANCE'],
   ILLEGAL_AGENT_DOMESTIC: ['TARGETED_KILLING', 'ARREST_OPERATION', 'INVESTIGATION', 'DOMESTIC_SURVEILLANCE'],
 };

@@ -657,7 +657,7 @@ var DOMESTIC_ORG_NAMES = {
     'HOSTAGE INCIDENT GRYPHON',
     'HOSTAGE INCIDENT IRONCLAD',
   ],
-  ASSASSINATION_TARGET: [
+  DOMESTIC_HVT: [
     'SUBJECT CROWBAR',
     'SUBJECT ANVIL',
     'SUBJECT GALLOWS',
@@ -1211,6 +1211,43 @@ var DOMESTIC_INTEL_VALUE_POOLS = {
     'Vigil maintains 2 emergency safe houses in {city}. House Alpha status: GREEN (uncompromised). House Bravo status: AMBER (possible hostile surveillance detected).',
     'Safe house network in {city}: 3 locations available. Asset must reach the nearest within 6 hours before hostile CI closes the cordon.',
   ],
+  // === DOMESTIC HVT INTEL FIELDS ===
+
+  RESIDENCE: [
+    'Subject resides in a 3rd-floor walk-up apartment in {city}\'s Eastside. Lease under a known alias. Single entrance via stairwell, no doorman. Mail pickup observed daily at 0730.',
+    'Vigil geolocation confirms primary residence: a rented townhouse in suburban {city}. Subject also frequents a second address — a woman\'s apartment 6 blocks east. No security cameras on the street.',
+    'Subject occupies a studio unit in a mid-rise building in {city}. Parking garage entrance on the north side. No concierge after 2200. Utility records confirm occupancy for 4 months.',
+    'Rental property in {city} residential district. Ground floor, rear-facing windows. Subject parks a late-model sedan in the alley behind the building. Neighbors describe him as quiet, keeps irregular hours.',
+    'Subject has been rotating between at least 2 addresses in {city}. Primary: a furnished apartment near the university district. Secondary: a motel on Route 9, cash payments, registered under a false name.',
+    'SIGINT places subject at a house in a {city} cul-de-sac. Property records show a 6-month lease paid upfront in cash. Minimal furniture visible through curtains. One vehicle in the driveway.',
+  ],
+
+  PERSONAL_SECURITY: [
+    'Subject appears to travel alone. No visible security detail. Carries a concealed handgun — printing visible under jacket on CCTV captures.',
+    'Subject moves with one associate who appears to serve as a driver and lookout. Both are assessed to be armed. No body armor observed.',
+    'No dedicated security. Subject varies routine slightly but is not conducting professional countersurveillance. Appears to rely on anonymity rather than protection.',
+    'Subject travels with 2 associates. At least one is armed — shoulder holster visible in restaurant footage. They sweep the car before the subject enters. Low-level but aware.',
+    'Solo mover. Subject carries no visible weapon but Vigil behavioral analysis flags evasive driving patterns and frequent mirror-checking. Some tradecraft training evident.',
+    'Subject has a single bodyguard — former military, concealed carry. Bodyguard drives, enters locations first, and positions himself near exits. Professional but predictable.',
+  ],
+
+  ISOLATION_WINDOWS: [
+    'Subject jogs alone every morning between 0545 and 0630 along a canal path in {city}. Low foot traffic. No cameras for a 400m stretch under the overpass. Best window.',
+    'Subject makes a weekly solo grocery run to a strip mall outside {city} — Thursday evenings around 1900. Parking lot is poorly lit, no security cameras in the rear section.',
+    'Subject visits a laundromat every 3 days, alone, between 2100 and 2200. Establishment has a rear exit to an alley with no CCTV coverage. 2-3 other patrons at that hour.',
+    'Subject walks to a coffee shop 4 blocks from his residence every morning. Route crosses an underpass with a 90-second blind spot from any surveillance camera. Foot traffic is minimal before 0700.',
+    'Pattern-of-life analysis shows subject drives alone to a storage unit facility every 5-6 days. Facility has minimal staffing after 1800 and camera coverage gaps on rows C and D.',
+    'Subject parks in an underground garage beneath his apartment. Garage has one camera at the entrance ramp — none on sublevel 2 where he parks. Average 45 seconds alone between car and stairwell.',
+  ],
+
+  COUNTERSURVEILLANCE: [
+    'Subject demonstrates basic countersurveillance awareness — checks mirrors, occasionally takes circuitous routes, varies departure times by 10-20 minutes. No formal training apparent.',
+    'Subject is countersurveillance-aware. Has been observed conducting U-turns, stopping at random storefronts, and watching reflections. Likely received intelligence tradecraft training abroad.',
+    'Minimal awareness. Subject follows a consistent routine, does not appear to check for surveillance, and uses the same routes daily. Abduction window is wide.',
+    'Subject is highly paranoid. Regularly switches between 2 vehicles, uses burner phones on a 48-hour rotation, and has been observed conducting SDRs through {city} shopping districts before meetings. Professional-grade tradecraft.',
+    'Moderate awareness. Subject scans parking lots before exiting his vehicle and avoids sitting with his back to doors. However, he has not detected Vigil\'s persistent surveillance over 72 hours of coverage.',
+    'Subject shows intermittent tradecraft — sometimes meticulous, sometimes sloppy. Appears to escalate caution around meetings with associates, then relax during personal errands. The relaxed periods are the window.',
+  ],
 };
 
 // --- Domestic Intel Value Generation ---
@@ -1289,7 +1326,7 @@ var DOMESTIC_THREAT_DESCRIPTIONS = {
     'ALERT: Multiple hostages seized in {city}. Subjects identified as {orgName}. Demands being communicated to local law enforcement. Vigil is providing real-time SIGINT and ISR support. Tactical response authorization requested.',
     'Vigil CCTV network has captured an armed hostage-taking at a facility in {city}. At least 4 hostages confirmed. Subject designated {orgName}. Vigil behavioral analysis indicates high risk of violence. Immediate tactical intervention may be required.',
   ],
-  ASSASSINATION_TARGET: [
+  DOMESTIC_HVT: [
     'Vigil has identified a high-priority domestic target requiring elimination in {city}. Subject designated {orgName}. Target presents an imminent national security threat based on intelligence intercepts. Legal authority review underway. Operational planning authorized.',
     'CLASSIFIED — DISPOSITION MATRIX: {orgName} has been designated for targeted action in {city}. Subject has evaded 3 prior federal arrest attempts and continues to direct operations that threaten national security. Vigil recommends lethal or capture options.',
     'Vigil intelligence assessment: {orgName} in {city} represents a clear and present danger. Subject\'s activities have directly resulted in loss of life and compromise of classified programs. Standard law enforcement approaches have failed. Escalated response authorized.',

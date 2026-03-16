@@ -30,7 +30,7 @@ var TIPS = {
     NARCOTICS_NETWORK:     'Major narcotics trafficking network operating within the US — production, distribution, or laundering of drug proceeds.',
     DOMESTIC_TERROR:       'Active domestic terrorism threat — imminent attack or advanced operational planning on US soil. Maximum priority.',
     HOSTAGE_DOMESTIC:      'Hostage situation on US soil. FBI HRT primary response. Posse Comitatus restricts military involvement.',
-    ASSASSINATION_TARGET:  'Credible threat of targeted killing on US soil. Federal protective detail and counteraction required.',
+    DOMESTIC_HVT:          'High-value target on US soil — designated for capture or elimination. Disposition matrix subject. Arrest is the sanctioned route; covert units may conduct unsanctioned operations.',
     DOMESTIC_CAPTURE_TARGET: 'High-priority fugitive evading federal arrest. Multi-agency manhunt with BOLO alert active.',
     ILLEGAL_AGENT_DOMESTIC: 'Foreign intelligence operative detected on US soil. Sponsored by a hostile intelligence service operating under cover. Domestic law enforcement agencies are sanctioned for response.',
     ILLEGAL_AGENT_FOREIGN:  'Foreign intelligence operative identified in a third country. Sponsored by a hostile service, operating under cover abroad. Capture, burn notice, or elimination are available responses.',
@@ -57,7 +57,8 @@ var TIPS = {
     INVESTIGATION:           'Long-running federal investigation — FISA warrants, grand jury subpoenas, financial analysis. Builds a prosecution.',
     DOMESTIC_SURVEILLANCE:   'Court-authorized domestic surveillance — physical and technical collection under FISA oversight.',
     ARREST_OPERATION:        'Tactical arrest of identified suspects. Federal warrant service with tactical teams and evidence collection.',
-    CAPTURE_OP:              'Covert capture operation in a foreign country. Snatch team apprehends the target for detention and interrogation. Yields a prisoner.',
+    CAPTURE_OP:              'Covert capture operation — SOF team apprehends a foreign intelligence operative for detention and interrogation. Yields a prisoner.',
+    COVERT_SNATCH:           'Quiet abduction — a small team grabs the target off the street or from a residence. No assault, no gunfire. Target vanishes. Yields a prisoner. Unsanctioned on domestic soil.',
     BURN_NOTICE:             'Diplomatic exposure — evidence of espionage shared with the host country. The operative is expelled. No prisoner, but significant relations improvement.',
   },
 

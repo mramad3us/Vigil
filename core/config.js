@@ -162,6 +162,19 @@ var OPERATION_TYPES = {
     baseSuccessRate: 60,
     intelReward: [3, 8],
   },
+  COVERT_SNATCH: {
+    id: 'COVERT_SNATCH', label: 'Covert Snatch Operation', shortLabel: 'SNATCH',
+    description: 'Quiet abduction — a small team grabs the target off the street, from a vehicle, or out of a residence. Hood, sedate, exfiltrate. No compound assault, no gunfire if it goes right.',
+    pros: ['Deniable — target simply vanishes', 'Low profile, no gunfire', 'Target captured alive for interrogation'],
+    cons: ['Narrow window of opportunity', 'Requires precise pattern-of-life intelligence', 'Risk of witnesses or police intervention', 'Target may be armed or have countersurveillance'],
+    requiredCapabilities: ['SOF'],
+    preferredCapabilities: ['SOF', 'INTEL', 'HUMINT'],
+    execHoursRange: [1, 6],
+    baseSuccessRate: 60,
+    intelReward: [8, 15],
+    illegalDomestic: true,
+    yieldsPrisoner: true,
+  },
   TARGETED_KILLING: {
     id: 'TARGETED_KILLING', label: 'Targeted Killing (Stand-Off)', shortLabel: 'TGT KILL',
     description: 'Covert stand-off elimination using sniper teams, IEDs, or close-range operatives. No compound breach. Designed for deniability — the target is killed in the open.',
@@ -233,7 +246,7 @@ var OPERATION_TYPES = {
   // --- Illegals Operation Types ---
   CAPTURE_OP: {
     id: 'CAPTURE_OP', label: 'Capture Operation', shortLabel: 'CAPTURE',
-    description: 'Covert snatch operation to capture a foreign intelligence operative alive. Yields a prisoner for interrogation. Requires precise intelligence and SOF teams.',
+    description: 'Covert snatch operation to capture the target alive for detention and interrogation. Yields a prisoner. Unsanctioned on domestic soil — covert units only.',
     pros: ['Prisoner for interrogation', 'High intelligence yield over time', 'Deniable if executed cleanly'],
     cons: ['Complex operation', 'Risk of diplomatic incident', 'Target may resist or self-terminate', 'Requires extraction plan'],
     requiredCapabilities: ['SOF'],
@@ -242,6 +255,7 @@ var OPERATION_TYPES = {
     baseSuccessRate: 55,
     intelReward: [5, 10],
     yieldsPrisoner: true,
+    illegalDomestic: true,
   },
   BURN_NOTICE: {
     id: 'BURN_NOTICE', label: 'Burn Notice', shortLabel: 'BURN',
@@ -384,15 +398,15 @@ var THREAT_INTEL_FIELDS = {
     { key: 'CAPTOR_DEMANDS',      label: 'Subject Demands & State of Mind',difficulty: 'HARD',      source: 'HUMINT' },
     { key: 'INTERNAL_COMMS',      label: 'Subject Communications',         difficulty: 'VERY_HARD', source: 'SIGINT' },
   ],
-  ASSASSINATION_TARGET: [
+  DOMESTIC_HVT: [
     { key: 'SUBJECT_ID',          label: 'Target Identification',          difficulty: 'EASY',      source: 'HUMINT' },
-    { key: 'CELL_LOCATION',       label: 'Target Location',                difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'RESIDENCE',           label: 'Residence & Known Addresses',    difficulty: 'EASY',      source: 'SIGINT' },
     { key: 'MOVEMENT_PATTERNS',   label: 'Pattern of Life',                difficulty: 'MEDIUM',    source: 'ISR' },
-    { key: 'GUARD_FORCE',         label: 'Security Assessment',            difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'PERSONAL_SECURITY',   label: 'Personal Security Posture',      difficulty: 'MEDIUM',    source: 'ISR' },
     { key: 'LEGAL_AUTHORITY',     label: 'Legal Authority Assessment',     difficulty: 'MEDIUM',    source: 'HUMINT' },
-    { key: 'COLLATERAL_RISK',     label: 'Collateral Risk Assessment',     difficulty: 'HARD',      source: 'ISR' },
+    { key: 'ISOLATION_WINDOWS',   label: 'Isolation Windows',              difficulty: 'HARD',      source: 'ISR' },
     { key: 'NETWORK_MAPPING',     label: 'Target Network & Associates',    difficulty: 'HARD',      source: 'SIGINT' },
-    { key: 'CONTINGENCY_PLANNING',label: 'Contingency Planning',           difficulty: 'VERY_HARD', source: 'HUMINT' },
+    { key: 'COUNTERSURVEILLANCE', label: 'Countersurveillance Awareness',  difficulty: 'VERY_HARD', source: 'HUMINT' },
   ],
   DOMESTIC_CAPTURE_TARGET: [
     { key: 'SUBJECT_ID',          label: 'Subject Identification',         difficulty: 'EASY',      source: 'HUMINT' },
