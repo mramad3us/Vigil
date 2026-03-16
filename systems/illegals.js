@@ -558,12 +558,21 @@ function assignDetentionSite(isDomestic, agentTier) {
 //  REPATRIATION
 // ===================================================================
 
-function repatriatePrisoner(prisonerId) {
+// targetCountry: for state agencies this is the agency's home country.
+// For non-state agencies, this is the enemy country the player chose to transfer to.
+function repatriatePrisoner(prisonerId, targetCountry) {
   var prisoner = getPrisoner(prisonerId);
   if (!prisoner || prisoner.repatriated) return;
 
+  var svc = getServiceById(prisoner.agency);
+  var isNonState = svc && svc.type === 'NON_STATE';
+
+  // Default target for state agencies
+  if (!targetCountry) targetCountry = prisoner.agencyCountry;
+
   prisoner.repatriated = true;
   prisoner.repatriatedDay = V.time.day;
+  prisoner.repatriatedTo = targetCountry;
   prisoner.interrogation.driedUp = true;
 
   // Relations boost scales by tier
@@ -575,19 +584,23 @@ function repatriatePrisoner(prisonerId) {
   var range = boostRanges[prisoner.tier] || [3, 5];
   var boost = randInt(range[0], range[1]);
 
-  if (prisoner.agencyCountry && typeof shiftRelations === 'function') {
-    shiftRelations(prisoner.agencyCountry, boost, 'Prisoner repatriation (' + prisoner.tierLabel + ')');
+  if (targetCountry && typeof shiftRelations === 'function') {
+    shiftRelations(targetCountry, boost, (isNonState ? 'Intelligence transfer' : 'Prisoner repatriation') + ' (' + prisoner.tierLabel + ')');
   }
 
-  addLog('REPATRIATED: ' + getPrisonerDisplayName(prisoner) + ' returned to ' + prisoner.agencyCountry + '. Relations +' + boost + '%.', 'log-info');
+  var displayName = getPrisonerDisplayName(prisoner);
+  var actionVerb = isNonState ? 'transferred to' : 'repatriated to';
+
+  addLog((isNonState ? 'TRANSFER: ' : 'REPATRIATED: ') + displayName + ' ' + actionVerb + ' ' + targetCountry + '. Relations +' + boost + '%.', 'log-info');
 
   pushFeedItem({
     id: uid('FI'),
     type: 'VIGIL_ALERT',
     severity: 'ELEVATED',
-    header: 'PRISONER REPATRIATED: ' + getPrisonerDisplayName(prisoner),
-    body: prisoner.tierLabel + ' from ' + prisoner.agencyLabel + ' repatriated to ' +
-      prisoner.agencyCountry + '. Diplomatic gesture — relations improved by ' + boost + '%. ' +
+    header: (isNonState ? 'PRISONER TRANSFERRED: ' : 'PRISONER REPATRIATED: ') + displayName,
+    body: prisoner.tierLabel + ' from ' + prisoner.agencyLabel + ' ' + actionVerb + ' ' +
+      targetCountry + '. ' + (isNonState ? 'Intelligence sharing gesture' : 'Diplomatic gesture') +
+      ' — relations improved by ' + boost + '%. ' +
       'Total intelligence yielded during detention: ' + Math.round(prisoner.interrogation.totalIntelYielded) + ' INTEL.',
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,

@@ -106,22 +106,60 @@
   window.confirmRepatriate = function(id) {
     var p = getPrisoner(id);
     if (!p) return;
-    showModal('CONFIRM REPATRIATION',
-      '<div class="response-select-instruction">' +
-        'Repatriate <strong>' + getPrisonerDisplayName(p) + '</strong> (' + p.tierLabel + ') to ' + p.agencyCountry + '?<br><br>' +
-        'This will end interrogation and return the prisoner in exchange for a diplomatic relations improvement ' +
-        'with ' + p.agencyCountry + '.<br><br>' +
-        'Total intelligence yielded: ' + Math.round(p.interrogation.totalIntelYielded) + ' INTEL.' +
-      '</div>',
-      { pause: false, actions: [
-        { label: 'REPATRIATE', onclick: "executeRepatriate('" + id + "')", primary: true },
+    var svc = getServiceById(p.agency);
+    var isNonState = svc && svc.type === 'NON_STATE';
+
+    if (isNonState) {
+      // Non-state: show enemy country selection
+      var enemies = svc.enemies || [];
+      if (enemies.length === 0) return;
+      var body = '<div class="response-select-instruction">' +
+        'Transfer <strong>' + getPrisonerDisplayName(p) + '</strong> (' + p.tierLabel + ', ' + esc(svc.shortLabel) + ') to an allied intelligence service.<br><br>' +
+        'Select a country to receive the prisoner and interrogation intelligence. Relations with that country will improve.' +
+      '</div>';
+      body += '<div class="response-select-grid">';
+      for (var ei = 0; ei < enemies.length; ei++) {
+        var country = enemies[ei];
+        var rel = typeof getRelations === 'function' ? getRelations(country) : null;
+        var relPct = rel !== null ? Math.round(rel) + '%' : '—';
+        body += '<div class="response-card" onclick="executeTransfer(\'' + esc(id) + '\',\'' + esc(country) + '\')">' +
+          '<div class="response-card-header">' +
+            '<span class="response-card-name">' + esc(country) + '</span>' +
+            '<span class="response-card-short">RELATIONS: ' + relPct + '</span>' +
+          '</div>' +
+          '<div class="response-card-desc">Transfer prisoner to ' + esc(country) + '\'s intelligence service for exploitation.</div>' +
+        '</div>';
+      }
+      body += '</div>';
+      showModal('TRANSFER PRISONER', body, { pause: false, wide: true, actions: [
         { label: 'CANCEL', onclick: 'hideModal()', primary: false },
       ]});
+    } else {
+      // State agency: standard repatriation
+      showModal('CONFIRM REPATRIATION',
+        '<div class="response-select-instruction">' +
+          'Repatriate <strong>' + getPrisonerDisplayName(p) + '</strong> (' + p.tierLabel + ') to ' + p.agencyCountry + '?<br><br>' +
+          'This will end interrogation and return the prisoner in exchange for a diplomatic relations improvement ' +
+          'with ' + p.agencyCountry + '.<br><br>' +
+          'Total intelligence yielded: ' + Math.round(p.interrogation.totalIntelYielded) + ' INTEL.' +
+        '</div>',
+        { pause: false, actions: [
+          { label: 'REPATRIATE', onclick: "executeRepatriate('" + id + "')", primary: true },
+          { label: 'CANCEL', onclick: 'hideModal()', primary: false },
+        ]});
+    }
   };
 
   window.executeRepatriate = function(id) {
     hideModal();
     repatriatePrisoner(id);
+    renderPrisonerList();
+    renderPrisonerDetail(id);
+  };
+
+  window.executeTransfer = function(id, country) {
+    hideModal();
+    repatriatePrisoner(id, country);
     renderPrisonerList();
     renderPrisonerDetail(id);
   };
@@ -267,13 +305,12 @@
     html += '</div>';
 
     // Actions
-    if (!p.repatriated && !p.interrogation.driedUp) {
+    if (!p.repatriated) {
+      var _svc = getServiceById(p.agency);
+      var _isNonState = _svc && _svc.type === 'NON_STATE';
+      var btnLabel = _isNonState ? 'TRANSFER TO ALLIED SERVICE' : ('REPATRIATE TO ' + esc(p.agencyCountry).toUpperCase());
       html += '<div class="ill-detail-section">';
-      html += '<button class="ill-repatriate-btn" onclick="confirmRepatriate(\'' + p.id + '\')">REPATRIATE TO ' + esc(p.agencyCountry).toUpperCase() + '</button>';
-      html += '</div>';
-    } else if (!p.repatriated && p.interrogation.driedUp) {
-      html += '<div class="ill-detail-section">';
-      html += '<button class="ill-repatriate-btn" onclick="confirmRepatriate(\'' + p.id + '\')">REPATRIATE TO ' + esc(p.agencyCountry).toUpperCase() + '</button>';
+      html += '<button class="ill-repatriate-btn" onclick="confirmRepatriate(\'' + p.id + '\')">' + btnLabel + '</button>';
       html += '</div>';
     }
 

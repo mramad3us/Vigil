@@ -12,9 +12,28 @@ function showModal(title, bodyHtml, options) {
   var bodyEl = $('modal-body');
 
   titleEl.textContent = title;
-  bodyEl.innerHTML = bodyHtml;
+
+  // Render actions as footer buttons appended after body content
+  var footerHtml = '';
+  if (options && options.actions && options.actions.length > 0) {
+    footerHtml = '<div class="modal-footer">';
+    for (var ai = 0; ai < options.actions.length; ai++) {
+      var act = options.actions[ai];
+      var btnCls = 'modal-btn ' + (act.primary ? 'modal-btn-primary' : (act.danger ? 'modal-btn-danger' : 'modal-btn-ghost'));
+      footerHtml += '<button class="' + btnCls + '" onclick="' + act.onclick + '">' + act.label + '</button>';
+    }
+    footerHtml += '</div>';
+  }
+  bodyEl.innerHTML = bodyHtml + footerHtml;
 
   overlay.classList.remove('hidden');
+
+  // Apply wide layout if requested
+  var box = overlay.querySelector('.modal-box');
+  if (box) {
+    if (options && options.wide) box.classList.add('modal-wide');
+    else box.classList.remove('modal-wide');
+  }
 
   // Auto-pause on modal if requested — store speed to restore later
   if (options && options.pause) {
