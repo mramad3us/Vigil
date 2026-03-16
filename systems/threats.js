@@ -89,7 +89,7 @@ function buildThreatIntelFields(threatType, location, orgName, targetInfo, spons
     };
 
     // Parse tagged prefixes from intel values
-    var taggedKeys = { CELL_STRUCTURE: '_cellType', PROGRAM_TYPE: '_programType', ASSET_CONDITION: '_assetStatus', ACTIVITY_TYPE: '_activityType' };
+    var taggedKeys = { CELL_STRUCTURE: '_cellType', PROGRAM_TYPE: '_programType', ASSET_CONDITION: '_assetStatus', ACTIVITY_TYPE: '_activityType', GUARD_FORCE: '_guardLevel' };
     if (taggedKeys[def.key] && value.indexOf('|') > 0 && value.indexOf('|') < 12) {
       var pipeIdx = value.indexOf('|');
       var tag = value.substring(0, pipeIdx);
@@ -819,6 +819,24 @@ function approveMoveThreatToOps(threatId) {
     }
   }
 
+  // HVT_TARGET: require GUARD_FORCE intel before allowing move to ops
+  if (threat.type === 'HVT_TARGET') {
+    var guardField = null;
+    for (var gfi = 0; gfi < threat.intelFields.length; gfi++) {
+      if (threat.intelFields[gfi].key === 'GUARD_FORCE') { guardField = threat.intelFields[gfi]; break; }
+    }
+    if (guardField && !guardField.revealed) {
+      dismissUrgentAlert();
+      showModal('INTEL REQUIRED', '<div class="response-select-instruction" style="margin-bottom:0;">' +
+        'Cannot transition <strong>' + threat.orgName + '</strong> to Operations.<br><br>' +
+        'Guard force assessment has not been completed. Vigil requires this field to determine ' +
+        'whether a covert snatch operation is viable or if a kinetic strike is the only option.<br><br>' +
+        'Continue intelligence collection to reveal <strong>GUARD FORCE &amp; SECURITY DETAIL</strong> before approving direct action.</div>',
+        { pause: false });
+      return;
+    }
+  }
+
   dismissUrgentAlert();
   showResponseSelectionModal(threat);
 }
@@ -914,7 +932,25 @@ function renderResponseCard(otId, threatId, isDomestic) {
   var successCls = ot.baseSuccessRate >= 75 ? 'high' : ot.baseSuccessRate >= 60 ? 'med' : 'low';
   var execLabel = ot.execHoursRange[0] + '-' + ot.execHoursRange[1] + 'h';
 
-  var html = '<div class="response-card" onclick="confirmResponseType(\'' + threatId + '\',\'' + otId + '\')">' +
+  // Gate COVERT_SNATCH: disabled when GUARD_FORCE is revealed as HEAVY
+  var gatedOut = false;
+  var gatedReason = '';
+  if (otId === 'COVERT_SNATCH') {
+    var threat = getThreat(threatId);
+    if (threat && threat.intelFields) {
+      for (var gf = 0; gf < threat.intelFields.length; gf++) {
+        var f = threat.intelFields[gf];
+        if (f.key === 'GUARD_FORCE' && f.revealed && f._guardLevel === 'HEAVY') {
+          gatedOut = true;
+          gatedReason = 'Security detail too heavy for covert snatch — target is in a fortified compound with rotating guards.';
+          break;
+        }
+      }
+    }
+  }
+
+  var html = '<div class="response-card' + (gatedOut ? ' response-card-disabled' : '') + '"' +
+    (gatedOut ? '' : ' onclick="confirmResponseType(\'' + threatId + '\',\'' + otId + '\')"') + '>' +
     '<div class="response-card-header">' +
       '<span class="response-card-name">' + ot.label + '</span>' +
       '<span class="response-card-short">' + ot.shortLabel + '</span>' +
@@ -938,6 +974,9 @@ function renderResponseCard(otId, threatId, isDomestic) {
   }
   if (ot.illegalDomestic && isDomestic) {
     html += '<div class="response-card-warning">ILLEGAL ON US SOIL</div>';
+  }
+  if (gatedOut) {
+    html += '<div class="response-card-warning" style="color:var(--text-dim)">' + gatedReason + '</div>';
   }
   html += '</div>';
   return html;

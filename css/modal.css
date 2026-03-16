@@ -316,6 +316,12 @@
   box-shadow: 0 0 12px rgba(var(--accent-rgb, 56, 189, 248), 0.08);
 }
 
+.response-card-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .response-card-header {
   display: flex;
   align-items: center;

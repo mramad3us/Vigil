@@ -173,10 +173,10 @@ var INTEL_VALUE_POOLS = {
     'Residential compound, high walls. Interior courtyard visible from overhead.',
   ],
   GUARD_FORCE: [
-    '8-12 armed personnel observed during daylight rotations.',
-    '4-6 guards, light weapons. No heavy arms observed.',
-    '15-20 personnel, rotating shifts. At least 2 crew-served weapons.',
-    'Guard force indeterminate — compound shows limited external security.',
+    'HEAVY|8-12 armed personnel observed during daylight rotations.',
+    'LIGHT|4-6 guards, light weapons. No heavy arms observed.',
+    'HEAVY|15-20 personnel, rotating shifts. At least 2 crew-served weapons.',
+    'LIGHT|Guard force indeterminate — compound shows limited external security.',
   ],
   INGRESS_ROUTES: [
     'Primary: helo insertion LZ 2km south, approach through wadi. Alternate: vehicle via Route 7.',
