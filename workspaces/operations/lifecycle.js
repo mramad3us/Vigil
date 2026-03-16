@@ -354,6 +354,10 @@
     op.fillVars = buildOpFillVars(op, assets);
 
     addLog('OP ' + op.codename + ': Option "' + option.label + '" approved.' + (op.deviatedFromVigil ? ' (DEVIATED FROM VIGIL)' : ''), 'log-decision');
+
+    // Immediately transition to transit — don't wait for next tick
+    transitionToTransit(op);
+    if (typeof renderWorkspace === 'function') renderWorkspace();
   };
 
   // --- Player Action: Cancel Operation ---

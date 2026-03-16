@@ -403,9 +403,9 @@ var THREAT_INTEL_FIELDS = {
     { key: 'RESIDENCE',           label: 'Residence & Known Addresses',    difficulty: 'EASY',      source: 'SIGINT' },
     { key: 'MOVEMENT_PATTERNS',   label: 'Pattern of Life',                difficulty: 'MEDIUM',    source: 'ISR' },
     { key: 'PERSONAL_SECURITY',   label: 'Personal Security Posture',      difficulty: 'MEDIUM',    source: 'ISR' },
-    { key: 'LEGAL_AUTHORITY',     label: 'Legal Authority Assessment',     difficulty: 'MEDIUM',    source: 'HUMINT' },
+    { key: 'ESCAPE_ROUTES',       label: 'Escape Routes & Bolt Holes',     difficulty: 'HARD',      source: 'IMAGERY' },
     { key: 'ISOLATION_WINDOWS',   label: 'Isolation Windows',              difficulty: 'HARD',      source: 'ISR' },
-    { key: 'NETWORK_MAPPING',     label: 'Target Network & Associates',    difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'COLLATERAL_RISK',     label: 'Collateral Risk Assessment',     difficulty: 'HARD',      source: 'ISR' },
     { key: 'COUNTERSURVEILLANCE', label: 'Countersurveillance Awareness',  difficulty: 'VERY_HARD', source: 'HUMINT' },
   ],
   DOMESTIC_CAPTURE_TARGET: [

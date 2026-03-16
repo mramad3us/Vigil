@@ -405,6 +405,9 @@ function approveMigration(theaterId) {
     addLog('DEFCON: Migration approved for ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + '. ' + migratedCount + ' asset(s) relocating.', 'log-info');
   }
   theater.pendingMigration = null;
+
+  // Immediate re-render so the UI reflects the migration
+  if (typeof renderWorkspace === 'function') renderWorkspace();
 }
 
 // Toggle an asset's selection in the migration proposal
