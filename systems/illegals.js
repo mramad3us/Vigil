@@ -423,16 +423,33 @@ function buildIllegalIntelFields(threatType, location, orgName, service, tier) {
 //  PRISONER CREATION PIPELINE
 // ===================================================================
 
+// Extract just the person's name from an intel value string.
+// Handles formats like:
+//   "Ahmed Tahan — taxi driver based in Seattle. Cover legend..."
+//   "True identity confirmed: Ahmed Tahan — a Afghanistan national..."
+//   "True identity: Major Dmitri Kozlov, SVR (Foreign Intelligence Service)..."
+function extractNameFromIntel(val) {
+  if (!val) return val;
+  // Strip "True identity confirmed: " or "True identity: " prefix
+  var s = val.replace(/^True identity(?:\s+confirmed)?:\s*/i, '');
+  // Take everything before " — " or ", " (agency/description separator)
+  var dash = s.indexOf(' — ');
+  var comma = s.indexOf(', ');
+  if (dash > 0 && (comma < 0 || dash < comma)) return s.substring(0, dash).trim();
+  if (comma > 0) return s.substring(0, comma).trim();
+  return s.split('.')[0].trim();
+}
+
 function createPrisonerFromThreat(threat, sourceOpId) {
   var site = assignDetentionSite(threat.domestic, threat.agentTier);
 
-  // Find cover identity and real identity from intel fields
+  // Find cover identity and real identity from intel fields — extract just the name
   var coverName = threat.orgName;
   var realName = null;
   for (var i = 0; i < threat.intelFields.length; i++) {
     var f = threat.intelFields[i];
-    if (f.key === 'COVER_IDENTITY' && f.revealed) coverName = f.value;
-    if (f.key === 'REAL_IDENTITY' && f.revealed) realName = f.value;
+    if (f.key === 'COVER_IDENTITY' && f.revealed) coverName = extractNameFromIntel(f.value);
+    if (f.key === 'REAL_IDENTITY' && f.revealed) realName = extractNameFromIntel(f.value);
   }
 
   var tierDef = threat.agentTier ? AGENT_TIERS[threat.agentTier] : AGENT_TIERS.RECRUITED_AGENT;
