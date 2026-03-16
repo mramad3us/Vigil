@@ -624,19 +624,19 @@ function repatriatePrisoner(prisonerId, targetCountry) {
   hook('game:start', function() {
     initAgencies();
     // Initial domestic illegal (0-1)
-    if (Math.random() < 0.4) {
+    if (Math.random() < 0.2) {
       spawnDomesticIllegal();
     }
   }, 6); // After other systems
 
   // --- Auto-spawn illegals ---
   hook('tick:day', function() {
-    // Domestic: ~15% every 5 days
-    if (V.time.day % 5 === 0 && Math.random() < 0.15) {
+    // Domestic: ~8% every 7 days
+    if (V.time.day % 7 === 0 && Math.random() < 0.08) {
       spawnDomesticIllegal();
     }
-    // Foreign: ~10% every 5 days
-    if (V.time.day % 5 === 2 && Math.random() < 0.10) {
+    // Foreign: ~5% every 7 days
+    if (V.time.day % 7 === 3 && Math.random() < 0.05) {
       spawnForeignIllegal();
     }
   }, 5);

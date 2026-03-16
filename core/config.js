@@ -410,13 +410,13 @@ var THREAT_INTEL_FIELDS = {
   ],
   DOMESTIC_CAPTURE_TARGET: [
     { key: 'SUBJECT_ID',          label: 'Subject Identification',         difficulty: 'EASY',      source: 'HUMINT' },
-    { key: 'CELL_LOCATION',       label: 'Subject Location',               difficulty: 'EASY',      source: 'SIGINT' },
-    { key: 'MOVEMENT_PATTERNS',   label: 'Pattern of Life',                difficulty: 'MEDIUM',    source: 'ISR' },
-    { key: 'GUARD_FORCE',         label: 'Security & Armed Assessment',    difficulty: 'MEDIUM',    source: 'ISR' },
-    { key: 'LEGAL_AUTHORITY',     label: 'Legal Authority & Warrants',     difficulty: 'MEDIUM',    source: 'HUMINT' },
-    { key: 'ESCAPE_ROUTES',       label: 'Escape Routes & Safe Houses',    difficulty: 'HARD',      source: 'IMAGERY' },
-    { key: 'NETWORK_MAPPING',     label: 'Associate Network',              difficulty: 'HARD',      source: 'SIGINT' },
-    { key: 'CONTINGENCY_PLANNING',label: 'Apprehension Plan',              difficulty: 'VERY_HARD', source: 'HUMINT' },
+    { key: 'FUGITIVE_LOCATION',   label: 'Last Known Location',            difficulty: 'EASY',      source: 'SIGINT' },
+    { key: 'FUGITIVE_MOVEMENTS',  label: 'Pattern of Life',                difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'FUGITIVE_ARMED',      label: 'Armed & Dangerous Assessment',   difficulty: 'MEDIUM',    source: 'ISR' },
+    { key: 'FUGITIVE_ASSOCIATES', label: 'Known Associates',               difficulty: 'HARD',      source: 'SIGINT' },
+    { key: 'ESCAPE_ROUTES',       label: 'Escape Routes & Bolt Holes',     difficulty: 'HARD',      source: 'IMAGERY' },
+    { key: 'FUGITIVE_BACKGROUND', label: 'Criminal & Personal History',    difficulty: 'HARD',      source: 'HUMINT' },
+    { key: 'FUGITIVE_APPREHENSION', label: 'Apprehension Assessment',      difficulty: 'VERY_HARD', source: 'HUMINT' },
   ],
   // === DOMESTIC THREAT TYPES ===
   DOMESTIC_EXTREMISM: [

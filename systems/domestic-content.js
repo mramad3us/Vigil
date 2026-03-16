@@ -1162,7 +1162,63 @@ var DOMESTIC_INTEL_VALUE_POOLS = {
     'Target has a go-bag at secondary residence in {city}. Vigil monitoring confirms subject rehearsed evacuation route twice this month. Foreign passport detected.',
   ],
 
-  // --- Capture / Fugitive ---
+  // --- High-Priority Fugitive ---
+
+  FUGITIVE_LOCATION: [
+    'Vigil geolocation analysis places subject in {city}. Cell phone metadata indicates the subject has been stationary at a residential address for 72+ hours. Address is a rental under a known alias.',
+    'Subject last confirmed in {city} via Vigil facial recognition at a convenience store 48 hours ago. Mobile device data suggests the subject is sheltering within a 3-block radius of the sighting.',
+    'Vigil CCTV network flagged subject at a motel on the outskirts of {city}. Vehicle registered to a third party is parked outside. Subject appears to be moving every 2-3 days.',
+    'Last known position: {city}. Subject is staying with a family member at a residential address. Vigil utility records confirm increased occupancy. No indication the subject is aware of surveillance.',
+    'Subject has been traced to a transient housing situation in {city}. Vigil monitoring of public WiFi access points placed the subject at 3 different locations over the past week.',
+    'Vigil license plate reader network tracked subject\'s vehicle to a parking structure in downtown {city}. Vehicle has not moved in 5 days. Subject may have switched to public transit.',
+  ],
+
+  FUGITIVE_MOVEMENTS: [
+    'Subject maintains a low-profile routine in {city}. Leaves residence after dark, returns before dawn. Avoids commercial areas with CCTV coverage. Purchases made with cash only.',
+    'Pattern-of-life analysis shows subject in {city} keeping irregular hours. Visits a specific laundromat every 3 days and a gas station for provisions. No regular employment detected.',
+    'Subject moves between 2-3 locations in the {city} area on a roughly 48-hour rotation. Counter-surveillance behavior observed: frequent U-turns, prolonged stops, and route variation.',
+    'Vigil tracking shows subject makes weekly trips to the {city} waterfront area. Possible contact with associate or dead-drop arrangement. Timing is consistent: Thursday evenings, 2100-2200 local.',
+    'Subject is mobile within {city}, using ride-share services under a false identity. Vigil has flagged the account. Movements suggest the subject is scouting for a more permanent hideout.',
+    'Behavioral analysis: subject in {city} is highly disciplined. Minimal digital footprint, cash transactions only, no social media activity. Indicates prior training or criminal experience.',
+  ],
+
+  FUGITIVE_ARMED: [
+    'ATF records indicate subject legally purchased 2 handguns and a shotgun prior to going underground. Weapons are unaccounted for. Vigil assessment: ARMED AND DANGEROUS.',
+    'Subject has no known firearms purchases, but prior criminal associates are known weapons traffickers. Vigil assessment: POSSIBLY ARMED. Apprehension teams should exercise caution.',
+    'Subject has documented military training and marksmanship qualifications. Prior service records indicate familiarity with rifles and sidearms. Vigil assessment: ARMED AND TRAINED.',
+    'No firearm purchases on record. Subject has no known military or law enforcement background. However, a felony assault conviction suggests willingness to use violence. Vigil assessment: POTENTIALLY DANGEROUS.',
+    'Subject previously arrested with a concealed firearm. Arrest record indicates a .40 caliber handgun and 3 loaded magazines. Current armed status: PRESUMED ARMED based on prior behavior.',
+    'Vigil intercepted a dark web purchase of a handgun shipped to a {city} address associated with the subject. Delivery confirmed 10 days ago. Subject is armed.',
+  ],
+
+  FUGITIVE_ASSOCIATES: [
+    'Social network analysis identifies 3 key associates in the {city} area providing support. One is a former cellmate, one is a family member, one is a romantic partner. All are under Vigil surveillance.',
+    'Subject is receiving assistance from 2 individuals in {city}: a former coworker who provides housing and a cousin who provides transportation. Phone records confirm regular contact.',
+    'Vigil monitoring identifies 4 associates. Two in {city} providing direct support. Two out-of-state contacts may be arranging onward travel. All communications use prepaid phones.',
+    'Subject appears to be operating alone in {city}. No associate contact detected in 14 days. Financial analysis shows cash withdrawals from a joint account held with an ex-spouse.',
+    'Associate network is small but disciplined. One individual in {city} provides lodging; another provides a vehicle on a rotating basis. A third contact, identity unknown, appears to be the subject\'s handler or advisor.',
+    'Vigil network mapping reveals subject communicating with 5 individuals via encrypted messaging. One associate has a commercial pilot\'s license — potential flight risk.',
+  ],
+
+  FUGITIVE_BACKGROUND: [
+    'Subject has extensive criminal history: 2 prior federal convictions (armed robbery, drug trafficking), 4 state-level arrests. Escaped federal custody 47 days ago during a hospital transfer.',
+    'Background investigation reveals subject is a former military contractor with combat deployments. Dishonorable discharge for assault. Warrants stem from weapons trafficking and conspiracy charges.',
+    'Subject is a former law enforcement officer dismissed for corruption. Intimate knowledge of police tactics and procedures. Multiple outstanding warrants across 3 states.',
+    'Criminal history includes organized crime ties — subject was a mid-level enforcer for a {city}-based operation. Fled after cooperating witnesses were identified. Considered a risk to informants.',
+    'Subject has no violent criminal history — warrants relate to massive financial fraud and flight from prosecution. However, Vigil behavioral analysis indicates desperation and erratic decision-making.',
+    'Background: subject was a key figure in a domestic extremist network. Went underground after federal indictment. Prior military training and survival skills make prolonged evasion possible.',
+  ],
+
+  FUGITIVE_APPREHENSION: [
+    'Vigil apprehension assessment: subject is a creature of habit despite evasion training. The laundromat and gas station visits in {city} are the most reliable intercept points. Recommend plainclothes approach.',
+    'Assessment: subject\'s motel pattern in {city} creates a predictable 48-hour window. Recommend early-morning entry when the subject is most likely asleep. Flash-bang deployment advised given armed status.',
+    'Apprehension window: subject\'s weekly waterfront visit in {city} provides the cleanest intercept opportunity. Open sightlines, limited civilian exposure, and 2 natural containment points.',
+    'Vigil recommends traffic-stop apprehension on a known transit route in {city}. Subject\'s vehicle is identified. Unmarked vehicles can box the subject at the Route 9 interchange.',
+    'Assessment: subject is expecting law enforcement action and has demonstrated counter-surveillance awareness. Recommend surveillance team maintain distance. Apprehend during a routine activity — grocery run or fueling stop — when guard is lowest.',
+    'Fugitive is sheltering with a cooperative family member in {city}. Vigil recommends a knock-and-announce approach with tactical backup staged one block away. Low risk of flight given residential setting.',
+  ],
+
+  // --- Domestic HVT ---
 
   HVT_IDENTITY: [
     'Target positively identified by Vigil facial recognition network: {orgName}. Subject is a priority 1 target on the disposition matrix. Current location: {city}.',
