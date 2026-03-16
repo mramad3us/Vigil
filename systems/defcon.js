@@ -481,7 +481,9 @@ function recallRelocatedAssets(theaterId) {
     var asset = V.assets[i];
     if (!asset.originalHomeBaseId) continue;
 
-    // Skip assets that are deployed on an active operation
+    // Skip assets assigned to an active operation or collection mission —
+    // they finish their mission first, then auto-recall via arriveAsset()
+    if (asset.assignedOpId || asset.assignedThreatId) continue;
     if (asset.status === 'DEPLOYED' || asset.status === 'COLLECTING') continue;
 
     // Only recall assets currently in this theater (stationed or in-transit to it)
