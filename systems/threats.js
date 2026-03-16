@@ -154,7 +154,7 @@ function spawnThreat(theaterId, forcedTypeId) {
 
   // Maritime spawn for eligible threat types
   var isMaritime = false;
-  if (type.canBeMaritime && typeof MARITIME_LOCATIONS !== 'undefined' && Math.random() < 0.45) {
+  if (type.canBeMaritime && typeof MARITIME_LOCATIONS !== 'undefined' && Math.random() < 0.08) {
     isMaritime = true;
     var maritimeLocs = MARITIME_LOCATIONS;
     if (theaterId) {
@@ -226,7 +226,7 @@ function spawnThreat(theaterId, forcedTypeId) {
     spawnedAt: V.time.totalMinutes,
     expiresAt: V.time.totalMinutes + expiresIn,
     urgent: isUrgent,
-    maritime: isMaritime || (loc.maritime && type.canBeMaritime) || false,
+    maritime: isMaritime,
     sponsorCountry: sponsorCountry,
 
     // Target info (revealed when TARGET_INTENT field is collected)
