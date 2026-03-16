@@ -787,6 +787,17 @@ function repatriatePrisoner(prisonerId) {
   hook('game:load', function() {
     if (!V.prisoners) V.prisoners = [];
     if (!V.agencies || Object.keys(V.agencies).length === 0) initAgencies();
+
+    // Migrate old saves: re-extract prisoner names from intel field prose
+    for (var pi = 0; pi < V.prisoners.length; pi++) {
+      var p = V.prisoners[pi];
+      if (p.name && p.name.indexOf(' — ') > 0) {
+        p.name = extractNameFromIntel(p.name);
+      }
+      if (p.realName && (p.realName.indexOf(' — ') > 0 || p.realName.indexOf('True identity') === 0)) {
+        p.realName = extractNameFromIntel(p.realName);
+      }
+    }
   }, 1);
 
 })();
