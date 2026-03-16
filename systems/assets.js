@@ -16,6 +16,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 3, IMAGERY: 3, SIGINT: 1 },
     designation: 'Naval Special Warfare Development Group',
     personnel: 300,
+    fieldUnit: true, teamSize: 16, maxTeams: 8,
     readiness: 'TIER_1',
     platform: 'Ground/Maritime',
     vehicles: ['MH-60M Black Hawk', 'MH-47G Chinook', 'RHIB assault craft', 'SDV Mk 8 Mod 1'],
@@ -30,6 +31,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 3, IMAGERY: 3, SIGINT: 1 },
     designation: '1st Special Forces Operational Detachment-Delta',
     personnel: 250,
+    fieldUnit: true, teamSize: 16, maxTeams: 6,
     readiness: 'TIER_1',
     platform: 'Ground/Airborne',
     vehicles: ['MH-6 Little Bird', 'Ground Mobility Vehicle', 'Pandur armored car', 'civilian cover vehicles'],
@@ -44,6 +46,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 2, IMAGERY: 2, SIGINT: 2 },
     designation: 'Joint Special Operations Command Task Force',
     personnel: 180,
+    fieldUnit: true, teamSize: 12, maxTeams: 4,
     readiness: 'TIER_1',
     platform: 'Multi-domain',
     vehicles: ['CV-22B Osprey', 'MH-60L DAP', 'technical vehicles'],
@@ -58,6 +61,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 1, IMAGERY: 2 },
     designation: '75th Ranger Regiment, U.S. Army',
     personnel: 3600,
+    fieldUnit: true, teamSize: 40, maxTeams: 18,
     readiness: 'TIER_2',
     platform: 'Light Infantry/Airborne',
     vehicles: ['Stryker ICV', 'JLTV', 'GMV 1.1', 'AH-64E Apache escort'],
@@ -72,6 +76,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 4, IMAGERY: 1, SIGINT: 1 },
     designation: 'U.S. Army Special Forces (Green Berets)',
     personnel: 12,
+    fieldUnit: true, teamSize: 12, maxTeams: 1,
     readiness: 'TIER_2',
     platform: 'Unconventional Warfare',
     vehicles: ['GMV 1.1 Ground Mobility Vehicle', 'Non-Standard Tactical Vehicles'],
@@ -86,6 +91,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 2, IMAGERY: 2 },
     designation: 'U.S. Navy SEAL Team',
     personnel: 300,
+    fieldUnit: true, teamSize: 16, maxTeams: 6,
     readiness: 'TIER_2',
     platform: 'Maritime/Land Special Operations',
     vehicles: ['RHIB assault boats', 'SEAL Delivery Vehicle', 'Combat Rubber Raiding Craft'],
@@ -100,6 +106,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 2, IMAGERY: 2 },
     designation: 'Marine Raider Regiment, MARSOC',
     personnel: 900,
+    fieldUnit: true, teamSize: 14, maxTeams: 8,
     readiness: 'TIER_2',
     platform: 'Special Operations',
     vehicles: ['MRZR tactical vehicles', 'Polaris DAGOR', 'assault boats'],
@@ -114,6 +121,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { IMAGERY: 2, ISR: 1 },
     designation: '160th Special Operations Aviation Regiment (Airborne)',
     personnel: 300,
+    fieldUnit: true, teamSize: 16, maxTeams: 6,
     readiness: 'TIER_1',
     platform: 'Special Operations Aviation',
     vehicles: ['6x MH-60M Black Hawk', '4x MH-47G Chinook', '4x AH-6M Little Bird', '2x MH-6M Little Bird'],
@@ -130,6 +138,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { IMAGERY: 1, ISR: 1 },
     designation: 'Marine Expeditionary Unit (Special Operations Capable)',
     personnel: 2200,
+    fieldUnit: true, teamSize: 40, maxTeams: 12,
     readiness: 'FULL',
     platform: 'Amphibious Assault',
     vehicles: ['3x LHD/LPD amphibious ships', 'AAV-7A1 amphibious assault vehicles', 'LAV-25 light armored vehicles', 'AH-1Z Viper attack helicopters', 'MV-22B Osprey tiltrotors', 'CH-53K King Stallion heavy lift', 'F-35B Lightning II (STOVL)'],
@@ -144,6 +153,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 3, IMAGERY: 3, ISR: 1 },
     designation: '1st Force Reconnaissance Company',
     personnel: 120,
+    fieldUnit: true, teamSize: 8, maxTeams: 6,
     readiness: 'TIER_2',
     platform: 'Deep Reconnaissance',
     vehicles: ['Combat Rubber Raiding Craft', 'Zodiac F-470', 'kayaks'],
@@ -160,6 +170,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { IMAGERY: 1 },
     designation: 'U.S. Army Infantry Brigade Combat Team',
     personnel: 4400,
+    fieldUnit: true, teamSize: 40, maxTeams: 20,
     readiness: 'FULL',
     platform: 'Mechanized Infantry',
     vehicles: ['Stryker ICV (96)', 'M2A4 Bradley IFV (44)', 'M1A2 SEPv3 Abrams MBT (14)', 'M109A7 Paladin SPH (18)', 'JLTV (120)', 'AH-64E Apache (24)'],
@@ -174,6 +185,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { IMAGERY: 1 },
     designation: 'U.S. Army Airborne Brigade Combat Team',
     personnel: 4900,
+    fieldUnit: true, teamSize: 40, maxTeams: 22,
     readiness: 'FULL',
     platform: 'Airborne Infantry',
     vehicles: ['JLTV (80)', 'M119A3 howitzer (18)', 'Stryker ATGM variants', 'RQ-7B Shadow UAS'],
@@ -604,6 +616,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 5, IMAGERY: 2, SIGINT: 1 },
     designation: 'Special Activities Division / Special Operations Group',
     personnel: 40,
+    fieldUnit: true, teamSize: 4, maxTeams: 4,
     readiness: 'TIER_1',
     platform: 'Covert Operations',
     vehicles: ['Civilian cover vehicles', 'leased rotary-wing', 'maritime insertion craft'],
@@ -618,6 +631,7 @@ var ASSET_TEMPLATES = [
     collectionProfile: { HUMINT: 5, IMAGERY: 2, SIGINT: 1 },
     designation: 'Special Activities Division / Special Operations Group',
     personnel: 40,
+    fieldUnit: true, teamSize: 5, maxTeams: 4,
     readiness: 'TIER_1',
     platform: 'Covert Operations',
     vehicles: ['Armored SUVs (non-attributable)', 'civilian rotary-wing', 'technical vehicles'],
@@ -1350,6 +1364,12 @@ var ASSET_CATEGORIES = {
             isMobileBase: tpl.type.indexOf('CSG') === 0,
             // Naval area of effectiveness (km from station point to target)
             effectiveRangeKm: tpl.effectiveRangeKm || 0,
+            // Team readiness (field units only)
+            fieldUnit: tpl.fieldUnit || false,
+            teamSize: tpl.teamSize || 0,
+            maxTeams: tpl.maxTeams || 0,
+            availableTeams: tpl.maxTeams || 0,
+            recoveryQueue: [],
           });
         }
       }
@@ -1396,6 +1416,69 @@ var ASSET_CATEGORIES = {
     }
   }, 5); // Run early in tick cycle
 
+  // --- Team Strain on Operation Resolution ---
+
+  hook('operation:resolved', function(data) {
+    if (!data || !data.operation) return;
+    var op = data.operation;
+    if (typeof STRAIN_OP_TYPES === 'undefined') return;
+    if (STRAIN_OP_TYPES.indexOf(op.operationType) < 0) return;
+
+    var success = op.status === 'SUCCESS';
+    var teamsLost = success ? 1 : 2;
+    var recoveryDays = success ? TEAM_RECOVERY.SUCCESS : TEAM_RECOVERY.FAILURE;
+
+    if (!op.assignedAssetIds) return;
+    for (var i = 0; i < op.assignedAssetIds.length; i++) {
+      var asset = getAsset(op.assignedAssetIds[i]);
+      if (!asset || !asset.fieldUnit || !asset.maxTeams) continue;
+      if (asset.availableTeams <= 0) continue;
+
+      var actualLoss = Math.min(teamsLost, asset.availableTeams);
+      asset.availableTeams -= actualLoss;
+
+      // Queue recovery entries
+      if (!asset.recoveryQueue) asset.recoveryQueue = [];
+      for (var t = 0; t < actualLoss; t++) {
+        asset.recoveryQueue.push({
+          returnDay: V.time.day + recoveryDays + t, // stagger slightly
+          reason: success ? 'REST' : 'CASUALTY',
+        });
+      }
+
+      addLog(asset.name + ': ' + actualLoss + ' team' + (actualLoss > 1 ? 's' : '') + ' stood down (' +
+        (success ? 'rest rotation' : 'casualties — refit required') + '). ' +
+        asset.availableTeams + '/' + asset.maxTeams + ' available.', 'log-warn');
+    }
+  }, 50); // After other operation:resolved hooks
+
+  // --- Team Recovery Tick (daily) ---
+
+  hook('tick:day', function() {
+    if (!V.assets) return;
+    for (var i = 0; i < V.assets.length; i++) {
+      var asset = V.assets[i];
+      if (!asset.fieldUnit || !asset.recoveryQueue || asset.recoveryQueue.length === 0) continue;
+
+      var recovered = 0;
+      var remaining = [];
+      for (var r = 0; r < asset.recoveryQueue.length; r++) {
+        if (V.time.day >= asset.recoveryQueue[r].returnDay) {
+          recovered++;
+        } else {
+          remaining.push(asset.recoveryQueue[r]);
+        }
+      }
+
+      if (recovered > 0) {
+        asset.recoveryQueue = remaining;
+        asset.availableTeams = Math.min(asset.availableTeams + recovered, asset.maxTeams);
+        addLog(asset.name + ': ' + recovered + ' team' + (recovered > 1 ? 's' : '') +
+          ' returned to duty. ' + asset.availableTeams + '/' + asset.maxTeams + ' available.', 'log-info');
+      }
+    }
+  }, 8);
+
 })();
 
 // --- Asset Helpers ---
@@ -1420,6 +1503,16 @@ function getAssetsByIds(ids) {
 function getAvailableAssets() {
   if (!V.assets) return [];
   return V.assets.filter(function(a) { return a.status === 'STATIONED'; });
+}
+
+// For kinetic ops: excludes field units with no available teams
+function getAvailableAssetsForStrain() {
+  if (!V.assets) return [];
+  return V.assets.filter(function(a) {
+    if (a.status !== 'STATIONED') return false;
+    if (a.fieldUnit && a.maxTeams > 0 && a.availableTeams <= 0) return false;
+    return true;
+  });
 }
 
 function getAvailableAssetsWithCapability(capability) {

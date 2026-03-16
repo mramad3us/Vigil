@@ -262,6 +262,7 @@
         detail = '<div class="globe-info-detail-grid">' +
           '<span class="globe-info-key">PLATFORM</span><span class="globe-info-val">' + (asset.platform || '—') + '</span>' +
           '<span class="globe-info-key">PERSONNEL</span><span class="globe-info-val">' + (asset.personnel ? asset.personnel.toLocaleString() : '—') + '</span>' +
+          (asset.fieldUnit && asset.maxTeams > 0 ? '<span class="globe-info-key">TEAMS</span><span class="globe-info-val" style="color:' + (asset.availableTeams <= 0 ? 'var(--red)' : asset.availableTeams <= Math.ceil(asset.maxTeams * 0.3) ? 'var(--amber)' : 'var(--green)') + '">' + asset.availableTeams + '/' + asset.maxTeams + ' (' + asset.teamSize + '-man)</span>' : '') +
           '<span class="globe-info-key">READINESS</span><span class="globe-info-val" style="color:' + readinessColor + '">' + (asset.readiness || 'FULL').replace('_', ' ') + '</span>' +
           '<span class="globe-info-key">HOME BASE</span><span class="globe-info-val">' + (homeBase ? homeBase.name : '—') + '</span>' +
           '<span class="globe-info-key">SPEED</span><span class="globe-info-val">' + (asset.speed > 0 ? asset.speed + ' km/h' : 'REMOTE') + '</span>' +

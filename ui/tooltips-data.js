@@ -154,6 +154,12 @@ var TIPS = {
     1: 'DEFCON 1 — COCKED PISTOL. Maximum combat readiness. All covert ops authorized. Military targets generated. Threat spawn x2.5.',
   },
 
+  // --- Team Readiness ---
+  teamReadiness: {
+    available: 'Deployable teams within this unit. Each kinetic operation consumes one team (two on failure). Teams rotate back after a rest period.',
+    strained:  'This unit has exhausted all available teams. Currently standing down for rest rotation or casualty replacement. Will return to service when teams recover.',
+  },
+
   // --- Conflict Types ---
   conflict: {
     BORDER_WAR:            'Active military conflict along a disputed border. High-intensity conventional operations.',

@@ -95,6 +95,22 @@
       V.usedCodenames = new Set(Array.isArray(V.usedCodenames) ? V.usedCodenames : []);
     }
 
+    // Migrate team readiness fields onto existing assets
+    if (V.assets) {
+      for (var ai = 0; ai < V.assets.length; ai++) {
+        var a = V.assets[ai];
+        if (a.fieldUnit === undefined) {
+          var tpl = typeof getAssetTemplate === 'function' ? getAssetTemplate(a.type) : null;
+          a.fieldUnit = tpl ? (tpl.fieldUnit || false) : false;
+          a.teamSize = tpl ? (tpl.teamSize || 0) : 0;
+          a.maxTeams = tpl ? (tpl.maxTeams || 0) : 0;
+          a.availableTeams = a.maxTeams;
+          a.recoveryQueue = [];
+        }
+        if (!a.recoveryQueue) a.recoveryQueue = [];
+      }
+    }
+
     // Resync uid counters so new IDs don't collide with loaded state
     if (typeof resyncUidCounters === 'function') resyncUidCounters();
 

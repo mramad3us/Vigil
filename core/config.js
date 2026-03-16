@@ -556,6 +556,23 @@ var THREAT_EXPIRATION = {
 // Effectiveness scale: 0 = no capability, 1 = marginal, 2-3 = decent, 4-5 = excellent.
 // Profiles are defined on each asset template in assets.js.
 
+// --- Team Readiness / Strain System ---
+// Kinetic op types that consume team availability on completion.
+// Non-kinetic ops (surveillance, investigation, cyber, diplomatic) are exempt.
+
+var STRAIN_OP_TYPES = [
+  'MILITARY_STRIKE', 'SOF_RAID', 'HOSTAGE_RESCUE', 'COUNTER_TERROR',
+  'NAVAL_INTERDICTION', 'HVT_ELIMINATION', 'HVT_CAPTURE', 'COVERT_SNATCH',
+  'TARGETED_KILLING', 'ASSET_EXTRACTION', 'DOMESTIC_HOSTAGE_RESCUE',
+  'ARREST_OPERATION', 'LAW_ENFORCEMENT', 'CAPTURE_OP',
+];
+
+// Recovery times (game-days) before a team rotates back to available.
+var TEAM_RECOVERY = {
+  SUCCESS: 3,    // Routine rest rotation after a successful kinetic op
+  FAILURE: 7,    // Casualties or wounded — longer stand-down for replacement and refit
+};
+
 // --- Theaters ---
 
 var THEATERS = {

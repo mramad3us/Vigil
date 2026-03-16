@@ -24,7 +24,10 @@ function generateVigilOptions(op) {
   // Find all available assets with relevant capabilities
   var isMaritimeOp = op.maritime || (opType && opType.maritime);
 
-  var eligible = getAvailableAssets().filter(function(a) {
+  // Use strain-aware pool for kinetic ops that consume team availability
+  var isStrainOp = typeof STRAIN_OP_TYPES !== 'undefined' && STRAIN_OP_TYPES.indexOf(op.operationType) >= 0;
+  var pool = isStrainOp && typeof getAvailableAssetsForStrain === 'function' ? getAvailableAssetsForStrain() : getAvailableAssets();
+  var eligible = pool.filter(function(a) {
     // Domestic agencies only available for domestic ops
     if (a.domesticAuthority && !op.domestic) return false;
 

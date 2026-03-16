@@ -540,9 +540,10 @@
     var cfg = _customConfig;
     var baseOption = op.options[cfg.baseOptionIdx];
 
-    // Get all available assets
-    var allAvailable = getAvailableAssets();
+    // Get all available assets (use strain-aware pool for kinetic ops)
     var opType = getOperationType(op.operationType);
+    var isStrainOp = typeof STRAIN_OP_TYPES !== 'undefined' && STRAIN_OP_TYPES.indexOf(op.operationType) >= 0;
+    var allAvailable = isStrainOp && typeof getAvailableAssetsForStrain === 'function' ? getAvailableAssetsForStrain() : getAvailableAssets();
 
     // Filter to assets with relevant capabilities
     var mustHaveAll = opType ? opType.assetMustHaveAll : null;
@@ -740,6 +741,10 @@
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">CATEGORY</span><span class="asset-detail-stat-val" style="color:' + (catInfo.color || 'var(--text)') + '">' + (catInfo.label || asset.category) + '</span></div>';
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">PLATFORM</span><span class="asset-detail-stat-val">' + (asset.platform || '—') + '</span></div>';
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">PERSONNEL</span><span class="asset-detail-stat-val">' + (asset.personnel ? asset.personnel.toLocaleString() : '—') + '</span></div>';
+    if (asset.fieldUnit && asset.maxTeams > 0) {
+      var teamColor = asset.availableTeams <= 0 ? 'var(--red)' : asset.availableTeams <= Math.ceil(asset.maxTeams * 0.3) ? 'var(--amber)' : 'var(--green)';
+      html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">TEAMS</span><span class="asset-detail-stat-val" style="color:' + teamColor + '">' + asset.availableTeams + '/' + asset.maxTeams + ' (' + asset.teamSize + '-man)</span></div>';
+    }
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">READINESS</span><span class="asset-detail-stat-val" style="color:' + readinessColor + '">' + (asset.readiness || 'FULL').replace('_', ' ') + '</span></div>';
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">HOME BASE</span><span class="asset-detail-stat-val">' + (base ? base.name : '—') + '</span></div>';
     html += '<div class="asset-detail-stat"><span class="asset-detail-stat-label">SPEED</span><span class="asset-detail-stat-val">' + (asset.speed > 0 ? asset.speed + ' km/h' : 'REMOTE') + '</span></div>';
