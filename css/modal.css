@@ -127,14 +127,14 @@
 /* --- Urgent Alert Overlay --- */
 .alert-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
   z-index: 600;
   padding: var(--sp-4);
   display: flex;
+  align-items: center;
   justify-content: center;
-  pointer-events: none;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
 }
 
 .alert-overlay.hidden {

@@ -4,6 +4,7 @@
    ============================================================ */
 
 var _modalStack = [];
+var _preModalSpeed = null;
 
 function showModal(title, bodyHtml, options) {
   var overlay = $('modal-overlay');
@@ -15,9 +16,13 @@ function showModal(title, bodyHtml, options) {
 
   overlay.classList.remove('hidden');
 
-  // Auto-pause on modal if requested
+  // Auto-pause on modal if requested — store speed to restore later
   if (options && options.pause) {
-    togglePause();
+    var currentSpeed = typeof getSpeed === 'function' ? getSpeed() : 0;
+    if (currentSpeed > 0) {
+      _preModalSpeed = currentSpeed;
+      setSpeed(0);
+    }
   }
 
   _modalStack.push({ title: title });
@@ -31,6 +36,12 @@ function hideModal() {
   var box = overlay.querySelector('.modal-box');
   if (box) box.classList.remove('modal-wide');
   _modalStack.pop();
+
+  // Restore speed if we paused for this modal
+  if (_modalStack.length === 0 && _preModalSpeed !== null) {
+    setSpeed(_preModalSpeed);
+    _preModalSpeed = null;
+  }
 }
 
 function isModalOpen() {
