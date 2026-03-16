@@ -95,6 +95,9 @@
       V.usedCodenames = new Set(Array.isArray(V.usedCodenames) ? V.usedCodenames : []);
     }
 
+    // Resync uid counters so new IDs don't collide with loaded state
+    if (typeof resyncUidCounters === 'function') resyncUidCounters();
+
     fire('game:load', V);
     addLog('Game loaded: ' + (save.label || slotId), 'log-info');
     return true;

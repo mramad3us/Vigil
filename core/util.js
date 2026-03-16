@@ -48,6 +48,31 @@ function uid(prefix) {
   return prefix + '_' + _uidCounters[prefix];
 }
 
+// Resync uid counters from existing state after a save load.
+// Scans all ID-bearing arrays to find the highest numeric suffix per prefix.
+function resyncUidCounters() {
+  var sources = [
+    V.threats, V.feed, V.assets, V.operations,
+    V.crises, V.prisoners, V.media && V.media.stories
+  ];
+  for (var i = 0; i < sources.length; i++) {
+    var arr = sources[i];
+    if (!Array.isArray(arr)) continue;
+    for (var j = 0; j < arr.length; j++) {
+      var id = arr[j] && arr[j].id;
+      if (!id || typeof id !== 'string') continue;
+      var parts = id.match(/^(.+)_(\d+)$/);
+      if (parts) {
+        var prefix = parts[1];
+        var num = parseInt(parts[2], 10);
+        if (!_uidCounters[prefix] || num > _uidCounters[prefix]) {
+          _uidCounters[prefix] = num;
+        }
+      }
+    }
+  }
+}
+
 // --- Template Engine (evolved from Faux13) ---
 
 function fillTemplate(tpl, vars) {
