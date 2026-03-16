@@ -1611,6 +1611,30 @@ function arriveAsset(asset) {
     asset.transitStartTotalMinutes = 0;
     asset.transitDurationMinutes = 0;
   }
+
+  // Auto-recall: if asset has an original station and its current theater
+  // DEFCON is back to peacetime (4/5), send it home immediately
+  if (asset.status === 'STATIONED' && asset.originalHomeBaseId) {
+    var assetTheater = typeof getAssetTheaterId === 'function' ? getAssetTheaterId(asset) : null;
+    var theaterDefcon = assetTheater && V.theaters[assetTheater] ? V.theaters[assetTheater].defcon : 5;
+    if (theaterDefcon >= 4) {
+      var origBase = getBase(asset.originalHomeBaseId);
+      if (origBase) {
+        asset.homeBaseId = asset.originalHomeBaseId;
+        asset.originalHomeBaseId = null;
+        var recallTransit = calcTransitMinutes(asset, origBase.lat, origBase.lon);
+        asset.status = 'IN_TRANSIT';
+        asset.currentBaseId = null;
+        asset.originLat = asset.currentLat;
+        asset.originLon = asset.currentLon;
+        asset.destinationLat = origBase.lat;
+        asset.destinationLon = origBase.lon;
+        asset.transitStartTotalMinutes = V.time.totalMinutes;
+        asset.transitDurationMinutes = recallTransit;
+        addLog('DEFCON: ' + asset.name + ' auto-recalled to ' + origBase.name + '.', 'log-info');
+      }
+    }
+  }
 }
 
 // --- Deploy Asset for Intel Collection on a Threat ---

@@ -90,6 +90,20 @@ function renderStatusBar() {
   var intelEl = $('sb-intel');
   if (intelEl) intelEl.textContent = V.resources.intel;
 
+  // Workload
+  var wlEl = $('sb-workload');
+  var wlBar = $('sb-workload-bar');
+  if (wlEl && typeof getWorkload === 'function') {
+    var wl = getWorkload();
+    wlEl.textContent = wl + '%';
+    if (wlBar) {
+      wlBar.style.width = wl + '%';
+      if (wl >= 100) wlBar.style.background = 'var(--red)';
+      else if (wl >= 80) wlBar.style.background = 'var(--amber)';
+      else wlBar.style.background = 'var(--green)';
+    }
+  }
+
   // Threat level
   var threatEl = $('sb-threat');
   if (threatEl) {
@@ -147,7 +161,10 @@ document.addEventListener('mousedown', function() {
 
 hook('tick', function() {
   renderStatusBar();
-  if (!_mouseOnInteractive && Date.now() > _clickLockUntil) {
+  // At speed 2+, always render workspace (timers/progress need live updates).
+  // At speed 1, guard against hover/click to prevent flicker and swallowed events.
+  var guardActive = _speed <= 1 && (_mouseOnInteractive || Date.now() <= _clickLockUntil);
+  if (!guardActive) {
     renderWorkspace();
   }
 }, 10);

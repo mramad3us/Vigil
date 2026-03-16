@@ -157,6 +157,13 @@
           <span class="sb-stat-label">INTEL</span>
           <span class="sb-stat-value" id="sb-intel">0</span>
         </div>
+        <div class="sb-stat" data-tip="Server workload. Each DEFCON level below 5 adds 10% load. Cannot lower DEFCON if workload would exceed 100%." data-tip-align="bottom">
+          <span class="sb-stat-label">WORKLOAD</span>
+          <span class="sb-stat-value" id="sb-workload">50%</span>
+          <div class="sb-stat-bar">
+            <div class="sb-stat-bar-fill" id="sb-workload-bar" style="width:50%;background:var(--green)"></div>
+          </div>
+        </div>
         <div class="sb-stat" data-tip="Global threat level across all theaters. Based on the highest-risk theater." data-tip-align="bottom">
           <span class="sb-stat-label">THREAT</span>
           <span class="sb-threat" id="sb-threat" style="color:var(--amber);border-color:var(--amber)">ELEVATED</span>

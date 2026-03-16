@@ -26,6 +26,35 @@ var THEATER_STATIONS = {
   NORTH_AMERICA:  { lat: 32.0, lon: -65.0,  name: 'Atlantic Seaboard' },
 };
 
+// --- Workload ---
+// Baseline 50%. Each DEFCON step below 5 adds 10% per theater.
+
+var WORKLOAD_BASELINE = 50;
+var WORKLOAD_PER_STEP = 10;
+
+function getWorkload() {
+  var load = WORKLOAD_BASELINE;
+  for (var tid in V.theaters) {
+    var defcon = V.theaters[tid].defcon || 5;
+    load += (5 - defcon) * WORKLOAD_PER_STEP;
+  }
+  return load;
+}
+
+function getWorkloadIfChanged(theaterId, newLevel) {
+  var load = WORKLOAD_BASELINE;
+  for (var tid in V.theaters) {
+    var defcon = (tid === theaterId) ? newLevel : (V.theaters[tid].defcon || 5);
+    load += (5 - defcon) * WORKLOAD_PER_STEP;
+  }
+  return load;
+}
+
+function canLowerDefcon(theaterId, level) {
+  if (level >= (V.theaters[theaterId].defcon || 5)) return true; // raising is always ok
+  return getWorkloadIfChanged(theaterId, level) <= 100;
+}
+
 // --- Set DEFCON ---
 
 function setDefcon(theaterId, level) {
@@ -34,6 +63,12 @@ function setDefcon(theaterId, level) {
 
   var prev = V.theaters[theaterId].defcon;
   if (prev === level) return;
+
+  // Block if lowering would exceed workload capacity
+  if (level < prev && !canLowerDefcon(theaterId, level)) {
+    addLog('DEFCON: Cannot lower ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + ' — server workload at capacity. Raise another theater first.', 'log-warn');
+    return;
+  }
 
   V.theaters[theaterId].defcon = level;
   V.theaters[theaterId].defconHistory.push({
@@ -59,6 +94,11 @@ function setDefcon(theaterId, level) {
   });
 
   fire('defcon:changed', { theaterId: theaterId, from: prev, to: level });
+
+  // Auto-recall relocated assets when DEFCON rises to 4 or 5
+  if (level >= 4 && prev < 4) {
+    recallRelocatedAssets(theaterId);
+  }
 
   // Generate migration proposal
   if (level <= 2) {
@@ -326,12 +366,14 @@ function approveMigration(theaterId) {
       // CSG repositioning — use maritime path to station point
       var station = THEATER_STATIONS[theaterId];
       if (station) {
+        if (!asset.originalHomeBaseId) asset.originalHomeBaseId = asset.homeBaseId;
         repositionCSG(asset.id, station.lat, station.lon);
       }
     } else {
       // Conventional asset — relocate homeBase and transit
       var targetBase = getBase(dest.id);
       if (targetBase) {
+        if (!asset.originalHomeBaseId) asset.originalHomeBaseId = asset.homeBaseId;
         asset.homeBaseId = dest.id;
         var transitMin = dest.transitMinutes;
         asset.status = 'IN_TRANSIT';
@@ -425,6 +467,81 @@ function requestRelocation(theaterId, scope) {
     addLog('DEFCON: ' + (scope === 'covert' ? 'Covert asset' : 'Force') + ' relocation proposal generated for ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + '.', 'log-info');
   } else {
     addLog('DEFCON: No eligible assets available for relocation to ' + (THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId) + '.', 'log-warn');
+  }
+}
+
+// --- Auto-recall relocated assets ---
+// When a theater's DEFCON rises back to 4/5, send relocated assets home.
+
+function recallRelocatedAssets(theaterId) {
+  var now = V.time.totalMinutes;
+  var recallCount = 0;
+
+  for (var i = 0; i < V.assets.length; i++) {
+    var asset = V.assets[i];
+    if (!asset.originalHomeBaseId) continue;
+
+    // Skip assets that are deployed on an active operation
+    if (asset.status === 'DEPLOYED' || asset.status === 'COLLECTING') continue;
+
+    // Only recall assets currently in this theater (stationed or in-transit to it)
+    var assetTheater = getAssetTheaterId(asset);
+    var headingToTheater = false;
+    if (asset.status === 'IN_TRANSIT' && asset.homeBaseId) {
+      var destBase = getBase(asset.homeBaseId);
+      if (destBase) {
+        var destTheater = null;
+        if (destBase.theaterId) destTheater = destBase.theaterId;
+        else {
+          for (var t in THEATERS) {
+            if (THEATERS[t].countries.indexOf(destBase.country) >= 0) { destTheater = t; break; }
+          }
+        }
+        if (destTheater === theaterId) headingToTheater = true;
+      }
+    }
+    if (assetTheater !== theaterId && !headingToTheater) continue;
+
+    var origBase = getBase(asset.originalHomeBaseId);
+    if (!origBase) continue;
+
+    if (asset.isMobileBase) {
+      // CSG: reposition back to original station
+      asset.homeBaseId = asset.originalHomeBaseId;
+      asset.originalHomeBaseId = null;
+      repositionCSG(asset.id, origBase.lat, origBase.lon);
+    } else {
+      // Conventional asset: transit back to original base
+      asset.homeBaseId = asset.originalHomeBaseId;
+      asset.originalHomeBaseId = null;
+
+      var transitMin = calcTransitMinutes(asset, origBase.lat, origBase.lon);
+      asset.status = 'IN_TRANSIT';
+      asset.assignedOpId = null;
+      asset.currentBaseId = null;
+      asset.originLat = asset.currentLat;
+      asset.originLon = asset.currentLon;
+      asset.destinationLat = origBase.lat;
+      asset.destinationLon = origBase.lon;
+      asset.transitStartTotalMinutes = now;
+      asset.transitDurationMinutes = transitMin;
+    }
+
+    recallCount++;
+    pushFeedItem({
+      id: uid('FI'),
+      type: 'DEFCON',
+      severity: 'ELEVATED',
+      header: 'RECALL: ' + asset.name,
+      body: asset.name + ' recalled to ' + origBase.name + '. ETA: ' + formatTransitTime(calcTransitMinutes(asset, origBase.lat, origBase.lon)) + '.',
+      timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
+      read: false,
+    });
+  }
+
+  if (recallCount > 0) {
+    var theaterName = THEATERS[theaterId] ? THEATERS[theaterId].name : theaterId;
+    addLog('DEFCON: ' + theaterName + ' stood down. ' + recallCount + ' asset(s) recalled to original stations.', 'log-info');
   }
 }
 

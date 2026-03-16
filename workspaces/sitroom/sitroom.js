@@ -246,9 +246,12 @@
       for (var d = 5; d >= 1; d--) {
         var dInfo = typeof getDefconInfo === 'function' ? getDefconInfo(d) : DEFCON_LEVELS[d];
         var activeCls = d === defcon ? ' active' : '';
+        var blocked = d < defcon && typeof canLowerDefcon === 'function' && !canLowerDefcon(tid, d);
+        if (blocked) activeCls += ' locked';
         var tipText = typeof TIPS !== 'undefined' && TIPS.defcon ? TIPS.defcon[d] : '';
+        if (blocked) tipText = 'WORKLOAD AT CAPACITY — raise another theater to free resources';
         html += '<div class="defcon-level defcon-' + d + activeCls + '"' +
-          ' onclick="setTheaterDefcon(\'' + tid + '\',' + d + ')"' +
+          (blocked ? '' : ' onclick="setTheaterDefcon(\'' + tid + '\',' + d + ')"') +
           ' data-tip="' + (tipText || '').replace(/"/g, '&quot;') + '" data-tip-align="bottom">' +
           d + '</div>';
       }

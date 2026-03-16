@@ -183,6 +183,16 @@
   color: var(--text);
 }
 
+.defcon-level.locked {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.defcon-level.locked:hover {
+  background: var(--bg-4);
+  color: var(--text-dim);
+}
+
 .defcon-level.active {
   color: var(--bg-1);
 }
