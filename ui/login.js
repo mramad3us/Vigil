@@ -214,13 +214,13 @@ function beginAuth() {
     initState();
     V.player.callsign = callsign;
 
-    // Load most recent save for returning operator
+    // Load most recent save for returning operator (by timestamp, any slot)
     if (_isReturningOperator) {
       var saves = {};
       try { saves = JSON.parse(localStorage.getItem('vigil_saves') || '{}'); } catch(e) {}
       var bestKey = null, bestTime = 0;
       for (var k in saves) {
-        if (saves[k].callsign === callsign && (saves[k].timestamp || 0) > bestTime) {
+        if (saves[k].data && (saves[k].timestamp || 0) > bestTime) {
           bestKey = k;
           bestTime = saves[k].timestamp;
         }
