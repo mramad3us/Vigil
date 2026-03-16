@@ -382,6 +382,7 @@ function buildIllegalIntelFields(threatType, location, orgName, service, tier) {
   if (!fieldDefs) return [];
 
   var fields = [];
+  var genContext = {};  // shared context across field generation (e.g., cover name for identity consistency)
   for (var i = 0; i < fieldDefs.length; i++) {
     var def = fieldDefs[i];
     var diff = INTEL_DIFFICULTY[def.difficulty];
@@ -392,7 +393,7 @@ function buildIllegalIntelFields(threatType, location, orgName, service, tier) {
     var scaledTicks = Math.round(baseTicks * tier.difficultyMod);
     var preRevealed = Math.random() < diff.preRevealChance;
 
-    var value = generateIllegalIntelValue(def.key, location, orgName, service, tier);
+    var value = generateIllegalIntelValue(def.key, location, orgName, service, tier, genContext);
 
     var fieldObj = {
       key: def.key,

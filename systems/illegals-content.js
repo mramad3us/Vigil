@@ -248,7 +248,8 @@ var NUMBERS_STATION_IDS = [
 // Called by buildIllegalIntelFields() in illegals.js.
 // Signature must match the call: (fieldKey, location, orgName, service, tier)
 
-function generateIllegalIntelValue(fieldKey, location, orgName, service, tier) {
+function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, ctx) {
+  if (!ctx) ctx = {};
   var agencyCountry = service.country || (service.countries ? service.countries[0] : 'unknown');
   var agencyShort = service.shortLabel || service.id;
   var agencyLabel = service.label || service.id;
@@ -275,6 +276,7 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier) {
     var nameRegion = getCoverNameRegion(agencyCountry);
     var namePool = ILLEGAL_COVER_NAMES[nameRegion] || ILLEGAL_COVER_NAMES.GENERIC;
     var coverName = pick(namePool);
+    ctx.coverName = coverName;
     var occPool = COVER_OCCUPATIONS[tierId] || COVER_OCCUPATIONS.RECRUITED_AGENT;
     var occupation = pick(occPool);
     var city = location ? location.city : 'unknown city';
@@ -328,21 +330,30 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier) {
   if (fieldKey === 'REAL_IDENTITY') {
     var realNameRegion = getCoverNameRegion(agencyCountry);
     var realNamePool = ILLEGAL_COVER_NAMES[realNameRegion] || ILLEGAL_COVER_NAMES.GENERIC;
-    // Pick a different name from the cover identity (best effort)
-    var realName = pick(realNamePool);
     var rankPool = [
       'Captain', 'Major', 'Lieutenant Colonel', 'Colonel',
       'Senior Officer', 'First Secretary', 'Operations Officer',
     ];
-    var rank = tierId === 'DEEP_COVER' ? pick(rankPool) : (tierId === 'MISSION_SPECIFIC' ? pick(rankPool) : null);
 
-    if (rank) {
-      return 'True identity: ' + rank + ' ' + realName + ', ' + agencyLabel + '. ' +
-        'Biographical intelligence file being compiled. Fingerprint and biometric data collected upon detention. ' +
-        'Cross-referencing with allied counterintelligence databases in progress.';
+    if (tierId === 'RECRUITED_AGENT') {
+      // Recruited agents use their own identity — real name IS the cover name
+      var recruitedName = ctx.coverName || pick(realNamePool);
+      return 'True identity confirmed: ' + recruitedName + ' — a ' + agencyCountry + ' national recruited by ' + agencyShort + '. ' +
+        'Subject is operating under their own identity with no alias. Limited biographical data available. Cooperating at a minimal level.';
     }
-    return 'True identity: ' + realName + ' — a ' + agencyCountry + ' national recruited by ' + agencyShort + '. ' +
-      'Limited biographical data available. Subject is cooperating at a minimal level.';
+
+    // DEEP_COVER and MISSION_SPECIFIC: real name differs from cover
+    var realName = pick(realNamePool);
+    // Avoid collision with cover name
+    if (ctx.coverName && realName === ctx.coverName && realNamePool.length > 1) {
+      for (var ri = 0; ri < realNamePool.length; ri++) {
+        if (realNamePool[ri] !== ctx.coverName) { realName = realNamePool[ri]; break; }
+      }
+    }
+    var rank = pick(rankPool);
+    return 'True identity: ' + rank + ' ' + realName + ', ' + agencyLabel + '. ' +
+      'Biographical intelligence file being compiled. Fingerprint and biometric data collected upon detention. ' +
+      'Cross-referencing with allied counterintelligence databases in progress.';
   }
 
   return 'Intelligence analysis in progress — data insufficient for assessment.';
