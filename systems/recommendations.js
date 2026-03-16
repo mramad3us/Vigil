@@ -119,8 +119,25 @@ function generateVigilOptions(op) {
 
     if (!isIllegal) {
       // Non-illegal domestic ops: offer sanctioned option + covert option
-      var sanctionedPool = scored.filter(function(s) { return s.asset.domesticAuthority; });
-      var covertPool = scored.filter(function(s) { return !s.asset.domesticAuthority; });
+      // For COUNTER_TERROR and DOMESTIC_HOSTAGE_RESCUE, military units with
+      // matching capabilities are exceptionally sanctioned for direct action
+      var exceptionalAuth = (op.operationType === 'COUNTER_TERROR' || op.operationType === 'DOMESTIC_HOSTAGE_RESCUE');
+      var sanctionedPool = scored.filter(function(s) {
+        if (s.asset.domesticAuthority) return true;
+        if (exceptionalAuth) {
+          return s.asset.capabilities.indexOf('HOSTAGE_RESCUE') >= 0 ||
+                 s.asset.capabilities.indexOf('COUNTER_TERROR') >= 0;
+        }
+        return false;
+      });
+      var covertPool = scored.filter(function(s) {
+        if (s.asset.domesticAuthority) return false;
+        if (exceptionalAuth) {
+          return s.asset.capabilities.indexOf('HOSTAGE_RESCUE') < 0 &&
+                 s.asset.capabilities.indexOf('COUNTER_TERROR') < 0;
+        }
+        return true;
+      });
 
       // Option A: Sanctioned (recommended)
       if (sanctionedPool.length > 0) {
