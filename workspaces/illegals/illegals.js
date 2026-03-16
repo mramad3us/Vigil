@@ -11,6 +11,7 @@
   var _selectedAgencyId = null;
   var _badgeCount = 0;
 
+
   registerWorkspace({
     id: 'illegals',
     label: 'Illegals',
@@ -107,7 +108,7 @@
     if (!p) return;
     showModal('CONFIRM REPATRIATION',
       '<div class="response-select-instruction">' +
-        'Repatriate <strong>' + p.name + '</strong> (' + p.tierLabel + ') to ' + p.agencyCountry + '?<br><br>' +
+        'Repatriate <strong>' + getPrisonerDisplayName(p) + '</strong> (' + p.tierLabel + ') to ' + p.agencyCountry + '?<br><br>' +
         'This will end interrogation and return the prisoner in exchange for a diplomatic relations improvement ' +
         'with ' + p.agencyCountry + '.<br><br>' +
         'Total intelligence yielded: ' + Math.round(p.interrogation.totalIntelYielded) + ' INTEL.' +
@@ -194,7 +195,7 @@
 
     return '<div class="ill-prisoner-row' + sel + '" onclick="selectPrisoner(\'' + p.id + '\')">' +
       '<div class="ill-prisoner-info">' +
-        '<div class="ill-prisoner-name">' + esc(p.realName || p.name) + '</div>' +
+        '<div class="ill-prisoner-name">' + esc(getPrisonerDisplayName(p)) + '</div>' +
         '<div class="ill-prisoner-agency">' + esc(p.agencyLabel ? (getServiceById(p.agency) || {}).shortLabel || p.agency : p.agency) + ' — ' + esc(p.agencyCountry) + '</div>' +
       '</div>' +
       '<span class="ill-tier-badge ' + tierCls + '">' + tierShort + '</span>' +
@@ -221,7 +222,7 @@
     var svcShort = svc ? svc.shortLabel : p.agency;
 
     var html = '<div class="ill-detail-header">' +
-      '<div class="ill-detail-title">' + esc(p.realName || p.name) + ' <span class="ill-tier-badge ' + tierCls + '">' + esc(p.tierLabel) + '</span></div>' +
+      '<div class="ill-detail-title">' + esc(getPrisonerDisplayName(p)) + ' <span class="ill-tier-badge ' + tierCls + '">' + esc(p.tierLabel) + '</span></div>' +
       '<div class="ill-detail-subtitle">' + esc(p.agencyLabel) + ' — ' + esc(p.agencyCountry) + '</div>' +
     '</div>';
 
@@ -233,8 +234,14 @@
       '<div class="ill-meta-item"><span class="ill-meta-label">DETENTION SITE: </span><span class="ill-meta-value">' + esc(p.detentionSite) + '</span></div>' +
       '<div class="ill-meta-item"><span class="ill-meta-label">CAPTURED: </span><span class="ill-meta-value">Day ' + p.capturedDay + '</span></div>' +
     '</div>';
-    if (p.realName && p.name !== p.realName) {
-      html += '<div class="ill-meta-row"><div class="ill-meta-item"><span class="ill-meta-label">COVER IDENTITY: </span><span class="ill-meta-value">' + esc(p.name) + '</span></div></div>';
+    // Show cover identity line if both cover and real identity are known and they differ
+    var _coverName = null, _realName = null;
+    for (var ci = 0; ci < p.intelFields.length; ci++) {
+      if (p.intelFields[ci].key === 'COVER_IDENTITY' && p.intelFields[ci].revealed) _coverName = extractNameFromIntel(p.intelFields[ci].value);
+      if (p.intelFields[ci].key === 'REAL_IDENTITY' && p.intelFields[ci].revealed) _realName = extractNameFromIntel(p.intelFields[ci].value);
+    }
+    if (_coverName && _realName && _coverName !== _realName) {
+      html += '<div class="ill-meta-row"><div class="ill-meta-item"><span class="ill-meta-label">COVER IDENTITY: </span><span class="ill-meta-value">' + esc(_coverName) + '</span></div></div>';
     }
     html += '</div>';
 
@@ -449,7 +456,7 @@
         var prisoner = allPrisoners[dp];
         var statusLabel = prisoner.repatriated ? 'REPATRIATED' : (prisoner.interrogation.driedUp ? 'DRIED UP' : Math.round(prisoner.interrogation.progress) + '%');
         html += '<div class="ill-link-row" onclick="setIllMode(\'PRISONERS\');selectPrisoner(\'' + prisoner.id + '\')">' +
-          esc(prisoner.realName || prisoner.name) + ' — ' + esc(prisoner.tierLabel) + ' [' + statusLabel + ']</div>';
+          esc(getPrisonerDisplayName(prisoner)) + ' — ' + esc(prisoner.tierLabel) + ' [' + statusLabel + ']</div>';
       }
       html += '</div>';
     }

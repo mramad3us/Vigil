@@ -428,6 +428,26 @@ function buildIllegalIntelFields(threatType, location, orgName, service, tier) {
 //   "Ahmed Tahan — taxi driver based in Seattle. Cover legend..."
 //   "True identity confirmed: Ahmed Tahan — a Afghanistan national..."
 //   "True identity: Major Dmitri Kozlov, SVR (Foreign Intelligence Service)..."
+// Derive display name live from a prisoner's intel field state:
+//   1. Real name (if REAL_IDENTITY revealed)
+//   2. Cover name (if COVER_IDENTITY revealed)
+//   3. Internal codename
+function getPrisonerDisplayName(p) {
+  if (p.intelFields) {
+    for (var i = 0; i < p.intelFields.length; i++) {
+      if (p.intelFields[i].key === 'REAL_IDENTITY' && p.intelFields[i].revealed) {
+        return extractNameFromIntel(p.intelFields[i].value);
+      }
+    }
+    for (var j = 0; j < p.intelFields.length; j++) {
+      if (p.intelFields[j].key === 'COVER_IDENTITY' && p.intelFields[j].revealed) {
+        return extractNameFromIntel(p.intelFields[j].value);
+      }
+    }
+  }
+  return p.codename || p.name || 'UNKNOWN';
+}
+
 function extractNameFromIntel(val) {
   if (!val) return val;
   // Strip "True identity confirmed: " or "True identity: " prefix
@@ -443,22 +463,12 @@ function extractNameFromIntel(val) {
 function createPrisonerFromThreat(threat, sourceOpId) {
   var site = assignDetentionSite(threat.domestic, threat.agentTier);
 
-  // Find cover identity and real identity from intel fields — extract just the name
-  var coverName = threat.orgName;
-  var realName = null;
-  for (var i = 0; i < threat.intelFields.length; i++) {
-    var f = threat.intelFields[i];
-    if (f.key === 'COVER_IDENTITY' && f.revealed) coverName = extractNameFromIntel(f.value);
-    if (f.key === 'REAL_IDENTITY' && f.revealed) realName = extractNameFromIntel(f.value);
-  }
-
   var tierDef = threat.agentTier ? AGENT_TIERS[threat.agentTier] : AGENT_TIERS.RECRUITED_AGENT;
   var params = INTERROGATION_PARAMS[tierDef.id] || INTERROGATION_PARAMS.RECRUITED_AGENT;
 
   var prisoner = {
     id: uid('PRS'),
-    name: coverName,
-    realName: realName,
+    codename: threat.orgName,  // internal Vigil designation — always available as fallback
     agency: threat.agencyId,
     agencyLabel: threat.agencyLabel,
     agencyCountry: threat.agencyCountry,
@@ -508,13 +518,13 @@ function createPrisonerFromThreat(threat, sourceOpId) {
   V.prisoners.push(prisoner);
   fire('prisoner:captured', { prisoner: prisoner });
 
-  addLog('PRISONER: ' + coverName + ' (' + tierDef.label + ') captured. Detained at ' + site.label + '.', 'log-info');
+  addLog('PRISONER: ' + threat.orgName + ' (' + tierDef.label + ') captured. Detained at ' + site.label + '.', 'log-info');
 
   pushFeedItem({
     id: uid('FI'),
     type: 'VIGIL_ALERT',
     severity: 'HIGH',
-    header: 'ILLEGAL CAPTURED: ' + coverName,
+    header: 'ILLEGAL CAPTURED: ' + getPrisonerDisplayName(prisoner),
     body: tierDef.label + ' from ' + threat.agencyLabel + ' captured and transferred to ' +
       site.label + ' (' + site.location + '). Interrogation initiated. ' +
       'Expected intel yield based on agent classification: ' + tierDef.id.replace(/_/g, ' ').toLowerCase() + '.',
@@ -569,13 +579,13 @@ function repatriatePrisoner(prisonerId) {
     shiftRelations(prisoner.agencyCountry, boost, 'Prisoner repatriation (' + prisoner.tierLabel + ')');
   }
 
-  addLog('REPATRIATED: ' + prisoner.name + ' returned to ' + prisoner.agencyCountry + '. Relations +' + boost + '%.', 'log-info');
+  addLog('REPATRIATED: ' + getPrisonerDisplayName(prisoner) + ' returned to ' + prisoner.agencyCountry + '. Relations +' + boost + '%.', 'log-info');
 
   pushFeedItem({
     id: uid('FI'),
     type: 'VIGIL_ALERT',
     severity: 'ELEVATED',
-    header: 'PRISONER REPATRIATED: ' + prisoner.name,
+    header: 'PRISONER REPATRIATED: ' + getPrisonerDisplayName(prisoner),
     body: prisoner.tierLabel + ' from ' + prisoner.agencyLabel + ' repatriated to ' +
       prisoner.agencyCountry + '. Diplomatic gesture — relations improved by ' + boost + '%. ' +
       'Total intelligence yielded during detention: ' + Math.round(prisoner.interrogation.totalIntelYielded) + ' INTEL.',
@@ -645,7 +655,7 @@ function repatriatePrisoner(prisonerId) {
         field.ticksAccumulated += 2; // 2x passive rate
         if (field.ticksAccumulated >= field.ticksToReveal) {
           field.revealed = true;
-          addLog('INTERROGATION: ' + p.name + ' revealed ' + field.label + '.', 'log-info');
+          addLog('INTERROGATION: ' + getPrisonerDisplayName(p) + ' revealed ' + field.label + '.', 'log-info');
         }
       }
 
@@ -671,7 +681,7 @@ function repatriatePrisoner(prisonerId) {
       // Dried up check
       if (p.interrogation.progress >= 100) {
         p.interrogation.driedUp = true;
-        addLog('INTERROGATION: ' + p.name + ' has been fully exploited. No further intelligence expected.', 'log-warn');
+        addLog('INTERROGATION: ' + getPrisonerDisplayName(p) + ' has been fully exploited. No further intelligence expected.', 'log-warn');
       }
     }
   }, 3);
@@ -746,7 +756,7 @@ function repatriatePrisoner(prisonerId) {
         var prisoner = createPrisonerFromThreat(threat, op.id);
         if (prisoner) {
           op._prisonerId = prisoner.id;
-          op._prisonerName = prisoner.name;
+          op._prisonerName = getPrisonerDisplayName(prisoner);
         }
       }
 
@@ -788,14 +798,12 @@ function repatriatePrisoner(prisonerId) {
     if (!V.prisoners) V.prisoners = [];
     if (!V.agencies || Object.keys(V.agencies).length === 0) initAgencies();
 
-    // Migrate old saves: re-extract prisoner names from intel field prose
+    // Migrate old saves: backfill codename from legacy name field
     for (var pi = 0; pi < V.prisoners.length; pi++) {
       var p = V.prisoners[pi];
-      if (p.name && p.name.indexOf(' — ') > 0) {
-        p.name = extractNameFromIntel(p.name);
-      }
-      if (p.realName && (p.realName.indexOf(' — ') > 0 || p.realName.indexOf('True identity') === 0)) {
-        p.realName = extractNameFromIntel(p.realName);
+      if (!p.codename) {
+        // Old saves stored display name in p.name — use orgName from source threat if possible, else keep as-is
+        p.codename = p.name || 'UNKNOWN';
       }
     }
   }, 1);
