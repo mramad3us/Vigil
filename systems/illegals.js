@@ -173,22 +173,37 @@ function spawnForeignIllegal() {
 
   var tier = pickAgentTier(service);
 
-  // Pick a third country — NOT the service's home, NOT the US
-  // Must be a country where US has relations >= 20%
   var homeCountry = service.country || (service.countries ? service.countries[0] : '');
   var eligibleLocations = [];
+  var isNonState = service.type === 'NON_STATE';
 
-  for (var tid in THEATERS) {
-    var theater = THEATERS[tid];
-    if (!theater.cities) continue;
-    for (var c = 0; c < theater.cities.length; c++) {
-      var city = theater.cities[c];
-      if (city.country === 'United States') continue;
-      if (city.country === homeCountry) continue;
-      // Check relations — must be >= 20%
-      var cd = V.diplomacy[city.country];
-      if (cd && cd.relations >= 20) {
-        eligibleLocations.push(city);
+  if (isNonState && service.targets) {
+    // Non-state: spawn in their target countries (excluding US — that's domestic)
+    var foreignTargets = service.targets.filter(function(t) { return t !== 'United States'; });
+    for (var tid in THEATERS) {
+      var theater = THEATERS[tid];
+      if (!theater.cities) continue;
+      for (var c = 0; c < theater.cities.length; c++) {
+        var city = theater.cities[c];
+        if (foreignTargets.indexOf(city.country) >= 0) {
+          eligibleLocations.push(city);
+        }
+      }
+    }
+  } else {
+    // State service: third country — NOT the service's home, NOT the US
+    // Must be a country where US has relations >= 20%
+    for (var tid2 in THEATERS) {
+      var theater2 = THEATERS[tid2];
+      if (!theater2.cities) continue;
+      for (var c2 = 0; c2 < theater2.cities.length; c2++) {
+        var city2 = theater2.cities[c2];
+        if (city2.country === 'United States') continue;
+        if (city2.country === homeCountry) continue;
+        var cd = V.diplomacy[city2.country];
+        if (cd && cd.relations >= 20) {
+          eligibleLocations.push(city2);
+        }
       }
     }
   }
@@ -197,9 +212,9 @@ function spawnForeignIllegal() {
   var loc = pick(eligibleLocations);
   // Add theater info
   var theaterInfo = null;
-  for (var tid2 in THEATERS) {
-    if (THEATERS[tid2].countries && THEATERS[tid2].countries.indexOf(loc.country) >= 0) {
-      theaterInfo = tid2;
+  for (var tid3 in THEATERS) {
+    if (THEATERS[tid3].countries && THEATERS[tid3].countries.indexOf(loc.country) >= 0) {
+      theaterInfo = tid3;
       break;
     }
   }
@@ -291,8 +306,7 @@ function pickSponsoringService(isDomestic) {
   var candidates = [];
 
   if (isDomestic) {
-    // Domestic: weighted from countries with relations <= 35%
-    // 60% hostile (<=10%), 30% tense (<=20%), 10% other (<=35%)
+    // State services: weighted from countries with relations <= 35%
     for (var i = 0; i < INTELLIGENCE_SERVICES.length; i++) {
       var svc = INTELLIGENCE_SERVICES[i];
       if (svc.country === 'United States') continue;
@@ -302,37 +316,30 @@ function pickSponsoringService(isDomestic) {
       else if (cd.relations <= 20) candidates.push({ svc: svc, weight: 3 });
       else if (cd.relations <= 35) candidates.push({ svc: svc, weight: 1 });
     }
-    // Non-state agencies also eligible
+    // Non-state: always hostile, but only if US is in their targets list
     for (var j = 0; j < NON_STATE_AGENCIES.length; j++) {
       var nsa = NON_STATE_AGENCIES[j];
-      // Check if any associated country is hostile enough
-      var maxWeight = 0;
-      for (var k = 0; k < nsa.countries.length; k++) {
-        var ncd = V.diplomacy[nsa.countries[k]];
-        if (!ncd) continue;
-        if (ncd.relations <= 10) maxWeight = Math.max(maxWeight, 4);
-        else if (ncd.relations <= 20) maxWeight = Math.max(maxWeight, 2);
-        else if (ncd.relations <= 35) maxWeight = Math.max(maxWeight, 1);
-      }
-      if (maxWeight > 0) candidates.push({ svc: nsa, weight: maxWeight });
+      if (!nsa.targets || nsa.targets.indexOf('United States') < 0) continue;
+      candidates.push({ svc: nsa, weight: 3 });
     }
   } else {
-    // Foreign: only services whose home country has relations <= 10%
+    // State services: only those with hostile relations
     for (var i2 = 0; i2 < INTELLIGENCE_SERVICES.length; i2++) {
       var svc2 = INTELLIGENCE_SERVICES[i2];
       var cd2 = V.diplomacy[svc2.country];
       if (!cd2 || cd2.relations > 10) continue;
       candidates.push({ svc: svc2, weight: 3 });
     }
-    // Non-state from hostile regions
+    // Non-state: always eligible — they're terrorists, relations irrelevant.
+    // Must have at least one non-US target country to spawn foreign illegals.
     for (var j2 = 0; j2 < NON_STATE_AGENCIES.length; j2++) {
       var nsa2 = NON_STATE_AGENCIES[j2];
-      var hasHostile = false;
-      for (var k2 = 0; k2 < nsa2.countries.length; k2++) {
-        var ncd2 = V.diplomacy[nsa2.countries[k2]];
-        if (ncd2 && ncd2.relations <= 10) { hasHostile = true; break; }
+      if (!nsa2.targets) continue;
+      var hasForeignTarget = false;
+      for (var k2 = 0; k2 < nsa2.targets.length; k2++) {
+        if (nsa2.targets[k2] !== 'United States') { hasForeignTarget = true; break; }
       }
-      if (hasHostile) candidates.push({ svc: nsa2, weight: 2 });
+      if (hasForeignTarget) candidates.push({ svc: nsa2, weight: 2 });
     }
   }
 

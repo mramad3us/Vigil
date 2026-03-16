@@ -931,28 +931,57 @@ var INTELLIGENCE_SERVICES = [
 // --- Non-State Agencies (terror/militant organizations that run illegals) ---
 // Can run MISSION_SPECIFIC and RECRUITED_AGENT illegals only (never DEEP_COVER).
 
+// Non-state agencies: always treated as hostile regardless of country relations.
+// targets: countries where the org actively operates against — determines spawn locations.
+//   If 'United States' is in targets, domestic illegals can spawn. Otherwise domestic = never.
+//   Foreign illegals spawn in target countries (excluding US).
+// enemies: countries that would value receiving a captured operative (transfer destinations).
+// countries: home base / sponsoring countries (origin, not where they operate).
+
 var NON_STATE_AGENCIES = [
-  { id: 'HEZBOLLAH',    label: 'Hezbollah (External Security Organization)',   shortLabel: 'HEZB',   type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Lebanon', 'Syria', 'Iran'],
+  { id: 'HEZBOLLAH',    label: 'Hezbollah (External Security Organization)',   shortLabel: 'HEZB',   type: 'NON_STATE', region: 'MIDDLE_EAST',
+    countries: ['Lebanon', 'Syria', 'Iran'],
+    targets: ['Israel', 'Saudi Arabia', 'United States', 'France', 'Argentina'],
     enemies: ['Israel', 'Saudi Arabia', 'United Kingdom', 'France'] },
-  { id: 'HAMAS',        label: 'Hamas (Izz ad-Din al-Qassam Brigades)',        shortLabel: 'HAMAS',  type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Lebanon', 'Syria'],
+  { id: 'HAMAS',        label: 'Hamas (Izz ad-Din al-Qassam Brigades)',        shortLabel: 'HAMAS',  type: 'NON_STATE', region: 'MIDDLE_EAST',
+    countries: ['Lebanon', 'Syria'],
+    targets: ['Israel', 'Egypt'],
     enemies: ['Israel', 'Egypt', 'Saudi Arabia'] },
-  { id: 'IRGC_QF',      label: 'IRGC Quds Force',                             shortLabel: 'QF',     type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Iran', 'Iraq', 'Syria', 'Lebanon', 'Yemen'],
+  { id: 'IRGC_QF',      label: 'IRGC Quds Force',                             shortLabel: 'QF',     type: 'NON_STATE', region: 'MIDDLE_EAST',
+    countries: ['Iran', 'Iraq', 'Syria', 'Lebanon', 'Yemen'],
+    targets: ['Israel', 'Saudi Arabia', 'United States', 'Iraq', 'United Kingdom', 'Germany'],
     enemies: ['Israel', 'Saudi Arabia', 'United Kingdom', 'Germany', 'France'] },
-  { id: 'IRA_SPLINTER',  label: 'Dissident Irish Republican Movement',         shortLabel: 'DIRA',   type: 'NON_STATE', region: 'EUROPE',      countries: ['United Kingdom'],
+  { id: 'IRA_SPLINTER',  label: 'Dissident Irish Republican Movement',         shortLabel: 'DIRA',   type: 'NON_STATE', region: 'EUROPE',
+    countries: ['United Kingdom'],
+    targets: ['United Kingdom'],
     enemies: ['United Kingdom'] },
-  { id: 'PKK',           label: 'PKK (Kurdistan Workers Party)',               shortLabel: 'PKK',    type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Turkey', 'Iraq', 'Syria'],
+  { id: 'PKK',           label: 'PKK (Kurdistan Workers Party)',               shortLabel: 'PKK',    type: 'NON_STATE', region: 'MIDDLE_EAST',
+    countries: ['Turkey', 'Iraq', 'Syria'],
+    targets: ['Turkey'],
     enemies: ['Turkey'] },
-  { id: 'AL_QAEDA',      label: 'Al-Qaeda Network',                           shortLabel: 'AQ',     type: 'NON_STATE', region: null,          countries: ['Afghanistan', 'Pakistan', 'Yemen', 'Somalia', 'Mali', 'Libya'],
+  { id: 'AL_QAEDA',      label: 'Al-Qaeda Network',                           shortLabel: 'AQ',     type: 'NON_STATE', region: null,
+    countries: ['Afghanistan', 'Pakistan', 'Yemen', 'Somalia', 'Mali', 'Libya'],
+    targets: ['United States', 'United Kingdom', 'France', 'Saudi Arabia', 'Egypt', 'India', 'Kenya', 'Indonesia'],
     enemies: ['Saudi Arabia', 'Egypt', 'India', 'Israel', 'United Kingdom', 'France', 'Kenya'] },
-  { id: 'ISIS_REMNANT',  label: 'Islamic State Remnant Network',              shortLabel: 'ISIS',   type: 'NON_STATE', region: null,          countries: ['Syria', 'Iraq', 'Libya', 'Afghanistan', 'Somalia', 'Mali'],
+  { id: 'ISIS_REMNANT',  label: 'Islamic State Remnant Network',              shortLabel: 'ISIS',   type: 'NON_STATE', region: null,
+    countries: ['Syria', 'Iraq', 'Libya', 'Afghanistan', 'Somalia', 'Mali'],
+    targets: ['Iraq', 'United States', 'United Kingdom', 'France', 'Turkey', 'Egypt', 'Kenya', 'Germany', 'Belgium'],
     enemies: ['Iraq', 'Turkey', 'Saudi Arabia', 'Egypt', 'Israel', 'France', 'United Kingdom', 'Kenya'] },
-  { id: 'WAGNER',        label: 'Wagner Group / Africa Corps',                shortLabel: 'WAGNER', type: 'NON_STATE', region: null,          countries: ['Russia', 'Mali', 'Libya', 'Syria'],
+  { id: 'WAGNER',        label: 'Wagner Group / Africa Corps',                shortLabel: 'WAGNER', type: 'NON_STATE', region: null,
+    countries: ['Russia', 'Mali', 'Libya', 'Syria'],
+    targets: ['Ukraine', 'France', 'United Kingdom', 'Poland', 'Germany', 'Mali', 'Libya'],
     enemies: ['Ukraine', 'France', 'United Kingdom', 'Poland', 'Germany'] },
-  { id: 'HOUTHI',        label: 'Ansar Allah (Houthi Movement)',              shortLabel: 'HOUTHI', type: 'NON_STATE', region: 'MIDDLE_EAST', countries: ['Yemen'],
+  { id: 'HOUTHI',        label: 'Ansar Allah (Houthi Movement)',              shortLabel: 'HOUTHI', type: 'NON_STATE', region: 'MIDDLE_EAST',
+    countries: ['Yemen'],
+    targets: ['Saudi Arabia', 'United Arab Emirates'],
     enemies: ['Saudi Arabia', 'United Kingdom', 'Israel'] },
-  { id: 'BOKO_HARAM',    label: 'Boko Haram / ISWAP',                        shortLabel: 'BH',     type: 'NON_STATE', region: 'AFRICA',      countries: ['Nigeria'],
+  { id: 'BOKO_HARAM',    label: 'Boko Haram / ISWAP',                        shortLabel: 'BH',     type: 'NON_STATE', region: 'AFRICA',
+    countries: ['Nigeria'],
+    targets: ['Nigeria', 'Cameroon', 'Chad', 'Niger'],
     enemies: ['Nigeria', 'Kenya'] },
-  { id: 'AL_SHABAAB',    label: 'Al-Shabaab',                                 shortLabel: 'AS',     type: 'NON_STATE', region: 'AFRICA',      countries: ['Somalia', 'Kenya', 'Ethiopia'],
+  { id: 'AL_SHABAAB',    label: 'Al-Shabaab',                                 shortLabel: 'AS',     type: 'NON_STATE', region: 'AFRICA',
+    countries: ['Somalia', 'Kenya', 'Ethiopia'],
+    targets: ['Kenya', 'Ethiopia', 'Somalia', 'Uganda'],
     enemies: ['Kenya', 'Ethiopia', 'Somalia'] },
 ];
 
