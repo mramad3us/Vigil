@@ -199,17 +199,6 @@ var OPERATION_TYPES = {
     intelReward: [3, 8],
   },
   // --- Domestic Operation Types ---
-  LAW_ENFORCEMENT: {
-    id: 'LAW_ENFORCEMENT', label: 'Law Enforcement Operation', shortLabel: 'LE OP',
-    description: 'Federal law enforcement operation with arrest authority. Coordinated with DOJ and local agencies.',
-    pros: ['Full legal authority', 'Can prosecute', 'Minimal political risk'],
-    cons: ['Slower than military response', 'Requires strong evidence chain'],
-    requiredCapabilities: ['LAW_ENFORCEMENT'],
-    preferredCapabilities: ['LAW_ENFORCEMENT', 'COUNTER_TERROR', 'SOF', 'INTEL'],
-    execHoursRange: [2, 8],
-    baseSuccessRate: 75,
-    intelReward: [5, 10],
-  },
   INVESTIGATION: {
     id: 'INVESTIGATION', label: 'Federal Investigation', shortLabel: 'FED INV',
     description: 'Deep federal investigation leveraging intelligence and law enforcement resources. Builds prosecution-ready cases.',
@@ -242,6 +231,18 @@ var OPERATION_TYPES = {
     execHoursRange: [1, 6],
     baseSuccessRate: 80,
     intelReward: [5, 10],
+  },
+  SOLO_APPREHENSION: {
+    id: 'SOLO_APPREHENSION', label: 'Solo Target Apprehension', shortLabel: 'APPREHEND',
+    description: 'Targeted apprehension of a single individual. Federal team identifies and intercepts the subject at a predictable location — may range from a plainclothes approach to a full tactical arrest.',
+    pros: ['Clean arrest of a single target', 'Yields prisoner for interrogation', 'Low profile — minimal public attention'],
+    cons: ['Subject may detect surveillance and flee', 'Risk of armed confrontation'],
+    requiredCapabilities: ['LAW_ENFORCEMENT'],
+    preferredCapabilities: ['LAW_ENFORCEMENT', 'INTEL', 'ISR'],
+    execHoursRange: [1, 4],
+    baseSuccessRate: 75,
+    intelReward: [5, 10],
+    yieldsPrisoner: true,
   },
   // --- Illegals Operation Types ---
   CAPTURE_OP: {
@@ -564,7 +565,7 @@ var STRAIN_OP_TYPES = [
   'MILITARY_STRIKE', 'SOF_RAID', 'HOSTAGE_RESCUE', 'COUNTER_TERROR',
   'NAVAL_INTERDICTION', 'HVT_ELIMINATION', 'HVT_CAPTURE', 'COVERT_SNATCH',
   'TARGETED_KILLING', 'ASSET_EXTRACTION', 'DOMESTIC_HOSTAGE_RESCUE',
-  'ARREST_OPERATION', 'LAW_ENFORCEMENT', 'CAPTURE_OP',
+  'ARREST_OPERATION', 'CAPTURE_OP', 'SOLO_APPREHENSION',
 ];
 
 // Recovery times (game-days) before a team rotates back to available.

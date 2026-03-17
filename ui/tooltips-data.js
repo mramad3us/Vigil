@@ -53,10 +53,11 @@ var TIPS = {
     TARGETED_KILLING:        'Authorized lethal action against a designated target. Multiple methods — air, sniper, drone. Attribution considerations.',
     ASSET_EXTRACTION:        'Emergency extraction of a compromised intelligence asset and potentially their family. Speed is critical.',
     DOMESTIC_HOSTAGE_RESCUE: 'Domestic hostage rescue by FBI HRT. Requires DOJ authorization. Posse Comitatus restricts military involvement.',
-    LAW_ENFORCEMENT:         'Federal law enforcement operation — arrest warrants, search warrants, multi-agency coordination. Miranda applies.',
+
     INVESTIGATION:           'Long-running federal investigation — FISA warrants, grand jury subpoenas, financial analysis. Builds a prosecution.',
     DOMESTIC_SURVEILLANCE:   'Court-authorized domestic surveillance — physical and technical collection under FISA oversight.',
     ARREST_OPERATION:        'Tactical arrest of identified suspects. Federal warrant service with tactical teams and evidence collection.',
+    SOLO_APPREHENSION:       'Targeted apprehension of a single individual. Federal team intercepts the subject — plainclothes approach or tactical arrest. Yields a prisoner.',
     CAPTURE_OP:              'Covert capture operation — SOF team apprehends a foreign intelligence operative for detention and interrogation. Yields a prisoner.',
     COVERT_SNATCH:           'Quiet abduction — a small team grabs the target off the street or from a residence. No assault, no gunfire. Target vanishes. Yields a prisoner. Unsanctioned on domestic soil.',
     BURN_NOTICE:             'Diplomatic exposure — evidence of espionage shared with the host country. The operative is expelled. No prisoner, but significant relations improvement.',

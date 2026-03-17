@@ -15,11 +15,13 @@
 
 var ILLEGAL_NAME_POOLS = {
   RUSSIAN: {
-    first: [
+    male: [
       'Aleksandr', 'Aleksei', 'Andrei', 'Anton', 'Arkady', 'Boris', 'Denis', 'Dmitri', 'Eduard', 'Evgeni',
       'Fyodor', 'Gennady', 'Igor', 'Ivan', 'Kirill', 'Konstantin', 'Leonid', 'Maksim', 'Mikhail', 'Nikolai',
       'Oleg', 'Pavel', 'Roman', 'Sergei', 'Stanislav', 'Timofei', 'Vadim', 'Valentin', 'Viktor', 'Vladislav',
       'Yuri', 'Anatoly', 'Vasily', 'Grigory', 'Semyon',
+    ],
+    female: [
       'Anna', 'Darya', 'Ekaterina', 'Elena', 'Galina', 'Irina', 'Kseniya', 'Larisa', 'Lyudmila', 'Marina',
       'Natalya', 'Olga', 'Svetlana', 'Tatiana', 'Valentina', 'Vera', 'Yelena', 'Yulia', 'Zoya', 'Polina',
     ],
@@ -31,12 +33,17 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   CHINESE: {
-    // Chinese: family name + given name (1-2 syllables)
-    first: [
-      'Wei', 'Yong', 'Jun', 'Ming', 'Yang', 'Peng', 'Hao', 'Lei', 'Jian', 'Lin',
-      'Mei', 'Hua', 'Xiu', 'Lan', 'Fang', 'Qiang', 'Bo', 'Tao', 'Gang', 'Chao',
-      'Xin', 'Rui', 'Yi', 'Zhi', 'Feng', 'Guang', 'Hai', 'Jie', 'Kai', 'Nan',
-      'Yan', 'Hong', 'Ping', 'Yue', 'Shan', 'Ting', 'Xia', 'Qian', 'Wen', 'Zhen',
+    // Chinese: family name + given name. Unisex names (Wei, Jie, Xin, etc.) appear in both pools.
+    male: [
+      'Wei', 'Yong', 'Jun', 'Ming', 'Peng', 'Hao', 'Lei', 'Jian', 'Qiang', 'Bo',
+      'Tao', 'Gang', 'Chao', 'Rui', 'Zhi', 'Feng', 'Guang', 'Hai', 'Kai', 'Cheng',
+      'Da', 'Guo', 'Hong', 'Liang', 'Long', 'Shan', 'Xiang', 'Yi', 'Zhen', 'Jie',
+      'Xin', 'Wen', 'Min', 'Hui', 'Jing',
+    ],
+    female: [
+      'Mei', 'Hua', 'Xiu', 'Lan', 'Fang', 'Xin', 'Yan', 'Ping', 'Yue', 'Ting',
+      'Xia', 'Qian', 'Wen', 'Na', 'Li', 'Juan', 'Jing', 'Shu', 'Min', 'Dan',
+      'Rong', 'Hui', 'Ying', 'Qin', 'Zhen', 'Wei', 'Jie', 'Yi', 'Hong', 'Rui',
     ],
     last: [
       'Li', 'Wang', 'Zhang', 'Liu', 'Chen', 'Yang', 'Zhao', 'Huang', 'Zhou', 'Wu',
@@ -47,10 +54,12 @@ var ILLEGAL_NAME_POOLS = {
     familyFirst: true,
   },
   MIDDLE_EASTERN: {
-    first: [
+    male: [
       'Khalid', 'Omar', 'Yusuf', 'Hassan', 'Tariq', 'Samir', 'Reza', 'Farhad', 'Nasser', 'Jamal',
       'Ibrahim', 'Ahmed', 'Mustafa', 'Ali', 'Mohammed', 'Hamid', 'Karim', 'Rashid', 'Amir', 'Bilal',
       'Farid', 'Majid', 'Walid', 'Ziad', 'Adnan', 'Bassam', 'Hani', 'Imad', 'Marwan', 'Nawaf',
+    ],
+    female: [
       'Fatima', 'Layla', 'Aisha', 'Noor', 'Zahra', 'Maryam', 'Hana', 'Rania', 'Sara', 'Dina',
       'Leila', 'Amira', 'Yasmin', 'Samira', 'Farida',
     ],
@@ -62,10 +71,12 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   EUROPEAN: {
-    first: [
+    male: [
       'Jean-Pierre', 'Hans', 'Marco', 'Pierre', 'Karl', 'Stefan', 'Luca', 'François', 'Jan', 'Tomás',
       'Anton', 'Dieter', 'Emile', 'Friedrich', 'Giuseppe', 'Henrik', 'Jacques', 'Klaus', 'Lorenzo', 'Matteo',
       'Nikolaus', 'Olivier', 'Patrick', 'René', 'Sven', 'Thierry', 'Ulrich', 'Werner', 'Xavier', 'Yves',
+    ],
+    female: [
       'Sophie', 'Maria', 'Anna', 'Elena', 'Claire', 'Ingrid', 'Katarina', 'Margaux', 'Nina', 'Petra',
       'Renata', 'Silvia', 'Tatjana', 'Ursula', 'Valentina',
     ],
@@ -77,10 +88,12 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   LATIN_AMERICAN: {
-    first: [
+    male: [
       'Carlos', 'Diego', 'Miguel', 'Fernando', 'Alejandro', 'Ricardo', 'Pablo', 'Luis', 'Andrés', 'Javier',
       'Antonio', 'Bruno', 'César', 'Daniel', 'Eduardo', 'Francisco', 'Gabriel', 'Héctor', 'Ignacio', 'Jorge',
       'Leonardo', 'Manuel', 'Nicolás', 'Oscar', 'Rafael', 'Santiago', 'Tomás', 'Valentín', 'Xavier', 'Raúl',
+    ],
+    female: [
       'Isabella', 'Valentina', 'Camila', 'Sofía', 'Lucia', 'Mariana', 'Carolina', 'Daniela', 'Gabriela', 'Laura',
       'Natalia', 'Paola', 'Regina', 'Ximena', 'Adriana',
     ],
@@ -92,10 +105,12 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   SOUTH_ASIAN: {
-    first: [
+    male: [
       'Rajesh', 'Amir', 'Vikram', 'Arjun', 'Mohammed', 'Farhan', 'Ravi', 'Imran', 'Sanjay', 'Naveed',
       'Ashok', 'Deepak', 'Gaurav', 'Harish', 'Irfan', 'Kabir', 'Lakshman', 'Nikhil', 'Pranav', 'Rohit',
       'Suresh', 'Tariq', 'Usman', 'Venkat', 'Wasim', 'Yash', 'Zaheer', 'Anand', 'Dinesh', 'Gopal',
+    ],
+    female: [
       'Priya', 'Ayesha', 'Sunita', 'Fatima', 'Meera', 'Anjali', 'Deepa', 'Hina', 'Kavita', 'Lakshmi',
       'Nadia', 'Pooja', 'Rashida', 'Sana', 'Tanvi',
     ],
@@ -107,13 +122,17 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   EAST_ASIAN: {
-    // Japanese and Korean names — family name first
-    first: [
+    // Japanese and Korean names — family name first. Unisex names appear in both pools.
+    male: [
       'Takeshi', 'Hiroshi', 'Kenji', 'Haruki', 'Ryota', 'Akira', 'Daichi', 'Fumio', 'Hayato', 'Isamu',
       'Kazuki', 'Masaru', 'Noboru', 'Ren', 'Shota', 'Tatsuo', 'Yuto', 'Kenichi', 'Makoto', 'Shinji',
       'Joon-ho', 'Sung-min', 'Dong-wook', 'Min-jun', 'Tae-hyun', 'Byung-ho', 'Chan-woo', 'Dae-jung', 'Gi-hun', 'Hyun-woo',
+      'Yuki',
+    ],
+    female: [
       'Yuki', 'Hana', 'Sakura', 'Mei', 'Aiko', 'Emi', 'Kaori', 'Mika', 'Riko', 'Satsuki',
       'Soo-jin', 'Min-ji', 'Hye-won', 'Ji-yeon', 'Yeon-hee',
+      'Makoto', 'Ren', 'Akira',
     ],
     last: [
       'Yamamoto', 'Tanaka', 'Watanabe', 'Sato', 'Nakamura', 'Yoshida', 'Suzuki', 'Takahashi', 'Kobayashi', 'Ito',
@@ -124,10 +143,12 @@ var ILLEGAL_NAME_POOLS = {
     familyFirst: true,
   },
   AFRICAN: {
-    first: [
+    male: [
       'Ibrahim', 'Moussa', 'Abdoulaye', 'Omar', 'Kwame', 'Chukwu', 'Aminu', 'Samuel', 'Jelani', 'Tendai',
       'Adebayo', 'Bakari', 'Chijioke', 'Dakarai', 'Emeka', 'Folarin', 'Gideon', 'Hamza', 'Idris', 'Jabari',
       'Kofi', 'Lamine', 'Mamadou', 'Nnamdi', 'Olumide', 'Sekou', 'Thierno', 'Uche', 'Yaw', 'Zuberi',
+    ],
+    female: [
       'Amina', 'Fatou', 'Blessing', 'Wanjiku', 'Adia', 'Chiamaka', 'Djeneba', 'Esther', 'Fatoumata', 'Grace',
       'Halima', 'Ife', 'Joy', 'Keza', 'Liya',
     ],
@@ -139,9 +160,11 @@ var ILLEGAL_NAME_POOLS = {
     ],
   },
   GENERIC: {
-    first: [
+    male: [
       'Daniel', 'Michael', 'Alexander', 'David', 'Thomas', 'Robert', 'James', 'Peter', 'Andrew', 'Mark',
       'William', 'Christopher', 'Jonathan', 'Stephen', 'Richard', 'Edward', 'Charles', 'George', 'Henry', 'Philip',
+    ],
+    female: [
       'Sarah', 'Elizabeth', 'Catherine', 'Jennifer', 'Amanda', 'Victoria', 'Margaret', 'Rebecca', 'Charlotte', 'Emily',
       'Rachel', 'Laura', 'Susan', 'Patricia', 'Natalie',
     ],
@@ -154,13 +177,17 @@ var ILLEGAL_NAME_POOLS = {
   },
 };
 
-// Compose a full name from first + last pools for a given region.
-function generateCoverName(region) {
+// Compose a full name from gendered first + last pools for a given region.
+// gender: 'M' or 'F' — if not provided, picks randomly (50/50).
+// Returns { name: 'Full Name', gender: 'M'|'F' }
+function generateCoverName(region, gender) {
   var pool = ILLEGAL_NAME_POOLS[region] || ILLEGAL_NAME_POOLS.GENERIC;
-  var first = pick(pool.first);
+  if (!gender) gender = Math.random() < 0.5 ? 'M' : 'F';
+  var firstPool = gender === 'F' ? pool.female : pool.male;
+  var first = pick(firstPool);
   var last = pick(pool.last);
-  if (pool.familyFirst) return last + ' ' + first;
-  return first + ' ' + last;
+  var name = pool.familyFirst ? (last + ' ' + first) : (first + ' ' + last);
+  return { name: name, gender: gender };
 }
 
 // Map countries to name regions
@@ -379,8 +406,10 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, c
   // --- COVER_IDENTITY: dynamically generated ---
   if (fieldKey === 'COVER_IDENTITY') {
     var nameRegion = getCoverNameRegion(agencyCountry);
-    var coverName = generateCoverName(nameRegion);
+    var generated = generateCoverName(nameRegion);
+    var coverName = generated.name;
     ctx.coverName = coverName;
+    ctx.gender = generated.gender;
     var occPool = COVER_OCCUPATIONS[tierId] || COVER_OCCUPATIONS.RECRUITED_AGENT;
     var occupation = pick(occPool);
     var city = location ? location.city : 'unknown city';
@@ -440,13 +469,13 @@ function generateIllegalIntelValue(fieldKey, location, orgName, service, tier, c
 
     if (tierId === 'RECRUITED_AGENT') {
       // Recruited agents use their own identity — real name IS the cover name
-      var recruitedName = ctx.coverName || generateCoverName(realNameRegion);
+      var recruitedName = ctx.coverName || generateCoverName(realNameRegion, ctx.gender).name;
       return 'True identity confirmed: ' + recruitedName + ' — a ' + agencyCountry + ' national recruited by ' + agencyShort + '. ' +
         'Subject is operating under their own identity with no alias. Limited biographical data available. Cooperating at a minimal level.';
     }
 
-    // DEEP_COVER and MISSION_SPECIFIC: real name differs from cover (composable pools make collisions near-impossible)
-    var realName = generateCoverName(realNameRegion);
+    // DEEP_COVER and MISSION_SPECIFIC: real name differs from cover — same gender
+    var realName = generateCoverName(realNameRegion, ctx.gender).name;
     var rank = pick(rankPool);
     return 'True identity: ' + rank + ' ' + realName + ', ' + agencyLabel + '. ' +
       'Biographical intelligence file being compiled. Fingerprint and biometric data collected upon detention. ' +

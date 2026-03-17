@@ -475,6 +475,26 @@ var THREAT_CONTEXT = {
     assessmentSuccess: 'Capture operation {codename} in {city}, {country} successfully apprehended a {agency} operative. Subject is in custody and being transported to a secure detention facility. Intelligence exploitation and interrogation will commence immediately.',
     assessmentFailure: 'Capture operation {codename} in {city}, {country} failed. The {agency} operative evaded the snatch team and is presumed to have been exfiltrated or sought diplomatic protection. The operation\'s exposure may compromise other intelligence activities in {country}.',
   },
+  DOMESTIC_CAPTURE_TARGET: {
+    targetDesc: 'subject\'s last known location',
+    objective: 'fugitive apprehension',
+    preMission: [
+      'High-priority fugitive {org} located in {city}. Subject has outstanding federal warrants and has evaded capture for an extended period. Vigil monitoring confirmed the subject\'s current position. Apprehension team being assembled.',
+      'Federal fugitive {org} identified in {city} through Vigil surveillance network. Subject is considered dangerous based on criminal history and prior evasion behavior. Domestic law enforcement assets cleared for targeted apprehension.',
+    ],
+    jackpotSuccess: [
+      '"JACKPOT." Subject detained by plainclothes team at {loc}. No resistance. Personal effects seized including false identification and cash. Subject transported to federal holding.',
+      '"JACKPOT." Fugitive apprehended without incident. Subject was intercepted during a routine activity and did not attempt to flee. Federal custody confirmed.',
+    ],
+    jackpotFailure: [
+      'Subject was not at the expected location. Evidence of hasty departure — personal items left behind but no forwarding indicators. Subject is back in the wind.',
+      'Apprehension team compromised during approach. Subject fled the area before contact was made. Expanded search in progress but subject has likely relocated.',
+    ],
+    sseSuccess: 'Subject\'s personal effects yielded false identification documents, prepaid communication devices, and evidence of an associate support network. All items catalogued for prosecution.',
+    sseFailure: 'Location was sanitized. Subject departed with all critical personal effects. Limited forensic evidence recovered.',
+    assessmentSuccess: 'Fugitive apprehension {codename} in {city} concluded successfully. Subject in federal custody. Outstanding warrants served. Prosecution process initiated.',
+    assessmentFailure: 'Fugitive apprehension {codename} in {city} failed. Subject remains at large. BOLO updated with latest known description and vehicle information. Vigil monitoring of associate network continues.',
+  },
 };
 
 // Fill template variables in threat context strings
@@ -1835,44 +1855,6 @@ DEBRIEF_GENERATORS.DOMESTIC_HOSTAGE_RESCUE = function(op, v, success) {
 };
 
 // =====================================================================
-//  LAW ENFORCEMENT
-// =====================================================================
-
-DEBRIEF_GENERATORS.LAW_ENFORCEMENT = function(op, v, success) {
-  var entries = [];
-  var suspectsCount = randInt(3, 8);
-  var warrantCount = randInt(2, 5);
-
-  // Pull real intel
-  var memberCountIntel = getIntel(v, 'MEMBER_COUNT');
-  var locationIntel = getIntel(v, 'CELL_LOCATION') || getIntel(v, 'ORG_LOCATION');
-  var leadershipIntel = getIntel(v, 'LEADERSHIP_ID');
-  var weaponsCacheIntel = getIntel(v, 'WEAPONS_CACHE');
-  var networkIntel = getIntel(v, 'SUPPORT_NETWORK') || getIntel(v, 'NETWORK_MAPPING') || getIntel(v, 'FINANCIAL_FLOWS');
-
-  entries.push({ time: dayLabel(-2) + ' ' + zuluTime(0), type: 'normal', text: 'Federal warrants obtained for ' + warrantCount + ' locations associated with ' + v.orgName + ' in ' + v.city + ', United States. ' + v.primaryAsset + ' designated as lead agency. Vigil providing intelligence support.' + (v.confidence ? ' Operation confidence: ' + v.confidence + '%.' : '') + (locationIntel ? ' Location intel: ' + locationIntel + '.' : '') });
-  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Pre-raid coordination complete. ' + randInt(20, 60) + ' agents and officers from ' + randInt(2, 4) + ' agencies briefed. Target packages distributed.' + (leadershipIntel ? ' Leadership identification: ' + leadershipIntel + '.' : '') + (weaponsCacheIntel ? ' Weapons intelligence: ' + weaponsCacheIntel + '.' : '') + ' Tactical plans reviewed. Flash-bang and breach equipment staged.' });
-  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-2), type: 'normal', text: 'All teams in position at ' + warrantCount + ' target locations across ' + v.city + '. ' + (memberCountIntel ? 'Suspect assessment: ' + memberCountIntel + '. ' : '') + 'Surveillance confirms ' + suspectsCount + ' targets at their expected locations. H-hour set. Intel coverage: ' + v.intelCoverage + '%.' });
-
-  if (success) {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"Execute." Simultaneous service of ' + warrantCount + ' warrants. ' + pick(LE_ENTRY) });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 15), type: 'normal', text: 'Location 1: ' + randInt(1, 3) + ' suspects detained. Location 2: ' + randInt(1, 3) + ' suspects in custody after brief standoff — talked down by negotiator. All locations secured within ' + randInt(20, 45) + ' minutes.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(1), type: 'critical', text: suspectsCount + ' total suspects arrested and processed. Evidence recovered: ' + pick(DEBRIEF_EVIDENCE) + '. No shots fired by federal agents.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(4), type: 'normal', text: 'All suspects transported to federal holding. Initial interviews underway. Evidence chain of custody documented. US Attorney\'s office preparing charges.' });
-  } else {
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: '"Execute." Warrant service initiated. ' + pick(LE_ENTRY) + ' However — ' + pick(DEBRIEF_COMPROMISE) + '.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 10), type: 'failure', text: randInt(1, 3) + ' target locations empty — evidence of hasty departure. Primary suspects fled before the operation. Only ' + randInt(1, 2) + ' of ' + suspectsCount + ' targets apprehended — low-level associates with limited intelligence value.' });
-    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Remaining targets entered into NCIC and TECS databases. Border alerts issued. ' + v.orgName + ' network in ' + v.city + ' is alerted and dispersing. Evidence at vacated locations was ' + pick(['destroyed — hard drives wiped, documents burned', 'partially recovered — forensic analysis may yield results', 'removed entirely — professional cleanup']) + '.' });
-  }
-
-  var assessment = success ?
-    'Law enforcement operation against ' + v.orgName + ' in ' + v.city + ' achieved all objectives. ' + suspectsCount + ' suspects in federal custody. Evidence sufficient for prosecution. Operation conducted within constitutional guidelines — all warrants valid, all rights observed.' :
-    'Law enforcement operation partially failed. Key targets fled before warrant service. ' + v.orgName + '\'s network in ' + v.city + ' was alerted — possible leak in the operational planning chain. Internal affairs review recommended. Remaining targets are fugitives.';
-
-  return [buildTimeline(entries), buildAssessment(assessment)];
-};
-
-// =====================================================================
 //  INVESTIGATION
 // =====================================================================
 
@@ -2014,6 +1996,71 @@ DEBRIEF_GENERATORS.ARREST_OPERATION = function(op, v, success) {
   var assessment = success ?
     'Arrest operation against ' + v.orgName + ' in ' + v.city + ' completed successfully. All ' + targetCount + ' subjects in custody. Evidence preserved. Intel coverage: ' + v.intelCoverage + '%. Prosecution timeline on track. Operation conducted within constitutional requirements.' + (v.confidence ? ' Vigil confidence was ' + v.confidence + '%.' : '') :
     'Arrest operation partially failed. Key subject(s) evaded custody. Intel coverage was ' + v.intelCoverage + '% — ' + (v.intelCoverage < 50 ? 'insufficient pre-arrest intelligence likely allowed targets to anticipate the operation.' : 'despite adequate intelligence, operational execution fell short.') + ' Vigil recommends fugitive task force activation and enhanced surveillance on known associates. The failed arrest will alert the wider ' + v.orgName + ' network.';
+
+  return [buildTimeline(entries), buildAssessment(assessment)];
+};
+
+// =====================================================================
+//  SOLO_APPREHENSION — Single-target arrest (illegals, fugitives)
+// =====================================================================
+
+DEBRIEF_GENERATORS.SOLO_APPREHENSION = function(op, v, success) {
+  var entries = [];
+
+  // Pull real intel — solo target keys
+  var subjectIdIntel = getIntel(v, 'SUBJECT_ID') || getIntel(v, 'COVER_IDENTITY') || getIntel(v, 'HVT_IDENTITY');
+  var locationIntel = getIntel(v, 'FUGITIVE_LOCATION') || getIntel(v, 'CELL_LOCATION');
+  var movementsIntel = getIntel(v, 'FUGITIVE_MOVEMENTS') || getIntel(v, 'MOVEMENT_PATTERNS');
+  var armedIntel = getIntel(v, 'FUGITIVE_ARMED') || getIntel(v, 'GUARD_FORCE');
+  var associatesIntel = getIntel(v, 'FUGITIVE_ASSOCIATES') || getIntel(v, 'NETWORK_MAPPING');
+  var apprehensionIntel = getIntel(v, 'FUGITIVE_APPREHENSION') || getIntel(v, 'CONTINGENCY_PLANNING');
+  var backgroundIntel = getIntel(v, 'FUGITIVE_BACKGROUND');
+  var actualGear = (v.equipment && v.equipment.length > 0) ? pickItems(v.equipment, 2) : '';
+  var actualVehicles = (v.vehicles && v.vehicles.length > 0) ? pickItems(v.vehicles, 1) : '';
+
+  var approachType = pick(['plainclothes', 'tactical', 'mixed']);
+  var approachDesc = approachType === 'plainclothes' ? 'Plainclothes surveillance team' :
+    approachType === 'tactical' ? 'Tactical arrest team in full kit' : 'Mixed element — plainclothes outer cordon, tactical inner team';
+
+  entries.push({ time: dayLabel(-1) + ' ' + zuluTime(0), type: 'normal', text: 'Apprehension order issued for ' + v.orgName + ' in ' + v.city + ', United States. ' + v.primaryAsset + ' assigned as lead. Single-target operation.' + (subjectIdIntel ? ' Subject profile: ' + subjectIdIntel + '.' : '') + (v.confidence ? ' Vigil confidence: ' + v.confidence + '%.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-4), type: 'normal', text: approachDesc + ' deployed to ' + v.city + '. ' + (locationIntel ? 'Subject located: ' + locationIntel + ' ' : 'Subject\'s last known position confirmed. ') + (movementsIntel ? 'Pattern-of-life assessment: ' + movementsIntel + ' ' : '') + (v.totalPersonnel ? v.totalPersonnel + ' personnel staged.' : '') + (actualVehicles ? ' Vehicles: ' + actualVehicles + '.' : '') });
+  entries.push({ time: dayLabel(0) + ' ' + zuluTime(-1), type: 'normal', text: 'Final brief. ' + (apprehensionIntel ? 'Apprehension plan: ' + apprehensionIntel + ' ' : 'Intercept planned at subject\'s next predictable location. ') + (armedIntel ? 'Armed assessment: ' + armedIntel + ' ' : '') + 'Rules of engagement: minimum force. Intel coverage: ' + v.intelCoverage + '%.' + (actualGear ? ' Team loadout: ' + actualGear + '.' : '') });
+
+  if (success) {
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: pick([
+      'Subject intercepted at ' + pick(['a gas station', 'a convenience store', 'a motel parking lot', 'a residential address', 'a laundromat', 'a transit stop']) + ' in ' + v.city + '. Plainclothes agents approached and identified themselves. Subject complied after brief verbal exchange. Handcuffed without incident.',
+      'Apprehension team moved on subject at ' + pick(['the known residence', 'a vehicle stop on a surface street', 'a commercial establishment', 'an associate\'s address']) + '. Subject attempted to walk away — agents identified themselves and subject was detained. No resistance.',
+      'Subject spotted at ' + pick(['a fueling station', 'a grocery store', 'a public park', 'a fast-food restaurant']) + '. Team closed in from two directions. Subject complied immediately upon seeing credentials. Arrested without incident.',
+      'Tactical team executed a vehicle stop on subject\'s car at a red light in ' + v.city + '. Agents boxed the vehicle. Subject ordered out at gunpoint. Complied immediately. Secured without incident.',
+      'FBI HRT breached subject\'s motel room at ' + pick(['0430', '0515', '0545']) + ' local. Flash-bang deployed. Subject found in bed. No resistance. Taken into custody.',
+      'Arrest team intercepted subject leaving ' + pick(['a restaurant', 'a gym', 'a rented storage unit', 'a barbershop']) + '. Agents in tactical vests converged from unmarked vehicles. Subject froze. Detained and cuffed within seconds.',
+    ]) + (v.prisonerName ? ' Prisoner designated: ' + v.prisonerName + '.' : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 20), type: 'normal', text: 'Subject\'s personal effects searched incident to arrest. Recovered: ' + pick(['a prepaid mobile phone, $2,400 in cash, and a set of false identification documents', 'encrypted communication device, foreign currency, and a notebook with coded entries', 'two mobile phones (1 encrypted), a laptop, and a go-bag containing travel documents', 'a handgun (loaded), false identification, and $6,000 in cash']) + '. All items catalogued for evidence.' + (associatesIntel ? ' Associate network assessment: ' + associatesIntel : '') });
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(2), type: 'normal', text: 'Subject transported to federal holding facility. ' + pick(['Initial interview conducted — subject is not cooperating.', 'Subject invoked right to counsel. Attorney notification in progress.', 'Subject is cooperating at a minimal level. Preliminary debriefing underway.', 'Subject provided name and date of birth only. Interrogation team standing by.']) + (backgroundIntel ? ' Background: ' + backgroundIntel : '') });
+  } else {
+    var gapAnalysis = '';
+    if (v._unrevealedIntel && v._unrevealedIntel.length > 0) {
+      var gaps = v._unrevealedIntel.slice(0, 2).map(function(f) { return f.label; }).join(' and ');
+      gapAnalysis = ' Intelligence gaps in ' + gaps + ' contributed to the failure.';
+    }
+    entries.push({ time: dayLabel(0) + ' ' + zuluTime(0), type: 'critical', text: pick([
+      'Apprehension team arrived at target location — subject was not present. Neighbors report the individual left with a bag hours earlier.',
+      'Subject detected surveillance team during approach. Fled on foot through a crowded area. Pursuit lost contact after 3 blocks.',
+      'Team approached subject at expected intercept point. Subject ran to a vehicle and departed at high speed. Vehicle pursuit terminated after 4 minutes per department policy.',
+      'Subject was tipped off — location was empty and cleaned. Personal effects removed. Subject is in the wind.',
+      'Tactical team breached the motel room — empty. Bed still warm. Subject departed through a rear fire escape within the last 20 minutes. Perimeter was not established in time.',
+      'Vehicle stop attempted. Subject accelerated through the box, T-boned an unmarked sedan, and fled on foot into a residential area. K-9 unit deployed but lost the trail.',
+    ]) + gapAnalysis });
+    entries.push({ time: dayLabel(0) + ' ' + zuluMinOffset(0, 30), type: 'failure', text: pick([
+      'Expanded search of surrounding area negative. Subject has left the immediate area. BOLO issued to all regional field offices and transportation hubs.',
+      'Review of CCTV footage shows subject departed the area via ' + pick(['public transit', 'a ride-share vehicle', 'a pre-positioned vehicle', 'an associate\'s car']) + ' approximately ' + randInt(1, 4) + ' hours before the team arrived.',
+      'Canvass of known associates yielded no cooperation. All contacts are aware of the investigation. Subject\'s network has gone dark.',
+    ]) });
+  }
+
+  var assessment = success ?
+    'Solo apprehension of ' + v.orgName + ' in ' + v.city + ' executed successfully. Subject in federal custody. Personal effects and devices seized for exploitation. Intel coverage: ' + v.intelCoverage + '%.' + (v.confidence ? ' Vigil confidence was ' + v.confidence + '%.' : '') :
+    'Apprehension of ' + v.orgName + ' in ' + v.city + ' failed. Subject evaded the team and is at large. Intel coverage was ' + v.intelCoverage + '% — ' + (v.intelCoverage < 50 ? 'insufficient intelligence on the subject\'s movements likely contributed to the miss.' : 'despite adequate intelligence, the subject\'s counter-surveillance awareness was underestimated.') + ' BOLO active. Recommend enhanced monitoring of known associates.';
 
   return [buildTimeline(entries), buildAssessment(assessment)];
 };

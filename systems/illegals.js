@@ -771,8 +771,8 @@ function repatriatePrisoner(prisonerId, targetCountry) {
 
     if (op.status === 'SUCCESS') {
 
-      // CAPTURE_OP or ARREST_OPERATION on illegal → create prisoner
-      if (op.operationType === 'CAPTURE_OP' || op.operationType === 'ARREST_OPERATION') {
+      // CAPTURE_OP, ARREST_OPERATION, or SOLO_APPREHENSION on illegal → create prisoner
+      if (op.operationType === 'CAPTURE_OP' || op.operationType === 'ARREST_OPERATION' || op.operationType === 'SOLO_APPREHENSION') {
         var prisoner = createPrisonerFromThreat(threat, op.id);
         if (prisoner) {
           op._prisonerId = prisoner.id;
