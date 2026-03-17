@@ -8,6 +8,7 @@
   var STORAGE_KEY = 'vigil_saves';
   var AUTOSAVE_ID = '__autosave__';
   var MAX_SAVES = 20;
+  var _lastSaveError = null; // Track save failures for UI display
 
   // --- Serialization ---
 
@@ -36,19 +37,48 @@
       }
     }
 
-    // --- Slim operations: strip options + intelFields from completed ops (debrief already stored) ---
+    // --- Slim operations: strip heavy fields from completed ops, cap history ---
     if (snap.operations && Array.isArray(snap.operations)) {
+      var activeOps = [];
+      var completedOps = [];
       for (var oi = 0; oi < snap.operations.length; oi++) {
         var op = snap.operations[oi];
         if (op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'EXPIRED') {
-          // Keep only the selected option's confidence for reference
+          // Strip heavy fields (debrief text is already stored)
           if (op.options && op.selectedOptionIdx !== undefined && op.options[op.selectedOptionIdx]) {
             op._selectedConfidence = op.options[op.selectedOptionIdx].confidencePercent;
           }
           delete op.options;
           delete op.intelFields;
+          // Strip location detail (only keep geo for map pin)
+          delete op.location;
+          delete op.briefing;
+          completedOps.push(op);
+        } else {
+          activeOps.push(op);
         }
       }
+      // Keep only the 30 most recent completed ops (by daySpawned descending)
+      completedOps.sort(function(a, b) { return (b.daySpawned || 0) - (a.daySpawned || 0); });
+      snap.operations = activeOps.concat(completedOps.slice(0, 30));
+    }
+
+    // --- Cap resolved threats: keep active + 30 most recent resolved ---
+    if (snap.threats && Array.isArray(snap.threats)) {
+      var activeThreats = [];
+      var resolvedThreats = [];
+      for (var ti = 0; ti < snap.threats.length; ti++) {
+        var t = snap.threats[ti];
+        if (t.status === 'ACTIVE' || t.phase === 'INTEL' || t.phase === 'OPS') {
+          activeThreats.push(t);
+        } else {
+          // Strip intelFields from resolved threats (values no longer needed)
+          delete t.intelFields;
+          resolvedThreats.push(t);
+        }
+      }
+      resolvedThreats.sort(function(a, b) { return (b.daySpawned || 0) - (a.daySpawned || 0); });
+      snap.threats = activeThreats.concat(resolvedThreats.slice(0, 30));
     }
 
     // --- Slim agencies: strip static config fields (rehydrated from INTELLIGENCE_SERVICES / NON_STATE_AGENCIES on load) ---
@@ -177,9 +207,13 @@
 
       var jsonStr = JSON.stringify(saves);
       localStorage.setItem(STORAGE_KEY, jsonStr);
+      _lastSaveError = null;
       addLog('Game saved: ' + (label || id), 'log-info');
     } catch (e) {
       console.error('[SAVE] Save failed:', e.message);
+      _lastSaveError = e.message && e.message.indexOf('quota') >= 0
+        ? 'Storage full — delete an existing save to free space, or export saves to file.'
+        : 'Save failed: ' + e.message;
       addLog('Save failed: ' + e.message, 'log-warn');
     }
   }
@@ -302,7 +336,16 @@
       return (saves[b].timestamp || 0) - (saves[a].timestamp || 0);
     });
 
-    var html = '<div style="margin-bottom:var(--sp-4)">' +
+    var html = '';
+
+    // Show error banner if last save failed
+    if (_lastSaveError) {
+      html += '<div style="margin-bottom:var(--sp-3);padding:var(--sp-3);background:rgba(255,60,60,0.12);border:1px solid var(--fail);border-radius:var(--radius-sm);color:var(--fail);font-family:var(--font-mono);font-size:var(--fs-xs)">' +
+        _lastSaveError +
+      '</div>';
+    }
+
+    html += '<div style="margin-bottom:var(--sp-4)">' +
       '<button class="modal-btn modal-btn-primary" onclick="quickSave()" style="width:100%">SAVE CURRENT GAME</button>' +
       '</div>';
 
@@ -350,6 +393,7 @@
 
   window.deleteSaveSlot = function(slotId) {
     deleteSave(slotId);
+    _lastSaveError = null; // Clear error — space freed
     hideModal();
     showSaveModal();
   };
