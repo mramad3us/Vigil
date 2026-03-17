@@ -58,9 +58,9 @@
           activeOps.push(op);
         }
       }
-      // Keep only the 30 most recent completed ops (by daySpawned descending)
+      // Keep only the 10 most recent completed ops (by daySpawned descending)
       completedOps.sort(function(a, b) { return (b.daySpawned || 0) - (a.daySpawned || 0); });
-      snap.operations = activeOps.concat(completedOps.slice(0, 30));
+      snap.operations = activeOps.concat(completedOps.slice(0, 10));
     }
 
     // --- Cap resolved threats: keep active + 30 most recent resolved ---
@@ -356,11 +356,12 @@
       for (var i = 0; i < keys.length; i++) {
         var s = saves[keys[i]];
         var dateStr = s.timestamp ? new Date(s.timestamp).toLocaleString() : 'Unknown';
+        var sizeKB = (JSON.stringify(s).length / 1024).toFixed(0);
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3);background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm)">' +
           '<div>' +
             '<div style="font-weight:600;color:var(--text-hi);font-size:var(--fs-sm)">' + (s.label || s.id) + '</div>' +
             '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim)">' +
-              (s.callsign || '?') + ' · Day ' + (s.day || '?') + ' · ' + dateStr +
+              (s.callsign || '?') + ' · Day ' + (s.day || '?') + ' · ' + sizeKB + ' KB · ' + dateStr +
             '</div>' +
           '</div>' +
           '<div style="display:flex;gap:var(--sp-1)">' +
