@@ -34,7 +34,7 @@
 
     render: function() {
       renderMediaList();
-      updateWorkspaceBadge('media', getUnreadMediaCount());
+      updateWorkspaceBadge('media', V.media.length);
     },
   });
 
@@ -57,13 +57,12 @@
     for (var i = 0; i < V.media.length; i++) {
       var story = V.media[i];
       var sentimentCls = story.sentiment === 'NEGATIVE' ? 'negative' : story.sentiment === 'POSITIVE' ? 'positive' : 'neutral';
-      var readCls = story.read ? ' read' : '';
 
-      html += '<div class="media-story' + readCls + '">' +
+      html += '<div class="media-story">' +
         '<div class="media-story-header">' +
           '<span class="media-source">' + story.source + '</span>' +
           '<span class="media-story-header-right">' +
-            (story.read ? '' : '<button class="media-read-btn" onclick="markMediaRead(\'' + story.id + '\')">DISMISS</button>') +
+            '<button class="media-read-btn" onclick="dismissMediaStory(\'' + story.id + '\')">DISMISS</button>' +
             '<span class="media-timestamp">' + formatTimestamp(story.timestamp) + '</span>' +
           '</span>' +
         '</div>' +
@@ -90,30 +89,22 @@
     };
 
     V.media.unshift(story);
-    if (V.media.length > 100) V.media.length = 100;
+    if (V.media.length > 5) V.media.length = 5;
 
     // Badge the media tab
-    updateWorkspaceBadge('media', getUnreadMediaCount());
+    updateWorkspaceBadge('media', V.media.length);
 
     return story;
   }
 
-  function getUnreadMediaCount() {
-    var count = 0;
-    for (var i = 0; i < V.media.length; i++) {
-      if (!V.media[i].read) count++;
-    }
-    return count;
-  }
-
-  window.markMediaRead = function(storyId) {
+  window.dismissMediaStory = function(storyId) {
     for (var i = 0; i < V.media.length; i++) {
       if (V.media[i].id === storyId) {
         V.media.splice(i, 1);
         break;
       }
     }
-    updateWorkspaceBadge('media', getUnreadMediaCount());
+    updateWorkspaceBadge('media', V.media.length);
     renderMediaList();
   };
 

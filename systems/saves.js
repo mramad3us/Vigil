@@ -331,6 +331,12 @@
       }
     }
 
+    // Migrate media: strip read entries from old saves, cap to 5
+    if (V.media && Array.isArray(V.media)) {
+      V.media = V.media.filter(function(m) { return !m.read; });
+      if (V.media.length > 5) V.media.length = 5;
+    }
+
     // Resync uid counters so new IDs don't collide with loaded state
     if (typeof resyncUidCounters === 'function') resyncUidCounters();
 
