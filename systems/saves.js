@@ -18,6 +18,8 @@
     'designation', 'collectionProfile', 'personnel', 'deniability',
     'domesticAuthority', 'diplomaticEffectiveness', 'isMobileBase',
     'effectiveRangeKm', 'fieldUnit', 'teamSize',
+    // Additional static fields from template
+    'speed', 'capabilities', 'category', 'readiness', 'maxReroutes', 'maxTeams',
   ];
 
   function serializeState() {
@@ -27,13 +29,24 @@
       return value;
     }));
 
-    // --- Slim assets: strip static template fields (rehydrated on load) ---
+    // --- Slim assets: strip static template fields + null transit data ---
     if (snap.assets && Array.isArray(snap.assets)) {
       for (var ai = 0; ai < snap.assets.length; ai++) {
         var a = snap.assets[ai];
         for (var si = 0; si < ASSET_STATIC_KEYS.length; si++) {
           delete a[ASSET_STATIC_KEYS[si]];
         }
+        // Strip null/zero transit fields (default on load)
+        if (!a.assignedOpId) delete a.assignedOpId;
+        if (!a.assignedThreatId) delete a.assignedThreatId;
+        if (!a.originLat) { delete a.originLat; delete a.originLon; }
+        if (!a.destinationLat) { delete a.destinationLat; delete a.destinationLon; }
+        if (!a.transitStartTotalMinutes) delete a.transitStartTotalMinutes;
+        if (!a.transitDurationMinutes) delete a.transitDurationMinutes;
+        if (!a.rerouteCount) delete a.rerouteCount;
+        // Strip runtime cache
+        delete a._transitPath;
+        delete a._stationPoint;
       }
     }
 
@@ -55,6 +68,12 @@
           delete op.briefing;
           completedOps.push(op);
         } else {
+          // Active ops: once approved, only keep the selected option
+          if (op.options && op.selectedOptionIdx !== undefined &&
+              (op.status === 'APPROVED' || op.status === 'ASSETS_IN_TRANSIT' || op.status === 'EXECUTING')) {
+            op.options = [op.options[op.selectedOptionIdx]];
+            op.selectedOptionIdx = 0;
+          }
           activeOps.push(op);
         }
       }
@@ -105,6 +124,11 @@
     if (snap.log && Array.isArray(snap.log) && snap.log.length > 100) {
       snap.log = snap.log.slice(snap.log.length - 100);
     }
+
+    // Debug: log size breakdown
+    var _db = {};
+    for (var _k in snap) { if (snap.hasOwnProperty(_k)) _db[_k] = (JSON.stringify(snap[_k]).length / 1024).toFixed(0); }
+    console.log('[SAVE] Size (KB):', JSON.stringify(_db));
 
     return snap;
   }
@@ -258,7 +282,21 @@
           if (a.teamSize === undefined) a.teamSize = tpl.teamSize || 0;
           if (a.maxTeams === undefined) a.maxTeams = tpl.maxTeams || 0;
           if (a.availableTeams === undefined) a.availableTeams = a.maxTeams;
+          // Additional static fields
+          if (a.speed === undefined) a.speed = tpl.speed || 0;
+          if (a.capabilities === undefined) a.capabilities = tpl.capabilities ? tpl.capabilities.slice() : [];
+          if (a.category === undefined) a.category = tpl.category || '';
+          if (a.readiness === undefined) a.readiness = tpl.readiness || 'FULL';
+          if (a.maxReroutes === undefined) a.maxReroutes = (tpl.readiness === 'TIER_1') ? 5 : 2;
         }
+        // Restore defaults for stripped null/zero fields
+        if (a.assignedOpId === undefined) a.assignedOpId = null;
+        if (a.assignedThreatId === undefined) a.assignedThreatId = null;
+        if (a.originLat === undefined) { a.originLat = null; a.originLon = null; }
+        if (a.destinationLat === undefined) { a.destinationLat = null; a.destinationLon = null; }
+        if (a.transitStartTotalMinutes === undefined) a.transitStartTotalMinutes = 0;
+        if (a.transitDurationMinutes === undefined) a.transitDurationMinutes = 0;
+        if (a.rerouteCount === undefined) a.rerouteCount = 0;
         if (!a.recoveryQueue) a.recoveryQueue = [];
       }
     }
