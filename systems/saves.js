@@ -63,9 +63,15 @@
           }
           delete op.options;
           delete op.intelFields;
-          // Strip location detail (only keep geo for map pin)
-          delete op.location;
-          delete op.briefing;
+          // Slim location to display fields only (strip geo coords, theater object)
+          if (op.location) {
+            op.location = {
+              city: op.location.city,
+              country: op.location.country,
+              theaterId: op.location.theaterId,
+              theaterName: op.location.theater ? op.location.theater.name : null,
+            };
+          }
           completedOps.push(op);
         } else {
           // Active ops: once approved, only keep the selected option
@@ -129,11 +135,6 @@
     if (snap.media && Array.isArray(snap.media) && snap.media.length > 5) {
       snap.media = snap.media.slice(snap.media.length - 5);
     }
-
-    // Debug: log size breakdown
-    var _db = {};
-    for (var _k in snap) { if (snap.hasOwnProperty(_k)) _db[_k] = (JSON.stringify(snap[_k]).length / 1024).toFixed(0); }
-    console.log('[SAVE] Size (KB):', JSON.stringify(_db));
 
     return snap;
   }
@@ -327,6 +328,19 @@
               }
             }
           }
+        }
+      }
+    }
+
+    // Rehydrate slim op locations (completed ops have theaterName instead of theater object)
+    if (V.operations && Array.isArray(V.operations)) {
+      for (var oi = 0; oi < V.operations.length; oi++) {
+        var op = V.operations[oi];
+        if (op.location && !op.location.theater && op.location.theaterName) {
+          op.location.theater = { name: op.location.theaterName };
+        }
+        if (op.location && !op.location.theater && op.location.theaterId && typeof THEATERS !== 'undefined' && THEATERS[op.location.theaterId]) {
+          op.location.theater = THEATERS[op.location.theaterId];
         }
       }
     }

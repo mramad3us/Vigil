@@ -355,6 +355,9 @@ function sendDiplomaticGift(country) {
           });
         } else {
           cd.pendingClearance.status = 'DENIED';
+          cd.pendingClearance.deniedAt = V.time.totalMinutes;
+          cd.pendingClearance.deniedMonth = V.time.month;
+          cd.pendingClearance.deniedYear = V.time.year;
           addLog('DIPLOMACY: ' + country + ' has DENIED clearance request.', 'log-warn');
           pushFeedItem({
             id: uid('FI'), type: 'DIPLOMATIC', severity: 'ELEVATED',
@@ -635,7 +638,11 @@ function fireDiplomaticIncident(country, type, op) {
 function requestClearance(country, opId) {
   var cd = V.diplomacy[country];
   if (!cd) return null;
+  if (cd.atWar) return null;
   if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') return cd.pendingClearance;
+  if (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED') return cd.pendingClearance;
+  if (cd.pendingClearance && cd.pendingClearance.status === 'DENIED' &&
+      cd.pendingClearance.deniedMonth === V.time.month && cd.pendingClearance.deniedYear === V.time.year) return null;
 
   var stance = deriveStance(country);
   var delayRanges = {
@@ -850,7 +857,11 @@ function startDiplomaticOutreach(country, assetId, mode) {
 function requestProactiveClearance(country, assetId) {
   var cd = V.diplomacy[country];
   if (!cd) return null;
+  if (cd.atWar) return null;
   if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') return cd.pendingClearance;
+  if (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED') return cd.pendingClearance;
+  if (cd.pendingClearance && cd.pendingClearance.status === 'DENIED' &&
+      cd.pendingClearance.deniedMonth === V.time.month && cd.pendingClearance.deniedYear === V.time.year) return null;
 
   var stance = deriveStance(country);
   var delayRanges = {

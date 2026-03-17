@@ -541,12 +541,22 @@
     var disabled = false;
     var reason = '';
 
-    if (stance >= 6) {
+    if (cd.atWar) {
+      disabled = true;
+      reason = 'Cannot request clearance from a nation at war with the US';
+    } else if (stance >= 6) {
       disabled = true;
       reason = 'Overt operations already authorized at this stance';
+    } else if (cd.pendingClearance && cd.pendingClearance.status === 'GRANTED') {
+      disabled = true;
+      reason = 'Clearance already granted';
     } else if (cd.pendingClearance && cd.pendingClearance.status === 'PENDING') {
       disabled = true;
       reason = 'Clearance already pending';
+    } else if (cd.pendingClearance && cd.pendingClearance.status === 'DENIED' &&
+        cd.pendingClearance.deniedMonth === V.time.month && cd.pendingClearance.deniedYear === V.time.year) {
+      disabled = true;
+      reason = 'Clearance denied this month — try again next month';
     }
 
     var expanded = (_activeAction === 'CLEARANCE' && !disabled);
@@ -570,11 +580,13 @@
   }
 
   function renderShareIntelCard(country) {
+    var cd = V.diplomacy[country];
     var threats = getDisclosableThreats(country);
     var disabled = false;
     var reason = '';
 
-    if (threats.length === 0) { disabled = true; reason = 'No disclosable threats for this country.'; }
+    if (cd && cd.atWar) { disabled = true; reason = 'Cannot share intelligence with a nation at war with the US'; }
+    else if (threats.length === 0) { disabled = true; reason = 'No disclosable threats for this country.'; }
     else if (V.resources.intel < 10) { disabled = true; reason = 'Insufficient intel (10 required)'; }
 
     var expanded = (_activeAction === 'SHARE_INTEL' && !disabled);

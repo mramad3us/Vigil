@@ -218,7 +218,7 @@
     // Briefing
     html += '<div class="op-detail-section" style="margin-top:var(--sp-4)">' +
       '<div class="op-detail-section-title">BRIEFING</div>' +
-      '<div class="op-detail-briefing">' + op.briefing + '</div>' +
+      '<div class="op-detail-briefing">' + (op.briefing || '<span style="opacity:0.4">Briefing data archived</span>') + '</div>' +
     '</div>';
 
     // Details — expanded
