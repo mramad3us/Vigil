@@ -501,8 +501,6 @@ function createPrisonerFromThreat(threat, sourceOpId) {
       driedUp: false,
     },
 
-    repatriated: false,
-    repatriatedDay: null,
   };
 
   // Copy intel fields (deep copy)
@@ -569,18 +567,13 @@ function assignDetentionSite(isDomestic, agentTier) {
 // For non-state agencies, this is the enemy country the player chose to transfer to.
 function repatriatePrisoner(prisonerId, targetCountry) {
   var prisoner = getPrisoner(prisonerId);
-  if (!prisoner || prisoner.repatriated) return;
+  if (!prisoner) return;
 
   var svc = getServiceById(prisoner.agency);
   var isNonState = svc && svc.type === 'NON_STATE';
 
   // Default target for state agencies
   if (!targetCountry) targetCountry = prisoner.agencyCountry;
-
-  prisoner.repatriated = true;
-  prisoner.repatriatedDay = V.time.day;
-  prisoner.repatriatedTo = targetCountry;
-  prisoner.interrogation.driedUp = true;
 
   // Relations boost scales by tier
   var boostRanges = {
@@ -612,6 +605,15 @@ function repatriatePrisoner(prisonerId, targetCountry) {
     timestamp: { day: V.time.day, hour: V.time.hour, minute: Math.floor(V.time.minutes) },
     read: false,
   });
+
+  // Remove prisoner from the game
+  for (var i = 0; i < V.prisoners.length; i++) {
+    if (V.prisoners[i].id === prisonerId) {
+      V.prisoners.splice(i, 1);
+      break;
+    }
+  }
+  updateWorkspaceBadge('illegals', V.prisoners.length);
 }
 
 // ===================================================================
@@ -645,7 +647,7 @@ function repatriatePrisoner(prisonerId, targetCountry) {
   hook('tick:hour', function() {
     for (var i = 0; i < V.prisoners.length; i++) {
       var p = V.prisoners[i];
-      if (p.repatriated || p.interrogation.driedUp) continue;
+      if (p.interrogation.driedUp) continue;
 
       // Progress
       p.interrogation.progress = Math.min(100, p.interrogation.progress + p.interrogation.progressRate);

@@ -78,7 +78,7 @@
           '</svg>' +
           '<div class="threat-gauge-label">' + tl.level + '</div>' +
         '</div>' +
-        '<div class="threat-gauge-text">' + Math.round(riskPct) + '% RISK CAPACITY</div>' +
+        '<div class="threat-gauge-text">' + Math.round(riskPct) + '% GLOBAL RISK</div>' +
       '</div>';
 
     // Stats

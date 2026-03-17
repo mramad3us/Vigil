@@ -153,15 +153,19 @@
   window.executeRepatriate = function(id) {
     hideModal();
     repatriatePrisoner(id);
+    _selectedPrisoner = null;
     renderPrisonerList();
-    renderPrisonerDetail(id);
+    var detail = $('ill-detail');
+    if (detail) detail.innerHTML = '<div class="ws-detail-empty">Select a prisoner</div>';
   };
 
   window.executeTransfer = function(id, country) {
     hideModal();
     repatriatePrisoner(id, country);
+    _selectedPrisoner = null;
     renderPrisonerList();
-    renderPrisonerDetail(id);
+    var detail = $('ill-detail');
+    if (detail) detail.innerHTML = '<div class="ws-detail-empty">Select a prisoner</div>';
   };
 
   window.executePursue = function(agencyId) {
@@ -178,39 +182,17 @@
     var list = $('ill-list');
     if (!list) return;
 
-    var active = [];
-    var repatriated = [];
-    for (var i = 0; i < V.prisoners.length; i++) {
-      if (V.prisoners[i].repatriated) {
-        repatriated.push(V.prisoners[i]);
-      } else {
-        active.push(V.prisoners[i]);
-      }
-    }
-
     var countEl = $('ill-count');
-    if (countEl) countEl.textContent = active.length + ' active';
+    if (countEl) countEl.textContent = V.prisoners.length + ' active';
 
-    var html = '';
-
-    if (active.length === 0 && repatriated.length === 0) {
-      html = '<div class="ill-empty">No detained operatives</div>';
-      list.innerHTML = html;
+    if (V.prisoners.length === 0) {
+      list.innerHTML = '<div class="ill-empty">No detained operatives</div>';
       return;
     }
 
-    if (active.length > 0) {
-      html += '<div class="ill-group-header">ACTIVE DETENTION</div>';
-      for (var a = 0; a < active.length; a++) {
-        html += renderPrisonerRow(active[a]);
-      }
-    }
-
-    if (repatriated.length > 0) {
-      html += '<div class="ill-group-header">REPATRIATED</div>';
-      for (var r = 0; r < repatriated.length; r++) {
-        html += renderPrisonerRow(repatriated[r]);
-      }
+    var html = '<div class="ill-group-header">ACTIVE DETENTION</div>';
+    for (var i = 0; i < V.prisoners.length; i++) {
+      html += renderPrisonerRow(V.prisoners[i]);
     }
 
     list.innerHTML = html;
@@ -222,9 +204,7 @@
     var tierShort = p.tier === 'DEEP_COVER' ? 'DEEP' : p.tier === 'MISSION_SPECIFIC' ? 'MSA' : 'RCA';
 
     var rightBadge = '';
-    if (p.repatriated) {
-      rightBadge = '<span class="ill-repatriated-badge">REPATRIATED</span>';
-    } else if (p.interrogation.driedUp) {
+    if (p.interrogation.driedUp) {
       rightBadge = '<span class="ill-dried-badge">DRIED UP</span>';
     } else {
       var pct = Math.round(p.interrogation.progress);
@@ -305,14 +285,12 @@
     html += '</div>';
 
     // Actions
-    if (!p.repatriated) {
-      var _svc = getServiceById(p.agency);
-      var _isNonState = _svc && _svc.type === 'NON_STATE';
-      var btnLabel = _isNonState ? 'TRANSFER TO ALLIED SERVICE' : ('REPATRIATE TO ' + esc(p.agencyCountry).toUpperCase());
-      html += '<div class="ill-detail-section">';
-      html += '<button class="ill-repatriate-btn" onclick="confirmRepatriate(\'' + p.id + '\')">' + btnLabel + '</button>';
-      html += '</div>';
-    }
+    var _svc = getServiceById(p.agency);
+    var _isNonState = _svc && _svc.type === 'NON_STATE';
+    var btnLabel = _isNonState ? 'TRANSFER TO ALLIED SERVICE' : ('REPATRIATE TO ' + esc(p.agencyCountry).toUpperCase());
+    html += '<div class="ill-detail-section">';
+    html += '<button class="ill-repatriate-btn" onclick="confirmRepatriate(\'' + p.id + '\')">' + btnLabel + '</button>';
+    html += '</div>';
 
     html += '</div>';
     detail.innerHTML = html;
@@ -382,7 +360,7 @@
     // Count held prisoners for this agency
     var prisonerCount = 0;
     for (var i = 0; i < V.prisoners.length; i++) {
-      if (V.prisoners[i].agency === agency.id && !V.prisoners[i].repatriated) prisonerCount++;
+      if (V.prisoners[i].agency === agency.id) prisonerCount++;
     }
 
     // Intel progress indicator
@@ -445,7 +423,7 @@
     // Prisoner acceleration note
     var heldPrisoners = [];
     for (var pi = 0; pi < V.prisoners.length; pi++) {
-      if (V.prisoners[pi].agency === id && !V.prisoners[pi].repatriated && !V.prisoners[pi].interrogation.driedUp) {
+      if (V.prisoners[pi].agency === id && !V.prisoners[pi].interrogation.driedUp) {
         heldPrisoners.push(V.prisoners[pi]);
       }
     }
@@ -491,7 +469,7 @@
       html += '<div class="ill-detail-section-title">DETAINED OPERATIVES</div>';
       for (var dp = 0; dp < allPrisoners.length; dp++) {
         var prisoner = allPrisoners[dp];
-        var statusLabel = prisoner.repatriated ? 'REPATRIATED' : (prisoner.interrogation.driedUp ? 'DRIED UP' : Math.round(prisoner.interrogation.progress) + '%');
+        var statusLabel = prisoner.interrogation.driedUp ? 'DRIED UP' : Math.round(prisoner.interrogation.progress) + '%';
         html += '<div class="ill-link-row" onclick="setIllMode(\'PRISONERS\');selectPrisoner(\'' + prisoner.id + '\')">' +
           esc(getPrisonerDisplayName(prisoner)) + ' — ' + esc(prisoner.tierLabel) + ' [' + statusLabel + ']</div>';
       }

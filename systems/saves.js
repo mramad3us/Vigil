@@ -345,6 +345,11 @@
       }
     }
 
+    // Migrate prisoners: remove repatriated prisoners from old saves
+    if (V.prisoners && Array.isArray(V.prisoners)) {
+      V.prisoners = V.prisoners.filter(function(p) { return !p.repatriated; });
+    }
+
     // Migrate media: strip read entries from old saves, cap to 5
     if (V.media && Array.isArray(V.media)) {
       V.media = V.media.filter(function(m) { return !m.read; });

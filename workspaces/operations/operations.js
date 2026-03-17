@@ -12,6 +12,7 @@
   var _expandedAssets = {}; // track which asset rows are expanded in option cards
   var _customConfig = null; // { opId, baseOptionIdx, assetIds: [...] }
   var _customFilter = 'ALL'; // 'ALL', 'SANCTIONED', 'COVERT'
+  var _readArchiveOps = {}; // track which archived ops have been viewed
 
   registerWorkspace({
     id: 'operations',
@@ -144,6 +145,8 @@
   function renderOpCard(op) {
     var statusCls = STATUS_CSS[op.status] || op.status.toLowerCase();
     var selectedCls = op.id === _selectedOpId ? ' selected' : '';
+    var isTerminal = op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'ARCHIVED' || op.status === 'EXPIRED';
+    var unreadCls = (isTerminal && !_readArchiveOps[op.id]) ? ' op-unread' : '';
     var statusLabel = STATUS_LABELS[op.status] || op.status;
 
     // Timer display
@@ -174,7 +177,7 @@
     }
     pipsHtml += '</div>';
 
-    return '<div class="op-card' + selectedCls + '" onclick="selectOperation(\'' + op.id + '\')"' +
+    return '<div class="op-card' + selectedCls + unreadCls + '" onclick="selectOperation(\'' + op.id + '\')"' +
       ' data-tip="' + escTip(op.label + ' · ' + (op.location ? op.location.city + ', ' + op.location.country : '?') + ' · Threat ' + op.threatLevel + '/5') + '"' +
       ' data-tip-align="right">' +
       '<div class="op-status-dot ' + statusCls + '"></div>' +
@@ -878,6 +881,10 @@
 
   window.selectOperation = function(opId) {
     _selectedOpId = opId;
+    var op = getOp(opId);
+    if (op && (op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'ARCHIVED' || op.status === 'EXPIRED')) {
+      _readArchiveOps[opId] = true;
+    }
     renderOpsList();
     renderOpsDetail(opId);
   };

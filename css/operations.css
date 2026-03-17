@@ -628,10 +628,19 @@
 }
 
 .ops-archive-grid .op-card {
-  opacity: 0.7;
+  opacity: 0.45;
 }
 
 .ops-archive-grid .op-card:hover {
+  opacity: 0.8;
+}
+
+.ops-archive-grid .op-card.op-unread {
+  opacity: 1;
+  border-left: 2px solid var(--accent);
+}
+
+.ops-archive-grid .op-card.op-unread:hover {
   opacity: 1;
 }
 
