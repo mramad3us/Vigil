@@ -284,6 +284,7 @@
     }
 
     fire('operation:resolved', { operation: op });
+    pruneCompletedOps();
   }
 
   function expireOperation(op) {
@@ -323,6 +324,32 @@
       opId: op.id,
       geo: op.geo,
     });
+    pruneCompletedOps();
+  }
+
+  // --- Prune completed ops to keep only the 10 most recent ---
+
+  var MAX_COMPLETED_OPS = 10;
+
+  function pruneCompletedOps() {
+    var completed = [];
+    for (var i = 0; i < V.operations.length; i++) {
+      var s = V.operations[i].status;
+      if (s === 'SUCCESS' || s === 'FAILURE' || s === 'EXPIRED' || s === 'ARCHIVED') {
+        completed.push(i);
+      }
+    }
+    if (completed.length <= MAX_COMPLETED_OPS) return;
+    // Sort by daySpawned ascending — remove the oldest
+    completed.sort(function(a, b) {
+      return (V.operations[a].daySpawned || 0) - (V.operations[b].daySpawned || 0);
+    });
+    var toRemove = completed.slice(0, completed.length - MAX_COMPLETED_OPS);
+    // Remove from highest index first to avoid shifting
+    toRemove.sort(function(a, b) { return b - a; });
+    for (var r = 0; r < toRemove.length; r++) {
+      V.operations.splice(toRemove[r], 1);
+    }
   }
 
   // --- Helper: check if all assigned assets have arrived ---
@@ -389,6 +416,7 @@
     V.resources.viability = clamp(V.resources.viability - 1, 0, 100);
     addLog('OP ' + op.codename + ' cancelled by operator.', 'log-info');
     fire('op:cancelled', { op: op });
+    pruneCompletedOps();
     if (typeof renderWorkspace === 'function') renderWorkspace('operations');
   };
 
