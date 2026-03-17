@@ -125,6 +125,11 @@
       snap.log = snap.log.slice(snap.log.length - 100);
     }
 
+    // --- Cap media to latest 5 entries ---
+    if (snap.media && Array.isArray(snap.media) && snap.media.length > 5) {
+      snap.media = snap.media.slice(snap.media.length - 5);
+    }
+
     // Debug: log size breakdown
     var _db = {};
     for (var _k in snap) { if (snap.hasOwnProperty(_k)) _db[_k] = (JSON.stringify(snap[_k]).length / 1024).toFixed(0); }

@@ -109,7 +109,7 @@
   window.markMediaRead = function(storyId) {
     for (var i = 0; i < V.media.length; i++) {
       if (V.media[i].id === storyId) {
-        V.media[i].read = true;
+        V.media.splice(i, 1);
         break;
       }
     }
