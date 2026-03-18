@@ -15,15 +15,15 @@
 
 var THREAT_TYPES = [
   // Global threats — can occur in any theater
-  { id: 'TERROR_CELL', label: 'Terror Cell', weight: 3, threatRange: [3, 5] },
-  { id: 'STATE_ACTOR', label: 'State Actor', weight: 2, threatRange: [4, 5] },
-  { id: 'CYBER_GROUP', label: 'Cyber Threat Group', weight: 3, threatRange: [2, 4] },
+  { id: 'TERROR_CELL', label: 'Terror Cell', weight: 4, threatRange: [3, 5] },
+  { id: 'STATE_ACTOR', label: 'State Actor', weight: 3, threatRange: [4, 5] },
+  { id: 'CYBER_GROUP', label: 'Cyber Threat Group', weight: 2, threatRange: [2, 4] },
   { id: 'HVT_TARGET', label: 'High-Value Target', weight: 2, threatRange: [3, 5] },
   { id: 'ASSET_COMPROMISED', label: 'Compromised Asset', weight: 1, threatRange: [3, 5] },
   { id: 'HOSTAGE_CRISIS', label: 'Hostage Crisis', weight: 1, threatRange: [4, 5] },
 
   // Region-restricted threats
-  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 2, threatRange: [2, 4], canBeMaritime: true,
+  { id: 'CRIMINAL_ORG', label: 'Criminal Organization', weight: 3, threatRange: [2, 4], canBeMaritime: true,
     theaters: ['LATIN_AMERICA', 'AFRICA', 'EAST_ASIA', 'MIDDLE_EAST', 'EUROPE'] },
   { id: 'PROLIFERATOR', label: 'WMD Proliferator', weight: 1, threatRange: [4, 5],
     theaters: ['MIDDLE_EAST', 'EAST_ASIA', 'SOUTH_ASIA', 'RUSSIA_CIS'] },
