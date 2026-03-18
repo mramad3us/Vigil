@@ -12,7 +12,6 @@
   var _expandedAssets = {}; // track which asset rows are expanded in option cards
   var _customConfig = null; // { opId, baseOptionIdx, assetIds: [...] }
   var _customFilter = 'ALL'; // 'ALL', 'SANCTIONED', 'COVERT'
-  var _readArchiveOps = {}; // track which archived ops have been viewed
 
   registerWorkspace({
     id: 'operations',
@@ -146,7 +145,7 @@
     var statusCls = STATUS_CSS[op.status] || op.status.toLowerCase();
     var selectedCls = op.id === _selectedOpId ? ' selected' : '';
     var isTerminal = op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'ARCHIVED' || op.status === 'EXPIRED';
-    var unreadCls = (isTerminal && !_readArchiveOps[op.id]) ? ' op-unread' : '';
+    var unreadCls = (isTerminal && !op._read) ? ' op-unread' : '';
     var statusLabel = STATUS_LABELS[op.status] || op.status;
 
     // Timer display
@@ -883,7 +882,7 @@
     _selectedOpId = opId;
     var op = getOp(opId);
     if (op && (op.status === 'SUCCESS' || op.status === 'FAILURE' || op.status === 'ARCHIVED' || op.status === 'EXPIRED')) {
-      _readArchiveOps[opId] = true;
+      op._read = true;
     }
     renderOpsList();
     renderOpsDetail(opId);

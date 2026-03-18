@@ -34,8 +34,26 @@
 
     render: function() {
       renderMediaList();
-      updateWorkspaceBadge('media', V.media.length);
+      // Mark all stories as seen when viewing the media tab
+      if (V.media) {
+        for (var i = 0; i < V.media.length; i++) V.media[i]._seen = true;
+      }
+      updateWorkspaceBadge('media', 0);
     },
+  });
+
+  function unseenMediaCount() {
+    if (!V.media) return 0;
+    var count = 0;
+    for (var i = 0; i < V.media.length; i++) {
+      if (!V.media[i]._seen) count++;
+    }
+    return count;
+  }
+
+  // On load, restore badge to unseen count
+  hook('game:load', function() {
+    updateWorkspaceBadge('media', unseenMediaCount());
   });
 
   // --- Render Media Feed ---
@@ -91,8 +109,8 @@
     V.media.unshift(story);
     if (V.media.length > 5) V.media.length = 5;
 
-    // Badge the media tab
-    updateWorkspaceBadge('media', V.media.length);
+    // Badge the media tab with unseen count
+    updateWorkspaceBadge('media', unseenMediaCount());
 
     return story;
   }
@@ -104,7 +122,7 @@
         break;
       }
     }
-    updateWorkspaceBadge('media', V.media.length);
+    updateWorkspaceBadge('media', unseenMediaCount());
     renderMediaList();
   };
 
