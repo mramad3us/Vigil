@@ -1,4 +1,4 @@
-To do list for project, remove entries when done and pushed, game version updates are indicated by ++minor, ++mid or ++major for respectively increasing minor, middle or major version of the game before doing the change at that line. All changes must be done sequentially, if ++minor or otherwise is alone on a line, that is the only thing expected to be done and pushed before moving on :
+To do list for project, remove entries when done and pushed, game version (E.G. 0.9.8 minor is 8, major is 0 and mid is 9) updates are indicated by ++minor, ++mid or ++major for respectively increasing minor, middle or major version of the game before doing the change at that line. All changes must be done sequentially, if ++minor or otherwise is alone on a line, that is the only thing expected to be done and pushed before moving on :
 
 ++minor
 - Must remove the QRF intel field from hostage rescue, QRF is relevant for Asset compromized threats but not hostage rescue or domestic hostage rescue
