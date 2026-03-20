@@ -5,8 +5,9 @@
 
 PORT=${1:-8080}
 DIR="$(cd "$(dirname "$0")" && pwd)"
+VERSION=$(grep -o "V\.version = '[^']*'" "$DIR/core/state.js" | grep -o "'[^']*'" | tr -d "'")
 
-echo "VIGIL — starting local server on port $PORT..."
+echo "VIGIL v${VERSION} — starting local server on port $PORT..."
 echo "Open http://localhost:$PORT in your browser if it doesn't open automatically."
 echo "Press Ctrl+C to stop."
 echo ""
