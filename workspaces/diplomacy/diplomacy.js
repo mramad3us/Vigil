@@ -516,6 +516,10 @@
     else if (cost === null) { disabled = true; reason = 'Outreach not available at this stance'; }
     else if (V.resources.intel < cost) { disabled = true; reason = 'Insufficient intel (' + cost + ' required)'; }
     else if (hasActiveMission(country, 'OUTREACH')) { disabled = true; reason = 'Outreach already in progress'; }
+    else if (cd.lastOutreachMonth != null && cd.lastOutreachYear != null &&
+             (V.time.year - cd.lastOutreachYear) * 12 + (V.time.month - cd.lastOutreachMonth) < 1) {
+      disabled = true; reason = 'Cooldown — outreach available next month';
+    }
 
     var expanded = (_activeAction === 'OUTREACH' && !disabled);
 

@@ -787,6 +787,11 @@ function startDiplomaticOutreach(country, assetId, mode) {
   var stance = deriveStance(country);
   if (cd.atWar) return null;
   if (hasActiveMission(country, 'OUTREACH')) return null;
+  // One-month cooldown per country
+  if (cd.lastOutreachMonth != null && cd.lastOutreachYear != null) {
+    var monthsSince = (V.time.year - cd.lastOutreachYear) * 12 + (V.time.month - cd.lastOutreachMonth);
+    if (monthsSince < 1) return null;
+  }
 
   var cost = getOutreachCost(stance);
   if (cost === null) return null;
@@ -971,6 +976,10 @@ function requestProactiveClearance(country, assetId) {
             });
             addLog('DIPLOMACY: Outreach to ' + country + ' failed. No change.', 'log-warn');
           }
+
+          // Record cooldown timestamp
+          cd.lastOutreachMonth = V.time.month;
+          cd.lastOutreachYear = V.time.year;
 
           if (m.assetId) {
             returnAssetsToBase([m.assetId]);
