@@ -54,11 +54,9 @@
 
           baseLayer: new Cesium.ImageryLayer(
             new Cesium.UrlTemplateImageryProvider({
-              url: 'lib/cesium/Assets/Textures/NaturalEarthII/{z}/{x}/{reverseY}.jpg',
-              tilingScheme: new Cesium.GeographicTilingScheme(),
-              maximumLevel: 2,
-            }),
-            { brightness: 0.3, saturation: 0.0, contrast: 1.4 }
+              url: 'lib/tiles/{z}/{x}/{y}.png',
+              maximumLevel: 5,
+            })
           ),
 
           terrain: undefined,
