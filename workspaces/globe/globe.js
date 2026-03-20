@@ -53,8 +53,10 @@
           creditContainer: document.createElement('div'),
 
           baseLayer: new Cesium.ImageryLayer(
-            new Cesium.TileMapServiceImageryProvider({
-              url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII'),
+            new Cesium.UrlTemplateImageryProvider({
+              url: 'lib/cesium/Assets/Textures/NaturalEarthII/{z}/{x}/{reverseY}.jpg',
+              tilingScheme: new Cesium.GeographicTilingScheme(),
+              maximumLevel: 2,
             }),
             { brightness: 0.3, saturation: 0.0, contrast: 1.4 }
           ),

@@ -3,89 +3,89 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(../lib/fonts/inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuOKfMZg.ttf) format('truetype');
+  src: url(inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuOKfMZg.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../lib/fonts/inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf) format('truetype');
+  src: url(inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(../lib/fonts/inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf) format('truetype');
+  src: url(inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(../lib/fonts/inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf) format('truetype');
+  src: url(inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../lib/fonts/inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf) format('truetype');
+  src: url(inter/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf) format('truetype');
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(../lib/fonts/jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8lqxjPQ.ttf) format('truetype');
+  src: url(jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8lqxjPQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../lib/fonts/jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPQ.ttf) format('truetype');
+  src: url(jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(../lib/fonts/jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8-qxjPQ.ttf) format('truetype');
+  src: url(jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8-qxjPQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(../lib/fonts/jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8FqtjPQ.ttf) format('truetype');
+  src: url(jetbrainsmono/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8FqtjPQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Rajdhani';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../lib/fonts/rajdhani/LDIxapCSOBg7S-QT7q4A.ttf) format('truetype');
+  src: url(rajdhani/LDIxapCSOBg7S-QT7q4A.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Rajdhani';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(../lib/fonts/rajdhani/LDI2apCSOBg7S-QT7pb0EMOs.ttf) format('truetype');
+  src: url(rajdhani/LDI2apCSOBg7S-QT7pb0EMOs.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Rajdhani';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(../lib/fonts/rajdhani/LDI2apCSOBg7S-QT7pbYF8Os.ttf) format('truetype');
+  src: url(rajdhani/LDI2apCSOBg7S-QT7pbYF8Os.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Rajdhani';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../lib/fonts/rajdhani/LDI2apCSOBg7S-QT7pa8FsOs.ttf) format('truetype');
+  src: url(rajdhani/LDI2apCSOBg7S-QT7pa8FsOs.ttf) format('truetype');
 }
