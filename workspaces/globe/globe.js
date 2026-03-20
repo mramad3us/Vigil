@@ -53,11 +53,10 @@
           creditContainer: document.createElement('div'),
 
           baseLayer: new Cesium.ImageryLayer(
-            new Cesium.UrlTemplateImageryProvider({
-              url: 'https://basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}@2x.png',
-              credit: 'CartoDB',
-              maximumLevel: 6,
-            })
+            new Cesium.TileMapServiceImageryProvider({
+              url: Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII'),
+            }),
+            { brightness: 0.3, saturation: 0.0, contrast: 1.4 }
           ),
 
           terrain: undefined,

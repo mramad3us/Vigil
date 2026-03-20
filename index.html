@@ -24,9 +24,10 @@
   <link rel="stylesheet" href="css/diplomacy.css">
   <link rel="stylesheet" href="css/illegals.css">
 
-  <!-- CesiumJS -->
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <!-- CesiumJS (bundled locally for offline play) -->
+  <script>window.CESIUM_BASE_URL = 'lib/cesium/';</script>
+  <script src="lib/cesium/Cesium.js"></script>
+  <link href="lib/cesium/Widgets/widgets.css" rel="stylesheet">
 </head>
 <body>
 
