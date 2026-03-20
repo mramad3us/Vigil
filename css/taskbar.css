@@ -396,17 +396,14 @@
 }
 
 .speed-btn {
-  min-width: 32px;
+  width: 32px;
   height: 28px;
-  padding: 0 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--fs-xs);
   color: var(--text-dim);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
-  white-space: nowrap;
 }
 
 .speed-btn:hover {
@@ -421,6 +418,46 @@
 
 .speed-btn.paused {
   color: var(--amber);
+}
+
+/* Speed control SVG icons */
+.speed-icon {
+  height: 12px;
+  width: auto;
+  fill: currentColor;
+  transition: fill var(--transition-fast);
+}
+
+.speed-btn .si-bar,
+.speed-btn .si-tri {
+  fill: currentColor;
+}
+
+/* Pulse animation on active play button */
+.speed-btn.active .si-tri {
+  animation: speed-pulse 2s ease-in-out infinite;
+}
+
+.speed-btn.active[data-speed="2"] .si-tri-2 { animation-delay: 0.15s; }
+.speed-btn.active[data-speed="3"] .si-tri-2 { animation-delay: 0.1s; }
+.speed-btn.active[data-speed="3"] .si-tri-3 { animation-delay: 0.2s; }
+
+/* Pause bars glow when paused */
+.speed-btn.paused .si-bar {
+  animation: pause-glow 1.5s ease-in-out infinite alternate;
+}
+.speed-btn.paused .si-bar-r {
+  animation-delay: 0.2s;
+}
+
+@keyframes speed-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pause-glow {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 
 /* --- System Tray --- */
