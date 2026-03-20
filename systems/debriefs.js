@@ -101,6 +101,27 @@ function pickCompromise(opType) {
   return pick(filtered.length > 0 ? filtered : DEBRIEF_COMPROMISE);
 }
 
+// Count hostile outcomes from narrative text to keep summaries consistent
+function countNarrativeOutcomes(text) {
+  var kia = 0;
+  var detained = 0;
+
+  // Detention signals
+  if (/[Ff]lex-cuffed|[Dd]etained|hands up|put his hands|hands visible|[Ss]urrendered|[Cc]aptured|threw his weapon/i.test(text)) detained += 1;
+
+  // Kill signals — count bodies described
+  var killPhrases = text.match(/double.tap|center mass|[Hh]ostile KIA|[Tt]arget down|[Tt]hreat neutralized|rounds?.+?(?:down|dropped|slumped|crumpled|went down)|headshot|[Bb]oth down|all targets down|EKIA|[Ff]rag.*?[Dd]etonation.*?[Ss]ilence/gi);
+  if (killPhrases) kia += killPhrases.length;
+
+  // "Both down" means 2, not 1
+  if (/[Bb]oth down/i.test(text)) kia += 1;
+
+  // Floor: if text has kills but we counted 0, default to 1
+  if (kia === 0 && detained === 0 && /engag|fire|shot|rounds/i.test(text)) kia = 1;
+
+  return { kia: kia, detained: detained };
+}
+
 var DEBRIEF_EXFIL = [
   "Exfiltration via tiltrotor to a forward staging area",
   "Ground exfil to a pre-positioned extraction vehicle",
@@ -1827,51 +1848,64 @@ DEBRIEF_GENERATORS.SOF_RAID = function (op, v, success) {
     });
 
     // Ground floor fighting
+    var _gfText = pick(SOF_GROUND_FLOOR_CLEAR);
+    var _gfOut = countNarrativeOutcomes(_gfText);
+    kia += _gfOut.kia; detained += _gfOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(8, 9)),
       type: "critical",
-      text: pick(SOF_GROUND_FLOOR_CLEAR),
+      text: _gfText,
     });
-    kia += randInt(1, 3);
 
     // Room-by-room clearing
+    var _rcText = pick(SOF_ROOM_CLEAR);
+    var _rcOut = countNarrativeOutcomes(_rcText);
+    kia += _rcOut.kia; detained += _rcOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(9, 11)),
       type: "critical",
-      text: pick(SOF_ROOM_CLEAR),
+      text: _rcText,
     });
-    kia += randInt(1, 2);
 
     // Sniper engagement during assault
+    var _snText = pick(SOF_SNIPER_ENGAGEMENT);
+    var _snOut = countNarrativeOutcomes(_snText);
+    kia += _snOut.kia; detained += _snOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(11, 12)),
       type: "critical",
-      text: pick(SOF_SNIPER_ENGAGEMENT),
+      text: _snText,
     });
-    kia += 1;
 
     // Upper floor push
+    var _ufText = pick(SOF_UPPER_FLOOR_CLEAR);
+    var _ufOut = countNarrativeOutcomes(_ufText);
+    kia += _ufOut.kia; detained += _ufOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(12, 14)),
       type: "critical",
-      text: pick(SOF_UPPER_FLOOR_CLEAR),
+      text: _ufText,
     });
-    kia += randInt(1, 2);
 
     // Additional contact
+    var _acText = pick(SOF_ROOM_CLEAR);
+    var _acOut = countNarrativeOutcomes(_acText);
+    kia += _acOut.kia; detained += _acOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(14, 16)),
       type: "critical",
-      text: pick(SOF_ROOM_CLEAR),
+      text: _acText,
     });
 
     // Final target contact
+    var _fcText = pick(SOF_FINAL_CONTACT);
+    var _fcOut = countNarrativeOutcomes(_fcText);
+    kia += _fcOut.kia; detained += _fcOut.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, randInt(16, 18)),
       type: "critical",
-      text: pick(SOF_FINAL_CONTACT),
+      text: _fcText,
     });
-    detained += randInt(0, 2);
 
     // JACKPOT call — adapted for threat context
     if (tc && tc.jackpotSuccess) {
@@ -2916,6 +2950,10 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function (op, v, success) {
   });
 
   if (success) {
+    // Track hostile outcomes through the narrative
+    var hrKia = 0;
+    var hrDetained = 0;
+
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 0),
       type: "critical",
@@ -2923,31 +2961,67 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function (op, v, success) {
         '"GREEN GREEN GREEN." Simultaneous breach on all entry points. Flashbangs deployed. ' +
         pick(SOF_BREACH_DETAIL),
     });
+
+    // Entry hall — 2 KIA
+    hrKia += 2;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 1),
       type: "critical",
       text: 'Entry hall. Two captors scrambled for weapons. Point man\'s IR laser found the first — double tap, center mass. He dropped. Second hostile raised an AK. Number two operator put three rounds through his chest before the muzzle came level. "FRIENDLIES, STAY DOWN." Screaming from the hostages on the floor.',
     });
+
+    // Room clear — pick one, count outcomes from narrative
+    var roomClearText = pick(SOF_ROOM_CLEAR);
+    var _hrRc = countNarrativeOutcomes(roomClearText);
+    hrKia += _hrRc.kia; hrDetained += _hrRc.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 2),
       type: "critical",
-      text: pick(SOF_ROOM_CLEAR) + " Clearing toward hostage holding area.",
+      text: roomClearText + " Clearing toward hostage holding area.",
     });
+
+    // Sniper engagement — count outcomes from narrative
+    var sniperText = pick(SOF_SNIPER_ENGAGEMENT);
+    var _hrSn = countNarrativeOutcomes(sniperText);
+    hrKia += _hrSn.kia; hrDetained += _hrSn.detained;
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 3),
       type: "critical",
-      text: pick(SOF_SNIPER_ENGAGEMENT),
+      text: sniperText,
     });
-    entries.push({
-      time: dayLabel(0) + " " + zuluMinOffset(0, 4),
-      type: "critical",
-      text:
-        "Hostage room. Helmet cam showed the door — reinforced, barricaded from inside. Breacher placed a water charge to minimize fragmentation. BANG. Door blew in. " +
-        randInt(2, 4) +
-        " captors guarding hostages — one reached for a detonator on the table. Sniper took the shot through the window simultaneously with the breach team entry. Round caught the man's hand. Detonator skittered across the floor. Operators engaged the remaining captors — controlled pairs, all targets down in under two seconds. All " +
-        hostageCount +
-        " hostages recovered alive.",
-    });
+
+    // Hostage room — captors guarding hostages
+    var hrRoomCaptors = randInt(2, 4);
+    // Detonator captor is wounded/neutralized, rest are KIA
+    // Randomly decide if detonator captor survives to be detained
+    var detonatorDetained = Math.random() < 0.4;
+    if (detonatorDetained) {
+      hrKia += (hrRoomCaptors - 1);
+      hrDetained += 1;
+      entries.push({
+        time: dayLabel(0) + " " + zuluMinOffset(0, 4),
+        type: "critical",
+        text:
+          "Hostage room. Helmet cam showed the door — reinforced, barricaded from inside. Breacher placed a water charge to minimize fragmentation. BANG. Door blew in. " +
+          hrRoomCaptors +
+          " captors guarding hostages — one reached for a detonator on the table. Sniper took the shot through the window simultaneously with the breach team entry. Round caught the man's hand. Detonator skittered across the floor. Operators engaged the remaining captors — controlled pairs, " + (hrRoomCaptors - 1) + " targets down in under two seconds. Detonator captor flex-cuffed — wounded hand, alive. All " +
+          hostageCount +
+          " hostages recovered alive.",
+      });
+    } else {
+      hrKia += hrRoomCaptors;
+      entries.push({
+        time: dayLabel(0) + " " + zuluMinOffset(0, 4),
+        type: "critical",
+        text:
+          "Hostage room. Helmet cam showed the door — reinforced, barricaded from inside. Breacher placed a water charge to minimize fragmentation. BANG. Door blew in. " +
+          hrRoomCaptors +
+          " captors guarding hostages — one reached for a detonator on the table. Sniper took the shot through the window simultaneously with the breach team entry. Round caught the man's hand. Detonator skittered across the floor. Operators engaged all captors — controlled pairs, all targets down in under two seconds. All " +
+          hostageCount +
+          " hostages recovered alive.",
+      });
+    }
+
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 6),
       type: "normal",
@@ -2958,17 +3032,15 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function (op, v, success) {
         randInt(0, 3) +
         " minor injuries — shock and minor abrasions. No life-threatening conditions.",
     });
+
+    var iedCount = randInt(1, 3);
+    var summaryText = "Building secured. " + hrKia + " hostile KIA.";
+    if (hrDetained > 0) summaryText += " " + hrDetained + " captured alive — flex-cuffed and moved to collection point for interrogation.";
+    summaryText += " EOD team cleared " + iedCount + " IEDs that had been rigged to the hostage room — the captors were prepared to kill the hostages if the rescue took ten seconds longer.";
     entries.push({
       time: dayLabel(0) + " " + zuluMinOffset(0, 15),
       type: "normal",
-      text:
-        "Building secured. " +
-        randInt(4, 8) +
-        " hostile KIA. " +
-        randInt(0, 2) +
-        " captured alive. EOD team cleared " +
-        randInt(1, 3) +
-        " IEDs that had been rigged to the hostage room — the captors were prepared to kill the hostages if the rescue took ten seconds longer.",
+      text: summaryText,
     });
     entries.push({
       time: dayLabel(0) + " " + zuluTime(1),
