@@ -396,8 +396,9 @@
 }
 
 .speed-btn {
-  width: 32px;
+  min-width: 32px;
   height: 28px;
+  padding: 0 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -405,6 +406,7 @@
   color: var(--text-dim);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .speed-btn:hover {
