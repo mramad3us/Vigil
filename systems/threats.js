@@ -193,6 +193,7 @@ function buildThreatIntelFields(
       ASSET_CONDITION: "_assetStatus",
       ACTIVITY_TYPE: "_activityType",
       GUARD_FORCE: "_guardLevel",
+      HARDENING_LEVEL: "_hardeningLevel",
     };
     if (
       taggedKeys[def.key] &&
@@ -399,6 +400,8 @@ function spawnThreat(theaterId, forcedTypeId) {
       threat.assetStatus = f._assetStatus;
     if (f.key === "ACTIVITY_TYPE" && f._activityType)
       threat.activityType = f._activityType;
+    if (f.key === "HARDENING_LEVEL" && f._hardeningLevel)
+      threat.hardeningLevel = f._hardeningLevel;
   }
 
   V.threats.push(threat);
@@ -870,6 +873,24 @@ function spawnThreat(theaterId, forcedTypeId) {
                   (threat.sponsorCountry
                     ? " directed by " + threat.sponsorCountry
                     : "") +
+                  ".",
+                "log-intel",
+              );
+            }
+            if (
+              csField.key === "HARDENING_LEVEL" &&
+              csField.revealed &&
+              csField._hardeningLevel &&
+              !threat.hardeningLevel
+            ) {
+              threat.hardeningLevel = csField._hardeningLevel;
+              addLog(
+                "INTEL: " +
+                  threat.orgName +
+                  " facility assessed as " +
+                  (threat.hardeningLevel === "HARDENED"
+                    ? "HARDENED — heavy strike capability required"
+                    : "SOFT — standard munitions sufficient") +
                   ".",
                 "log-intel",
               );
@@ -1531,6 +1552,13 @@ function getEligibleOpTypes(threat) {
         );
       });
     }
+  }
+
+  // STRATEGIC_TARGET: remove DRONE_STRIKE if target is hardened
+  if (threat.type === "STRATEGIC_TARGET" && threat.hardeningLevel === "HARDENED") {
+    opTypes = opTypes.filter(function (t) {
+      return t !== "DRONE_STRIKE";
+    });
   }
 
   // AT_WAR: strip DIPLOMATIC_RESPONSE

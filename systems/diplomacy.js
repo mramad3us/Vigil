@@ -131,7 +131,7 @@ function shiftRelations(country, delta, reason) {
       hour: V.time.hour,
       reason: reason || '',
     });
-    if (cd.relationsHistory.length > 50) cd.relationsHistory.shift();
+    if (cd.relationsHistory.length > 20) cd.relationsHistory.shift();
     addLog('DIPLOMACY: ' + country + ' relations ' + (delta > 0 ? 'improved' : 'degraded') +
       ' (' + prev + '% → ' + cd.relations + '%).', delta > 0 ? 'log-info' : 'log-warn');
   }

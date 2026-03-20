@@ -90,6 +90,17 @@ var DEBRIEF_COMPROMISE = [
   "weather conditions degraded ISR coverage at a critical moment",
 ];
 
+var GROUND_OP_TYPES = ['SOF_RAID', 'HOSTAGE_RESCUE', 'DOMESTIC_HOSTAGE_RESCUE', 'ASSET_EXTRACTION', 'COVERT_SNATCH', 'CAPTURE_OP'];
+
+function pickCompromise(opType) {
+  if (GROUND_OP_TYPES.indexOf(opType) >= 0) return pickCompromise(op.operationType);
+  // Non-ground ops: filter out QRF-specific entries
+  var filtered = DEBRIEF_COMPROMISE.filter(function(c) {
+    return c.indexOf('QRF') < 0;
+  });
+  return pick(filtered.length > 0 ? filtered : DEBRIEF_COMPROMISE);
+}
+
 var DEBRIEF_EXFIL = [
   "Exfiltration via tiltrotor to a forward staging area",
   "Ground exfil to a pre-positioned extraction vehicle",
@@ -1400,7 +1411,7 @@ DEBRIEF_GENERATORS.MILITARY_STRIKE = function (op, v, success) {
       type: "normal",
       text:
         "Initial BDA: impacts observed in target area. However, " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ".",
     });
     if (isWMD) {
@@ -1994,7 +2005,7 @@ DEBRIEF_GENERATORS.SOF_RAID = function (op, v, success) {
       text:
         pick(SOF_ROOM_CLEAR) +
         " But " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ". " +
         targetDesc.charAt(0).toUpperCase() +
         targetDesc.slice(1) +
@@ -2306,7 +2317,7 @@ DEBRIEF_GENERATORS.SURVEILLANCE = function (op, v, success) {
       type: "failure",
       text:
         "Target organization went dark after suspected detection of ISR platform. " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ". All tracked individuals changed communications methods simultaneously.",
     });
     entries.push({
@@ -2678,7 +2689,7 @@ DEBRIEF_GENERATORS.CYBER_OP = function (op, v, success) {
         "'s security team isolated the compromised segment within " +
         randInt(8, 30) +
         " minutes. " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ". Implant " +
         implantName +
         " burned.",
@@ -2977,7 +2988,7 @@ DEBRIEF_GENERATORS.HOSTAGE_RESCUE = function (op, v, success) {
       type: "critical",
       text:
         "Immediate heavy contact in the entry hallway. PKM fire from a prepared position shredded the doorframe. Point man took fragments to the plate carrier — knocked back but functional. Team returned fire, suppressed. " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ". Captors were alerted.",
     });
     entries.push({
@@ -3279,7 +3290,7 @@ DEBRIEF_GENERATORS.COUNTER_TERROR = function (op, v, success) {
       type: "critical",
       text:
         '"All stations: execute." Raids initiated simultaneously. However, ' +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ".",
     });
     if (isHostage) {
@@ -3690,7 +3701,7 @@ DEBRIEF_GENERATORS.INTEL_COLLECTION = function (op, v, success) {
       time: dayLabel(0) + " " + zuluTime(1),
       type: "failure",
       text:
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ". Source " +
         sourceCode +
         " " +
@@ -4054,7 +4065,7 @@ DEBRIEF_GENERATORS.DRONE_STRIKE = function (op, v, success) {
         "x " +
         munitionType +
         " away. Impact on target coordinates. However — " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         ".",
     });
     if (isFacility) {
@@ -4761,7 +4772,7 @@ DEBRIEF_GENERATORS.TARGETED_KILLING = function (op, v, success) {
     entries.push({
       time: dayLabel(0) + " " + zuluTime(0),
       type: "critical",
-      text: "Action executed. However — " + pick(DEBRIEF_COMPROMISE) + ".",
+      text: "Action executed. However — " + pickCompromise(op.operationType) + ".",
     });
     entries.push({
       time: dayLabel(0) + " " + zuluTime(0) + "+5min",
@@ -5828,7 +5839,7 @@ DEBRIEF_GENERATORS.ARREST_OPERATION = function (op, v, success) {
       type: "critical",
       text:
         "Arrest team approached target location. " +
-        pick(DEBRIEF_COMPROMISE) +
+        pickCompromise(op.operationType) +
         "." +
         gapAnalysis,
     });

@@ -230,6 +230,31 @@
     'The diplomatic fallout from US military operations in {country} continues to grow. Allied nations have expressed concern over the unilateral action, and the UN Security Council is expected to address the incident. Analysts warn this could have lasting implications for US security partnerships in the region.',
   ];
 
+  // --- Asset Name Summarization ---
+
+  function summarizeAssetNames(assetNames, agencyList) {
+    if (assetNames.length === 0) return 'federal tactical teams';
+    if (assetNames.length === 1) return assetNames[0];
+
+    if (agencyList.length === 0) {
+      return assetNames.length <= 2 ? assetNames.join(' and ') : 'federal tactical teams';
+    }
+
+    if (agencyList.length === 1) {
+      // 1 agency, 1 unit → full name
+      if (assetNames.length === 1) return assetNames[0];
+      // 1 agency, multiple units → agency + "tactical teams"
+      return agencyList[0] + ' tactical teams';
+    }
+
+    if (agencyList.length === 2) {
+      return agencyList[0] + ' and ' + agencyList[1] + ' tactical units';
+    }
+
+    // 3+ agencies
+    return 'Joint federal tactical teams';
+  }
+
   // --- Story Generation Hooks ---
 
   // Threat manifestation — always covered
@@ -283,6 +308,8 @@
       if (!asset) continue;
       if (asset.deniability === 'OVERT') hasOvert = true;
       if (asset.domesticAuthority) hasDomesticAuth = true;
+      // Skip covert units in domestic ops — they operate secretly alongside sanctioned units
+      if (op.domestic && asset.deniability === 'COVERT') continue;
       assetNames.push(asset.name);
       // Extract agency from asset name (e.g. "FBI HRT" → "FBI")
       var agencyMatch = asset.name.match(/^(FBI|DEA|ATF|DHS|USCG|USMS|CBP|Secret Service|Treasury)/i);
@@ -307,10 +334,11 @@
     // Build asset context string for body templates
     if (isDomestic && hasDomesticAuth) {
       // Sanctioned domestic — agencies are public about it
+      var assetSummary = summarizeAssetNames(assetNames, agencyList);
       if (assetNames.length === 1) {
-        vars.assetContext = 'The operation was conducted by ' + assetNames[0] + '.';
+        vars.assetContext = 'The operation was conducted by ' + assetSummary + '.';
       } else {
-        vars.assetContext = 'The operation involved ' + assetNames.join(', ') + ' in a coordinated response.';
+        vars.assetContext = 'The operation involved ' + assetSummary + ' in a coordinated response.';
       }
     } else if (isDomestic) {
       // Unsanctioned domestic (covert military on US soil) — vague coverage

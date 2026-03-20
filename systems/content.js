@@ -268,7 +268,7 @@ var INTEL_VALUE_POOLS = {
 
   // Naval Interdiction
   VESSEL_IDENTIFICATION: [
-    "MV Horizon Star, Panamanian flag. 12,000 DWT cargo vessel. Built 2011.",
+    "MV Horizon Star, Panamanian flag. 12,000 DWT cargo vessel. Built {buildYear}.",
     "Fishing vessel cluster — 4 trawlers operating outside normal fishing grounds.",
     "Container ship MSC Valencia, Liberian flag. History of sanctions evasion.",
     "Dhow-type vessel, no AIS transponder. Operating at night only.",
@@ -657,10 +657,45 @@ INTEL_VALUE_POOLS.PROGRAM_TYPE = [
   "NETWORK|Clandestine supply chain trafficking chemical precursors and delivery system components. Front companies in 3 countries. End user: assessed as state weapons program.",
 ];
 
+INTEL_VALUE_POOLS.HARDENING_LEVEL = [
+  "HARDENED|Deep underground facility with reinforced concrete blast doors and 5m+ earth cover. Assessed as resistant to all munitions except MOP-class bunker busters.",
+  "HARDENED|Hardened aircraft shelter construction with steel-reinforced concrete, blast-rated doors, and dispersed underground ammunition storage. Requires penetrating munitions.",
+  "HARDENED|Mountain tunnel complex with multiple access points. Rock overburden estimated at 60m+. Standard precision munitions will not penetrate. Heavy ordnance required.",
+  "HARDENED|Reinforced command bunker with NBC filtration and independent power. Buried under 8m of reinforced concrete. Survivable against conventional airstrike.",
+  "SOFT|Above-ground facility with standard commercial construction. No blast protection observed. Vulnerable to precision-guided munitions of any class.",
+  "SOFT|Prefabricated industrial structures with sheet-metal cladding. No hardening detected. Light ordnance sufficient for destruction.",
+  "SOFT|Open-air staging area with vehicle revetments but no overhead cover. Highly vulnerable to air-delivered munitions.",
+  "SOFT|Conventional masonry construction, single-story. No bunker or underground component detected. Standard PGMs adequate.",
+];
+
+INTEL_VALUE_POOLS.DEFENSIVE_PERIMETER = [
+  "Triple concentric security: outer vehicle barriers at 500m, manned checkpoint ring at 200m, inner blast wall with guard towers. Response force estimated at platoon strength.",
+  "Standard military perimeter: chain-link with razor wire, 4 guard towers, vehicle patrol every 30 minutes. Single entry control point. Vulnerable to covert approach from the south.",
+  "Layered defense: anti-vehicle ditch, earthen berm, concrete wall with embedded sensors. Motion-activated floodlights. Dog patrols at irregular intervals.",
+  "Minimal perimeter security: low wall with intermittent guard posts. Civilian traffic transits freely along eastern boundary. Multiple blind spots identified via ISR.",
+  "Dense urban location — no formal perimeter. Security relies on plainclothes personnel and surveillance cameras. Approach routes through market district provide cover for assault element.",
+];
+
+INTEL_VALUE_POOLS.PERSONNEL_COUNT = [
+  "ISR observation over 72 hours: 40-60 personnel during day shift, 15-20 at night. Rotation every 8 hours. Armed guards: approximately 25% of total.",
+  "Thermal and vehicle analysis estimates 80-120 personnel on site. Barracks-style housing suggests permanent garrison. Shift change at 0600 and 1800 local.",
+  "Small facility staff: 10-15 technical personnel observed, plus 8-10 armed security. Low nighttime presence — 4-6 guards only.",
+  "Large installation: estimated 200+ personnel across 3 shifts. Includes both military and civilian workers. Peak manning during 0800-1700 window.",
+  "Assessment: 30-40 military personnel with an additional 20 civilian technical staff. Guard force rotates in 12-hour shifts. QRF of 10-15 troops billeted on site.",
+];
+
+INTEL_VALUE_POOLS.OUTPUT_CAPACITY = [
+  "SIGINT intercepts reference weekly production quotas consistent with industrial-scale weapons manufacturing. Output estimated at 15-20 units per month.",
+  "Facility operates 24/7 based on thermal emissions and vehicle traffic patterns. Output assessment: sufficient to equip a battalion-sized element every 60 days.",
+  "Dual-use facility — civilian production line covers military output. Vigil estimates 30% of capacity dedicated to military program. Strategic impact: MODERATE.",
+  "Satellite imagery shows expansion of storage facilities and increased outbound logistics activity. Production is accelerating — estimated 200% increase over 6-month baseline.",
+  "Limited output capacity: small-batch research and development facility. Strategic value is in the technology, not the production volume. Destruction would set program back 3-5 years.",
+];
+
 INTEL_VALUE_POOLS.FACILITY_ID = [
   "Primary facility identified: underground complex near {city}. Overhead imagery shows ventilation systems, security perimeter, heavy vehicle access.",
   "Three facilities of interest in {country}: research lab (confirmed), enrichment facility (probable), and testing site (possible).",
-  "Facility located 40km north of {city}. Constructed 2008-2010. Assessed as production facility based on thermal and electromagnetic signatures.",
+  "Facility located 40km north of {city}. Constructed {buildYear}. Assessed as production facility based on thermal and electromagnetic signatures.",
   "Dual-use pharmaceutical plant in {city} industrial zone. SIGINT intercepts suggest clandestine production wing. IAEA denied access twice.",
   "Hardened bunker complex under mountain terrain. Tunnel entrances visible on imagery. Power consumption inconsistent with declared purpose.",
 ];
@@ -713,7 +748,7 @@ INTEL_VALUE_POOLS.ENTRY_POINTS = [
 // --- HVT Intel ---
 
 INTEL_VALUE_POOLS.HVT_IDENTITY = [
-  "Target positively identified: {orgName} senior commander. Responsible for planning multiple attacks in the {theater} theater. On disposition matrix since 2019.",
+  "Target positively identified: {orgName} senior commander. Responsible for planning multiple attacks in the {theater} theater. On disposition matrix since {pastYear}.",
   "High-value target confirmed: {orgName} operational leader in {city}. Vigil facial recognition match from surveillance drone footage. Confidence: 95%.",
   "Target identified as {orgName} — senior figure with direct command authority. Vigil HUMINT source confirms target is coordinating operations from {city}.",
 ];
@@ -810,10 +845,16 @@ function generateIntelValue(
   }
   val = val.replace(/\{orgName\}/g, orgName || "unknown organization");
   val = val.replace(/\{sponsor\}/g, sponsorCountry || "unknown state");
+  val = val.replace(/\{pastYear\}/g, function () {
+    return V.time.year - randInt(1, 5);
+  });
+  val = val.replace(/\{buildYear\}/g, function () {
+    return V.time.year - randInt(5, 15);
+  });
   val = val.replace(/\{cve\}/g, function () {
     return (
       "CVE-" +
-      (2025 + Math.floor(Math.random() * 4)) +
+      (V.time.year - randInt(0, 3)) +
       "-" +
       (10000 + Math.floor(Math.random() * 89999))
     );

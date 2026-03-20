@@ -364,7 +364,6 @@ var THREAT_INTEL_FIELDS = {
     { key: 'HOSTAGE_CONDITION',   label: 'Hostage Condition',              difficulty: 'MEDIUM',    source: 'SIGINT' },
     { key: 'ENTRY_POINTS',        label: 'Entry Points & Building Layout', difficulty: 'HARD',      source: 'IMAGERY' },
     { key: 'CAPTOR_DEMANDS',      label: 'Captor Demands & Intentions',    difficulty: 'HARD',      source: 'HUMINT' },
-    { key: 'QRF_PROXIMITY',       label: 'QRF / Reinforcement Proximity',  difficulty: 'HARD',      source: 'ISR' },
     { key: 'INTERNAL_COMMS',      label: 'Captor Communications',          difficulty: 'VERY_HARD', source: 'SIGINT' },
   ],
   HVT_TARGET: [

@@ -91,6 +91,26 @@ function generateVigilOptions(op) {
 
   if (eligible.length === 0) return [];
 
+  // Exclude assets that cannot arrive before the operation deadline
+  if (op.urgencyHours) {
+    var deadlineMinutes = op.urgencyHours * 60;
+    eligible = eligible.filter(function(a) {
+      return calcTransitMinutes(a, destLat, destLon) <= deadlineMinutes;
+    });
+    if (eligible.length === 0) return [];
+  }
+
+  // Hardened STRATEGIC_TARGET: MILITARY_STRIKE must use HEAVY_STRIKE-capable assets
+  if (op.operationType === 'MILITARY_STRIKE') {
+    var relThreat = op.relatedThreatId ? getThreat(op.relatedThreatId) : null;
+    if (relThreat && relThreat.type === 'STRATEGIC_TARGET' && relThreat.hardeningLevel === 'HARDENED') {
+      eligible = eligible.filter(function(a) {
+        return a.capabilities.indexOf('HEAVY_STRIKE') >= 0;
+      });
+      if (eligible.length === 0) return [];
+    }
+  }
+
   // Score and sort by relevance (preferred capabilities + distance)
   var scored = eligible.map(function(a) {
     var capScore = 0;
@@ -332,6 +352,9 @@ function buildOption(scored, destLat, destLon, op, opType, strategy) {
   var assetIds = selected.map(function(a) { return a.id; });
   var transitMinutes = calcGroupTransitMinutes(assetIds, destLat, destLon);
   var transitHours = transitMinutes / 60;
+
+  // Reject option if group transit exceeds the operational deadline
+  if (op.urgencyHours && transitMinutes > op.urgencyHours * 60) return null;
 
   var riskLevel = calcOptionRisk(selected, transitHours, op.threatLevel, allCovered);
   var confidencePercent = calcOptionConfidence(opType, selected, transitHours, op.threatLevel, allCovered, op);

@@ -299,6 +299,12 @@
   box-shadow: 0 0 0 1px var(--accent-dim);
 }
 
+.vigil-option-card.vigil-option-expired {
+  opacity: 0.5;
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px rgba(255,60,60,0.15);
+}
+
 .vigil-rec-badge {
   font-family: var(--font-mono);
   font-size: 9px;

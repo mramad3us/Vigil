@@ -404,7 +404,7 @@
     // Relations History
     if (cd.relationsHistory && cd.relationsHistory.length > 0) {
       html += '<div class="diplo-section"><div class="diplo-section-title">RELATIONS HISTORY</div>';
-      var history = cd.relationsHistory.slice(-8).reverse();
+      var history = cd.relationsHistory.slice(-5).reverse();
       for (var h = 0; h < history.length; h++) {
         var entry = history[h];
         var delta = entry.to - entry.from;

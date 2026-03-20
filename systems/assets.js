@@ -198,7 +198,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'CSG_7', name: 'Carrier Strike Group 7', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'YOKOSUKA', speed: 55, effectiveRangeKm: 1500,
-    capabilities: ['NAVAL', 'STRIKE', 'ISR'],
+    capabilities: ['NAVAL', 'STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 1 },
     designation: 'Carrier Strike Group 7, U.S. 7th Fleet',
     personnel: 7500,
@@ -212,7 +212,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'CSG_2', name: 'Carrier Strike Group 2', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'NORFOLK', speed: 55, effectiveRangeKm: 1500,
-    capabilities: ['NAVAL', 'STRIKE', 'ISR'],
+    capabilities: ['NAVAL', 'STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 1 },
     designation: 'Carrier Strike Group 2, U.S. 2nd Fleet',
     personnel: 7500,
@@ -226,7 +226,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'CSG_3', name: 'Carrier Strike Group 3', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'PEARL_HARBOR', speed: 55, effectiveRangeKm: 1500,
-    capabilities: ['NAVAL', 'STRIKE', 'ISR'],
+    capabilities: ['NAVAL', 'STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 2 },
     designation: 'Carrier Strike Group 3, U.S. 3rd Fleet',
     personnel: 7500,
@@ -240,7 +240,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'DDG_SQUADRON', name: 'Destroyer Squadron 15', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'YOKOSUKA', speed: 60, effectiveRangeKm: 1600,
-    capabilities: ['NAVAL', 'STRIKE'],
+    capabilities: ['NAVAL', 'STRIKE', 'HEAVY_STRIKE'],
     collectionProfile: { SIGINT: 1 },
     designation: 'Destroyer Squadron 15, U.S. 7th Fleet',
     personnel: 1200,
@@ -254,7 +254,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'SSN_SQUADRON', name: 'Submarine Squadron 8', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'NORFOLK', speed: 50, effectiveRangeKm: 1600,
-    capabilities: ['NAVAL', 'INTEL', 'STRIKE'],
+    capabilities: ['NAVAL', 'INTEL', 'STRIKE', 'HEAVY_STRIKE'],
     collectionProfile: { SIGINT: 3, ISR: 1 },
     designation: 'Submarine Squadron 8, U.S. Atlantic Fleet',
     personnel: 600,
@@ -268,7 +268,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'CSG_5', name: 'Carrier Strike Group 5', category: 'NAVY', deniability: 'OVERT',
     homeBaseId: 'NORFOLK', speed: 55, effectiveRangeKm: 1500,
-    capabilities: ['NAVAL', 'STRIKE', 'ISR'],
+    capabilities: ['NAVAL', 'STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 1, SIGINT: 1, ISR: 1 },
     designation: 'Carrier Strike Group 5, U.S. Atlantic Fleet',
     personnel: 7500,
@@ -296,7 +296,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'SSGN', name: 'SSGN Guided Missile Submarine', category: 'NAVY', deniability: 'COVERT',
     homeBaseId: 'KINGS_BAY', speed: 40, effectiveRangeKm: 2000,
-    capabilities: ['NAVAL', 'STRIKE', 'SOF'],
+    capabilities: ['NAVAL', 'STRIKE', 'SOF', 'HEAVY_STRIKE'],
     collectionProfile: { SIGINT: 2 },
     designation: 'Submarine Squadron 16',
     personnel: 160,
@@ -340,7 +340,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'B2_WING', name: 'B-2 Spirit Wing', category: 'AIR', deniability: 'OVERT',
     homeBaseId: 'CREECH', speed: 900,
-    capabilities: ['STRIKE'],
+    capabilities: ['STRIKE', 'HEAVY_STRIKE'],
     collectionProfile: {},
     designation: '509th Bomb Wing (Provisional)',
     personnel: 350,
@@ -368,7 +368,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'F15E_SQN', name: 'F-15E Strike Eagle Squadron', category: 'AIR', deniability: 'OVERT',
     homeBaseId: 'LAKENHEATH', speed: 2650,
-    capabilities: ['STRIKE', 'ISR'],
+    capabilities: ['STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 1 },
     designation: '492nd Fighter Squadron, 48th Fighter Wing',
     personnel: 500,
@@ -396,7 +396,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'B1B_SQN', name: 'B-1B Lancer Squadron', category: 'AIR', deniability: 'OVERT',
     homeBaseId: 'ELLSWORTH', speed: 1335,
-    capabilities: ['STRIKE'],
+    capabilities: ['STRIKE', 'HEAVY_STRIKE'],
     collectionProfile: {},
     designation: '34th Bomb Squadron, 28th Bomb Wing',
     personnel: 300,
@@ -453,7 +453,7 @@ var ASSET_TEMPLATES = [
   {
     type: 'B21_RAIDER', name: 'B-21 Raider Wing', category: 'AIR', deniability: 'OVERT',
     homeBaseId: 'ELLSWORTH', speed: 1000,
-    capabilities: ['STRIKE', 'ISR'],
+    capabilities: ['STRIKE', 'ISR', 'HEAVY_STRIKE'],
     collectionProfile: { IMAGERY: 2, ISR: 1 },
     designation: '420th Flight Test Squadron (Operational)',
     personnel: 250,

@@ -401,14 +401,21 @@
       '<div style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim);margin-bottom:var(--sp-3)">Select a deployment option to proceed. Vigil recommendation is highlighted.</div>' +
       '<div class="vigil-options">';
 
+    // Compute remaining minutes for transit expiry checks
+    var _remainMin = op.expiresAt ? Math.max(0, op.expiresAt - V.time.totalMinutes) : Infinity;
+
     for (var i = 0; i < op.options.length; i++) {
       var opt = op.options[i];
-      var recCls = opt.isRecommended ? ' vigil-recommended' : '';
+      var transitExpired = _remainMin < Infinity && opt.transitTimeMinutes > _remainMin;
+      var recCls = opt.isRecommended && !transitExpired ? ' vigil-recommended' : '';
+      if (transitExpired) recCls += ' vigil-option-expired';
       var riskCls = 'risk-' + opt.riskLevel.toLowerCase();
 
       html += '<div class="vigil-option-card' + recCls + '">';
 
-      if (opt.isRecommended) {
+      if (transitExpired) {
+        html += '<div class="vigil-rec-badge" style="color:var(--red)">✕ WINDOW EXPIRED — TRANSIT EXCEEDS REMAINING TIME</div>';
+      } else if (opt.isRecommended) {
         html += '<div class="vigil-rec-badge">★ VIGIL RECOMMENDED</div>';
       }
 
@@ -439,7 +446,9 @@
         '</div>' +
         '<div class="vigil-stat" data-tip="' + escTip(TIPS.vigilOption.eta) + '">' +
           '<span class="vigil-stat-label">ETA</span>' +
-          '<span class="vigil-stat-value">' + formatTransitTime(opt.transitTimeMinutes) + '</span>' +
+          '<span class="vigil-stat-value"' + (transitExpired ? ' style="color:var(--red)"' : '') + '>' + formatTransitTime(opt.transitTimeMinutes) +
+            (transitExpired ? ' <span style="font-size:var(--fs-xs)">(' + formatTransitTime(Math.round(_remainMin)) + ' left)</span>' : '') +
+          '</span>' +
         '</div>' +
         '<div class="vigil-stat">' +
           '<span class="vigil-stat-label">ASSETS</span>' +
@@ -513,7 +522,9 @@
       }
 
       var allUnavailable = unavailableCount === assets.length;
-      if (allUnavailable) {
+      if (transitExpired) {
+        html += '<button class="op-action-btn execute vigil-select-btn" disabled style="opacity:0.4;cursor:not-allowed">WINDOW EXPIRED</button>';
+      } else if (allUnavailable) {
         html += '<button class="op-action-btn execute vigil-select-btn" disabled style="opacity:0.4;cursor:not-allowed">ALL ASSETS UNAVAILABLE</button>';
       } else {
         html += '<button class="op-action-btn execute vigil-select-btn" onclick="approveOption(\'' + op.id + '\',' + i + ')">SELECT THIS OPTION' + (unavailableCount > 0 ? ' (' + (assets.length - unavailableCount) + '/' + assets.length + ' AVAILABLE)' : '') + '</button>';
@@ -603,6 +614,14 @@
       return true;
     });
 
+    // Exclude assets that cannot arrive before the operation deadline
+    var remainingMinutes = op.expiresAt ? Math.max(0, op.expiresAt - V.time.totalMinutes) : (op.urgencyHours ? op.urgencyHours * 60 : Infinity);
+    if (remainingMinutes < Infinity) {
+      eligibleAvailable = eligibleAvailable.filter(function(a) {
+        return calcTransitMinutes(a, op.geo.lat, op.geo.lon) <= remainingMinutes;
+      });
+    }
+
     var selectedAssets = getAssetsByIds(cfg.assetIds);
 
     // Recalculate stats
@@ -670,12 +689,15 @@
       'DEVIATION WARNING: Custom force configurations carry the same viability risk as selecting a non-recommended option. Failure with a deviated configuration incurs severe viability penalties.' +
     '</div>';
 
-    // Actions
+    // Actions — check transit against remaining window
     var canDeploy = cfg.assetIds.length > 0;
+    var customRemainMin = op.expiresAt ? Math.max(0, op.expiresAt - V.time.totalMinutes) : Infinity;
+    if (canDeploy && customRemainMin < Infinity && recalc.transitMinutes > customRemainMin) canDeploy = false;
+    var deployLabel = (!canDeploy && cfg.assetIds.length > 0) ? 'WINDOW EXPIRED' : 'DEPLOY CUSTOM CONFIGURATION';
     html += '<div style="display:flex;gap:var(--sp-2)">' +
       '<button class="op-action-btn execute vigil-select-btn" style="flex:1"' +
       (canDeploy ? '' : ' disabled style="opacity:0.4;cursor:not-allowed;flex:1"') +
-      ' onclick="approveCustomConfig(\'' + op.id + '\')">DEPLOY CUSTOM CONFIGURATION</button>' +
+      ' onclick="approveCustomConfig(\'' + op.id + '\')\">' + deployLabel + '</button>' +
       '<button class="op-action-btn cancel" style="flex:0 0 auto" onclick="cancelCustomConfig()">CANCEL</button>' +
     '</div>';
 
