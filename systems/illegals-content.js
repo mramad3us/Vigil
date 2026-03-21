@@ -121,24 +121,34 @@ var ILLEGAL_NAME_POOLS = {
       'Naqvi', 'Pillai', 'Reddy', 'Shah', 'Trivedi',
     ],
   },
-  EAST_ASIAN: {
-    // Japanese and Korean names — family name first. Unisex names appear in both pools.
+  JAPANESE: {
     male: [
       'Takeshi', 'Hiroshi', 'Kenji', 'Haruki', 'Ryota', 'Akira', 'Daichi', 'Fumio', 'Hayato', 'Isamu',
       'Kazuki', 'Masaru', 'Noboru', 'Ren', 'Shota', 'Tatsuo', 'Yuto', 'Kenichi', 'Makoto', 'Shinji',
-      'Joon-ho', 'Sung-min', 'Dong-wook', 'Min-jun', 'Tae-hyun', 'Byung-ho', 'Chan-woo', 'Dae-jung', 'Gi-hun', 'Hyun-woo',
       'Yuki',
     ],
     female: [
       'Yuki', 'Hana', 'Sakura', 'Mei', 'Aiko', 'Emi', 'Kaori', 'Mika', 'Riko', 'Satsuki',
-      'Soo-jin', 'Min-ji', 'Hye-won', 'Ji-yeon', 'Yeon-hee',
       'Makoto', 'Ren', 'Akira',
     ],
     last: [
       'Yamamoto', 'Tanaka', 'Watanabe', 'Sato', 'Nakamura', 'Yoshida', 'Suzuki', 'Takahashi', 'Kobayashi', 'Ito',
       'Shimizu', 'Hayashi', 'Mori', 'Ikeda', 'Fujita', 'Ogawa', 'Matsuda', 'Endo', 'Aoki', 'Ueda',
+    ],
+    familyFirst: true,
+  },
+  KOREAN: {
+    male: [
+      'Joon-ho', 'Sung-min', 'Dong-wook', 'Min-jun', 'Tae-hyun', 'Byung-ho', 'Chan-woo', 'Dae-jung', 'Gi-hun', 'Hyun-woo',
+      'Seung-hyun', 'Woo-jin', 'Jae-won', 'Young-ho', 'Sang-hoon', 'Jun-seo', 'Si-woo', 'Do-yoon', 'Ha-jun', 'Ye-jun',
+    ],
+    female: [
+      'Soo-jin', 'Min-ji', 'Hye-won', 'Ji-yeon', 'Yeon-hee', 'Eun-bi', 'Na-young', 'Seo-yeon', 'Ha-neul', 'Ye-rin',
+      'Ji-soo', 'Da-hye', 'Su-bin', 'Yoo-jin', 'Chae-won',
+    ],
+    last: [
       'Kim', 'Park', 'Lee', 'Choi', 'Jung', 'Kang', 'Yoon', 'Jang', 'Lim', 'Han',
-      'Shin', 'Kwon', 'Oh', 'Seo', 'Song',
+      'Shin', 'Kwon', 'Oh', 'Seo', 'Song', 'Hwang', 'Ahn', 'Ryu', 'Bae', 'Noh',
     ],
     familyFirst: true,
   },
@@ -203,7 +213,7 @@ var COUNTRY_TO_NAME_REGION = {
   'Cuba': 'LATIN_AMERICAN', 'Venezuela': 'LATIN_AMERICAN', 'Brazil': 'LATIN_AMERICAN',
   'Colombia': 'LATIN_AMERICAN', 'Argentina': 'LATIN_AMERICAN', 'Mexico': 'LATIN_AMERICAN',
   'Pakistan': 'SOUTH_ASIAN', 'India': 'SOUTH_ASIAN', 'Bangladesh': 'SOUTH_ASIAN',
-  'Japan': 'EAST_ASIAN', 'South Korea': 'EAST_ASIAN', 'North Korea': 'EAST_ASIAN',
+  'Japan': 'JAPANESE', 'South Korea': 'KOREAN', 'North Korea': 'KOREAN',
   'Nigeria': 'AFRICAN', 'Somalia': 'AFRICAN', 'Kenya': 'AFRICAN', 'Ethiopia': 'AFRICAN',
   'Mali': 'AFRICAN', 'South Africa': 'AFRICAN',
 };
